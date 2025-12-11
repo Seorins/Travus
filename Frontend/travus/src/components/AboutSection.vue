@@ -19,10 +19,10 @@
         </div>
         <div class="bubble-row right">
           <div class="right-bubble">새로운 여행 플랫폼인가요?</div>
-          <img class="bubble-avatar" src="@/assets/avatar2.png" alt="avatar" />
+          <img class="bubble-avatar" src="@/assets/avatar1.png" alt="avatar" />
         </div>
         <div class="bubble-row left">
-          <img class="bubble-avatar" src="@/assets/avatar3.png" alt="avatar" />
+          <img class="bubble-avatar" src="@/assets/avatar1.png" alt="avatar" />
           <div class="left-bubble">트래버스 출발합니다~</div>
         </div>
       </div>
@@ -125,8 +125,8 @@
   border-radius: 50%;
   object-fit: cover;
   flex-shrink: 0;
-  border: 3px solid white;
   box-shadow: 0px 2px 6px rgba(0,0,0,0.1);
+  background-color: #88685f;
 }
 
 .left-bubble {
