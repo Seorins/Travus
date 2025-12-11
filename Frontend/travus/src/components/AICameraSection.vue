@@ -98,7 +98,7 @@ const handleFeatureFocus = (event) => {
 <style scoped>
 .ai-camera-section {
   min-height: 100vh;
-  background: #b4d5fe; /* 연한 파란색 단색 */
+  background: #b4d5fe;
   padding: 6rem 2rem;
   display: flex;
   align-items: center;

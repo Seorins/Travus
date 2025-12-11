@@ -35,6 +35,16 @@
         <AICameraSection @focus="handleFocus" />
       </section>
 
+      <!-- 그라데이션 텍스트 섹션 -->
+      <section class="section scroll-snap-section" data-section="gradient-text">
+        <GradientTextSection @focus="handleFocus" />
+      </section>
+
+      <!-- 이미지 배너 섹션 -->
+      <section class="section scroll-snap-section" data-section="image-banner">
+        <ImageBannerSection @focus="handleFocus" />
+      </section>
+
       <!-- 푸터 -->
       <FooterSection @focus="handleFocus" />
     </main>
@@ -52,6 +62,8 @@ import AboutSection from '@/components/AboutSection.vue'
 import TravelTargetSection from '@/components/TravelTargetSection.vue'
 import DestinationSection from '@/components/DestinationSection.vue'
 import AICameraSection from '@/components/AICameraSection.vue'
+import GradientTextSection from '@/components/GradientTextSection.vue'
+import ImageBannerSection from '@/components/ImageBannerSection.vue'
 import FooterSection from '@/components/FooterSection.vue'
 
 // GSAP ScrollTrigger 등록
@@ -89,8 +101,8 @@ const handleFocus = (text) => {
 }
 
 onMounted(() => {
-  // 각 섹션이 부드럽게 올라오는 애니메이션 (target-section 제외)
-  const sections = document.querySelectorAll('.section:not([data-section="target"])')
+  // 각 섹션이 부드럽게 올라오는 애니메이션 (target-section, gradient-text, image-banner 제외)
+  const sections = document.querySelectorAll('.section:not([data-section="target"]):not([data-section="gradient-text"]):not([data-section="image-banner"])')
 
   sections.forEach((section) => {
     gsap.fromTo(
@@ -114,10 +126,20 @@ onMounted(() => {
     )
   })
 
-  // target-section은 즉시 보이도록
+  // target-section, gradient-text, image-banner는 즉시 보이도록
   const targetSection = document.querySelector('.section[data-section="target"]')
   if (targetSection) {
     gsap.set(targetSection, { opacity: 1, y: 0 })
+  }
+
+  const gradientTextSection = document.querySelector('.section[data-section="gradient-text"]')
+  if (gradientTextSection) {
+    gsap.set(gradientTextSection, { opacity: 1, y: 0 })
+  }
+
+  const imageBannerSection = document.querySelector('.section[data-section="image-banner"]')
+  if (imageBannerSection) {
+    gsap.set(imageBannerSection, { opacity: 1, y: 0 })
   }
 })
 
@@ -151,6 +173,10 @@ onUnmounted(() => {
 .section[data-section='target'] {
   opacity: 1;
   transform: none;
+}
+
+.section[data-section='gradient-text'] {
+  min-height: auto;
 }
 
 /* 전역 스타일 */
