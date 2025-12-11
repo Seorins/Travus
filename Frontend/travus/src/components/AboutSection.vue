@@ -1,5 +1,8 @@
 <template>
   <section class="about-container">
+    <!-- 배경 큰 글씨 -->
+    <div class="background-text">TRAVUS</div>
+
     <!-- 왼쪽 텍스트 영역 -->
     <div class="left-area">
 
@@ -10,18 +13,27 @@
 
       <!-- 말풍선 -->
       <div class="bubble-list">
-        <div class="bubble">혹시 대표님 이름인가요?</div>
-        <div class="bubble">고진진 이름이랑 비슷하네요!</div>
-        <div class="bubble">소이정씨 택배왔습니다~</div>
+        <div class="bubble-row left">
+          <img class="bubble-avatar" src="@/assets/avatar1.png" alt="avatar" />
+          <div class="left-bubble">새로 나온 버스 이름인가요?</div>
+        </div>
+        <div class="bubble-row right">
+          <div class="right-bubble">새로운 여행 플랫폼인가요?</div>
+          <img class="bubble-avatar" src="@/assets/avatar2.png" alt="avatar" />
+        </div>
+        <div class="bubble-row left">
+          <img class="bubble-avatar" src="@/assets/avatar3.png" alt="avatar" />
+          <div class="left-bubble">트래버스 출발합니다~</div>
+        </div>
       </div>
 
-      <p class="description">
-        소이정의 뜻이 정확하게 뭐냐고 물으시는 분들이 정말 많아요~<br /><br />
-        ‘소이정’은 ‘(소작은 소, 정이로울 이, 정할 정)’
-        <strong>적지 않다 소작소이이다.</strong> 라는 뜻을 가진 한자입니다.<br /><br />
-        작은 시작으로 큰 뜻을 이루고자 하는 마음이 담겨있습니다.<br />
-        소이정은 우리의 뜻이기도, 우리 모두의 이름이기도 합니다.<br /><br />
-        여러분도 오늘부터 소이정과 함께해요!
+      <p class="description"><strong>
+        'TravUs'는 'Travel(여행)'과 'Us(우리)'가 합쳐진 이름으로,<br />
+        <span>우리 모두를 위한 여행</span>이라는 뜻을 담고 있습니다.<br /><br />
+        누구나 불편함 없이 여행을 즐길 수 있도록 길을 만드는 작은 시작이 되고자 하는 마음이 담겨 있어요.<br />
+        TravUs는 우리 모두의 여행을 위한 이름이기도 합니다.<br /><br />
+        여러분도 오늘부터 TravUs와 함께해요!
+      </strong>
       </p>
     </div>
 
@@ -37,6 +49,7 @@
 
 <style scoped>
 .about-container {
+  position: relative;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -44,15 +57,33 @@
   background-color: #f0c9bd;
   min-height: 100vh;
   box-sizing: border-box;
+  overflow: hidden;
 }
 
+
+.background-text {
+  position: absolute;
+  font-size: 160px;
+  font-weight: 800;
+  color: rgba(160, 128, 119, 0.12);
+  top: 24%;
+  left: 60%;
+  transform: translate(-50%, -50%);
+  z-index: 0;
+  pointer-events: none;
+  white-space: nowrap;
+  letter-spacing: 3px;
+  font-family: 'Arial Rounded MT Bold', 'Nunito', 'Quicksand', 'Helvetica Neue', Arial, sans-serif;
+}
 
 .left-area {
   width: 60%;
+  position: relative;
+  z-index: 1;
 }
 
 .title {
-  font-size: 48px;
+  font-size: 56px;
   font-weight: 700;
   line-height: 1.3;
   color: #a08077;
@@ -68,33 +99,110 @@
 .bubble-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin-bottom: 35px;
+  gap: 20px;
+  margin-bottom: 40px;
+  max-width: 100%;
+  padding: 30px;
 }
 
-.bubble {
+.bubble-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.bubble-row.left {
+  justify-content: flex-start;
+}
+
+.bubble-row.right {
+  justify-content: flex-end;
+}
+
+.bubble-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 3px solid white;
+  box-shadow: 0px 2px 6px rgba(0,0,0,0.1);
+}
+
+.left-bubble {
   background: white;
   display: inline-block;
-  padding: 12px 20px;
+  padding: 16px 24px;
   border-radius: 20px;
   width: fit-content;
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 500;
-  color: #444;
+  color: #a08077;
   box-shadow: 0px 3px 6px rgba(0,0,0,0.1);
   animation: float 3s ease-in-out infinite;
+  position: relative;
+  font-weight: bold;
+}
+
+.left-bubble::after {
+  content: '';
+  position: absolute;
+  left: -8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
+  border-right: 8px solid white;
+}
+
+.right-bubble {
+  background: white;
+  display: inline-block;
+  padding: 16px 24px;
+  border-radius: 20px;
+  width: fit-content;
+  font-size: 18px;
+  font-weight: 500;
+  color: #a08077;
+  box-shadow: 0px 3px 6px rgba(0,0,0,0.1);
+  animation: float 3s ease-in-out infinite;
+  position: relative;
+  font-weight: bold;
+}
+
+.right-bubble::after {
+  content: '';
+  position: absolute;
+  right: -8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
+  border-left: 8px solid white;
 }
 
 .description {
-  font-size: 17px;
+  font-size: 19px;
   line-height: 1.8;
-  color: #5c3a32;
+  color: #88685f;
+  letter-spacing: -0.5px;
 }
 
+.description span{
+  background-color: #88685f;
+  color: white;
+  padding: 2px 5px;
+}
 .right-area {
   width: 50%;
   display: flex;
   justify-content: center;
+  position: relative;
+  z-index: 1;
 }
 
 .char-img {
