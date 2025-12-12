@@ -1,108 +1,59 @@
 <template>
   <footer class="footer-section" tabindex="0" @focus="handleFocus">
     <div class="footer-container">
-      <!-- 상단 영역: 소셜 아이콘 & 연락처 + 메뉴 -->
+      <!-- 상단 영역: 소셜 아이콘 & 연락처 -->
       <div class="footer-top">
-        <div class="left-section">
-          <div class="social-links">
-            <a href="#" class="social-icon" aria-label="Naver">N</a>
-            <a href="#" class="social-icon" aria-label="Play">▶</a>
-            <a href="#" class="social-icon" aria-label="YouTube">▶</a>
-            <a href="#" class="social-icon" aria-label="Instagram">📷</a>
-            <a href="#" class="social-icon" aria-label="Location">📍</a>
-          </div>
-          <div class="contact-info">
-            <span><strong>T.</strong> 031 293 0128</span>
-            <span><strong>M.</strong> admin@travus.com</span>
-          </div>
+        <div class="social-links">
+          <a href="#" class="social-icon" aria-label="GitHub"><i class="fa-brands fa-github"></i></a>
+          <a href="#" class="social-icon" aria-label="GitLab"><i class="fa-brands fa-gitlab"></i></a>
+          <a href="#" class="social-icon" aria-label="YouTube"><i class="fa-brands fa-youtube"></i></a>
+          <a href="#" class="social-icon" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+          <a href="#" class="social-icon" aria-label="Location"><i class="fa-solid fa-location-dot"></i></a>
         </div>
-        <nav class="top-menu">
-          <a href="#" class="menu-item">About Us</a>
-          <a href="#" class="menu-item">Work</a>
-          <a href="#" class="menu-item">Solution</a>
-          <a href="#" class="menu-item">Project</a>
-          <a href="#" class="menu-item">Community</a>
-        </nav>
+        <div class="contact-info">
+          <span><strong>M.</strong> tjfls295@naver.com</span>
+          <span><strong>M.</strong> admin@travus.com</span>
+        </div>
       </div>
 
-      <!-- 중간 영역: 메뉴 링크 -->
+      <!-- 중간 영역: 큰 로고 + 메뉴 링크 -->
       <div class="footer-content">
-        <div class="footer-links">
-          <div class="link-column">
-            <h4>About Us</h4>
-            <ul>
-              <li><a href="#">About Travus</a></li>
-              <li><a href="#">Travus 사람들</a></li>
-              <li><a href="#">우리의 철학</a></li>
-              <li><a href="#">기업문화</a></li>
-            </ul>
-          </div>
-
-          <div class="link-column">
-            <h4>Work</h4>
-            <ul>
-              <li><a href="#">Portfolio</a></li>
-              <li><a href="#">Service</a></li>
-              <li><a href="#">AI Image</a></li>
-            </ul>
-          </div>
-
-          <div class="link-column">
-            <h4>Solution</h4>
-            <ul>
-              <li><a href="#">3D Lab 🔗</a></li>
-              <li><a href="#">기업전용 CMS</a></li>
-              <li><a href="#">의료전용 CMS</a></li>
-              <li><a href="#">팝플전용 CMS</a></li>
-              <li><a href="#">기타 솔루션</a></li>
-            </ul>
-          </div>
-
-          <div class="link-column">
-            <h4>Project</h4>
-            <ul>
-              <li><a href="#">FAQ</a></li>
-              <li><a href="#">프로젝트 문의</a></li>
-              <li><a href="#">프로젝트 게시판 🔗</a></li>
-            </ul>
-          </div>
-
-          <div class="link-column">
-            <h4>Community</h4>
-            <ul>
-              <li><a href="#">새소식</a></li>
-              <li><a href="#">뉴스레터</a></li>
-              <li><a href="#">1:1문의</a></li>
-              <li><a href="#">상시채용</a></li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      <!-- 하단 영역: 뉴스레터 + 큰 로고 -->
-      <div class="footer-bottom-section">
-        <!-- 뉴스레터 구독 -->
-        <div class="newsletter-section">
-          <h3 class="newsletter-title">뉴스레터 구독</h3>
-          <form class="newsletter-form" @submit.prevent="subscribeNewsletter">
-            <input type="email" placeholder="Your email address" class="newsletter-input" />
-            <button type="submit" class="newsletter-submit" aria-label="구독하기">→</button>
-          </form>
-        </div>
-
         <!-- 큰 로고 -->
         <div class="large-logo">TRAVUS</div>
+
+        <!-- 메뉴 링크 -->
+        <div class="footer-menu">
+          <div class="menu-column">
+            <a href="#" class="menu-link">About Us</a>
+            <div class="sub-menu">
+              <a href="#">About 소이경</a>
+              <a href="#">소이경 사람들</a>
+              <a href="#">우리의 철학</a>
+              <a href="#">기업문화</a>
+            </div>
+          </div>
+          <div class="menu-column">
+            <a href="#" class="menu-link">Services</a>
+            <div class="sub-menu">
+              <a href="#">Portfolio</a>
+              <a href="#">AI Image</a>
+              <a href="#">기타 솔루션</a>
+            </div>
+          </div>
+          <div class="menu-column">
+            <a href="#" class="menu-link">Contact</a>
+            <div class="sub-menu">
+              <a href="#">프로젝트 문의</a>
+              <a href="#">1:1문의</a>
+              <a href="#">FAQ</a>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- 최하단: 회사 정보 -->
       <div class="footer-bottom">
-        <div class="copyright">© 2024 TRAVUS</div>
-        <div class="footer-tags">
-          <span>여성기업</span>
-          <span>벤처기업</span>
-          <span>기술전환위원증기업</span>
-          <span>산업디자인전문기업</span>
-        </div>
+        <div class="copyright">© 2025 TravUs. All rights reserved.</div>
       </div>
 
       <!-- 맨 위로 버튼 -->
@@ -144,9 +95,6 @@ const scrollToTop = () => {
   })
 }
 
-const subscribeNewsletter = () => {
-  alert('뉴스레터 구독이 완료되었습니다!')
-}
 
 const handleFocus = (event) => {
   const text =
@@ -175,20 +123,14 @@ const handleFocus = (event) => {
   margin: 0 auto;
 }
 
-/* 상단 영역 - 소셜 아이콘 & 연락처 + 메뉴 */
+/* 상단 영역 - 소셜 아이콘 & 연락처 */
 .footer-top {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-bottom: 2rem;
+  padding-bottom: 3rem;
   border-bottom: 1px solid #ddd;
-  margin-bottom: 3rem;
-}
-
-.left-section {
-  display: flex;
-  gap: 3rem;
-  align-items: center;
+  margin-bottom: 2rem;
 }
 
 .social-links {
@@ -244,97 +186,14 @@ const handleFocus = (event) => {
   color: #666;
 }
 
-/* 중간 영역 - 메뉴 링크 */
+/* 중간 영역 - 큰 로고 + 메뉴 링크 */
 .footer-content {
-  margin-bottom: 3rem;
-}
-
-.footer-links {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 3rem;
-}
-
-.link-column h4 {
-  font-size: 1.1rem;
-  margin-bottom: 1.5rem;
-  font-weight: 700;
-  color: #000;
-}
-
-.link-column ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.link-column li {
-  margin-bottom: 0.75rem;
-}
-
-.link-column a {
-  color: #666;
-  text-decoration: none;
-  transition: all 0.3s ease;
-  display: inline-block;
-  font-size: 0.95rem;
-}
-
-.link-column a:hover {
-  color: #000;
-  transform: translateX(3px);
-}
-
-/* 하단 영역 - 뉴스레터 + 큰 로고 */
-.footer-bottom-section {
   display: flex;
   justify-content: space-between;
-  align-items: flex-end;
-  padding-bottom: 3rem;
+  align-items: center;
+  padding: 3rem 0;
   border-bottom: 1px solid #ddd;
-  margin-bottom: 2rem;
-  position: relative;
-}
-
-.newsletter-section {
-  flex-shrink: 0;
-}
-
-.newsletter-title {
-  font-size: 1rem;
-  font-weight: 700;
-  margin-bottom: 1rem;
-  color: #000;
-}
-
-.newsletter-form {
-  display: flex;
-  max-width: 400px;
-  background: #fff;
-  border: 1px solid #ddd;
-  border-radius: 25px;
-  overflow: hidden;
-}
-
-.newsletter-input {
-  flex: 1;
-  padding: 0.75rem 1.5rem;
-  border: none;
-  outline: none;
-  font-size: 0.95rem;
-}
-
-.newsletter-submit {
-  background: #fff;
-  border: none;
-  padding: 0 1.5rem;
-  cursor: pointer;
-  font-size: 1.5rem;
-  transition: all 0.3s ease;
-}
-
-.newsletter-submit:hover {
-  background: #f0f0f0;
+  margin-bottom: 3rem;
 }
 
 .large-logo {
@@ -343,9 +202,65 @@ const handleFocus = (event) => {
   letter-spacing: -0.05em;
   color: #000;
   line-height: 1;
+}
+
+.footer-menu {
+  display: flex;
+  gap: 4rem;
+  align-items: flex-start;
+}
+
+.menu-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.menu-link {
+  color: #000;
+  text-decoration: none;
+  font-size: 1.2rem;
+  font-weight: 700;
+  transition: all 0.3s ease;
+  position: relative;
+  margin-bottom: 0.5rem;
+}
+
+.menu-link::after {
+  content: '';
   position: absolute;
-  right: 0;
-  bottom: 3rem;
+  bottom: -5px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: #000;
+  transition: width 0.3s ease;
+}
+
+.menu-link:hover {
+  color: #666;
+}
+
+.menu-link:hover::after {
+  width: 100%;
+}
+
+.sub-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.sub-menu a {
+  color: #666;
+  text-decoration: none;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+}
+
+.sub-menu a:hover {
+  color: #000;
+  transform: translateX(3px);
 }
 
 /* 최하단 - 회사 정보 */
@@ -440,7 +355,6 @@ const handleFocus = (event) => {
 @media (max-width: 1200px) {
   .large-logo {
     font-size: 6rem;
-    bottom: 2rem;
   }
 }
 
@@ -456,20 +370,27 @@ const handleFocus = (event) => {
     justify-content: space-between;
   }
 
-  .footer-links {
-    grid-template-columns: repeat(3, 1fr);
+  .footer-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2rem;
+    padding: 3rem 0;
   }
 
   .large-logo {
     font-size: 5rem;
-    position: static;
-    margin-top: 2rem;
   }
 
-  .footer-bottom-section {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 2rem;
+  .footer-menu {
+    gap: 3rem;
+  }
+
+  .menu-link {
+    font-size: 1.1rem;
+  }
+
+  .sub-menu a {
+    font-size: 0.9rem;
   }
 
   .footer-bottom {
@@ -479,10 +400,26 @@ const handleFocus = (event) => {
 }
 
 @media (max-width: 768px) {
-  .left-section {
+  .footer-top {
     flex-direction: column;
     gap: 1.5rem;
     align-items: flex-start;
+  }
+
+  .social-links {
+    gap: 0.75rem;
+  }
+
+  .social-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 1rem;
+  }
+
+  .contact-info {
+    flex-direction: column;
+    gap: 0.5rem;
+    font-size: 0.9rem;
   }
 
   .top-menu {
@@ -490,12 +427,27 @@ const handleFocus = (event) => {
     gap: 1rem;
   }
 
-  .footer-links {
-    grid-template-columns: 1fr;
-  }
-
   .large-logo {
     font-size: 3rem;
+  }
+
+  .footer-menu {
+    flex-direction: column;
+    gap: 2rem;
+    align-items: flex-start;
+    width: 100%;
+  }
+
+  .menu-column {
+    width: 100%;
+  }
+
+  .menu-link {
+    font-size: 1.1rem;
+  }
+
+  .sub-menu a {
+    font-size: 0.9rem;
   }
 
   .scroll-to-top {
