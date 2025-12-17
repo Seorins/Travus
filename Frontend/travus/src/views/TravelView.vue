@@ -11,7 +11,7 @@
     <section class="travel-header">
       <div class="container">
         <h1 class="page-title">여행지 정보</h1>
-        <p class="page-subtitle">전국의 다양한 여행지를 찾아보세요</p>
+        <p class="page-subtitle">전국의 다양한 무장애 여행지를 찾아보세요</p>
 
         <!-- 검색바 -->
         <div class="search-bar">
@@ -19,10 +19,10 @@
             type="text"
             v-model="searchQuery"
             placeholder="여행지를 검색하세요..."
-            @input="handleSearch"
+            @keyup.enter="handleSearch"
             class="search-input"
           />
-          <button class="search-btn">
+          <button class="search-btn" @click="handleSearch">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
               <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
             </svg>
@@ -40,33 +40,17 @@
             <label class="filter-label">지역</label>
             <select v-model="selectedRegion" @change="handleFilterChange" class="filter-select">
               <option value="">전체</option>
-              <option value="서울">서울</option>
-              <option value="부산">부산</option>
-              <option value="제주">제주</option>
-              <option value="경기">경기</option>
-              <option value="강원">강원</option>
-              <option value="충북">충북</option>
-              <option value="충남">충남</option>
-              <option value="경북">경북</option>
-              <option value="경남">경남</option>
-              <option value="전북">전북</option>
-              <option value="전남">전남</option>
-            </select>
-          </div>
-
-          <!-- 카테고리 필터 -->
-          <div class="filter-group">
-            <label class="filter-label">카테고리</label>
-            <select v-model="selectedCategory" @change="handleFilterChange" class="filter-select">
-              <option value="">전체</option>
-              <option value="beach">해변</option>
-              <option value="mountain">산/등산</option>
-              <option value="culture">문화유산</option>
-              <option value="food">맛집</option>
-              <option value="city">도시</option>
-              <option value="nature">자연/힐링</option>
-              <option value="island">섬</option>
-              <option value="winter">겨울스포츠</option>
+              <option value="1">서울</option>
+              <option value="6">부산</option>
+              <option value="39">제주</option>
+              <option value="31">경기</option>
+              <option value="32">강원</option>
+              <option value="33">충북</option>
+              <option value="34">충남</option>
+              <option value="35">경북</option>
+              <option value="36">경남</option>
+              <option value="37">전북</option>
+              <option value="38">전남</option>
             </select>
           </div>
 
@@ -75,27 +59,35 @@
             <label class="filter-label">정렬</label>
             <select v-model="sortBy" @change="handleSort" class="filter-select">
               <option value="latest">최신순</option>
-              <option value="popular">인기순</option>
               <option value="name">이름순</option>
             </select>
           </div>
 
           <!-- 결과 수 -->
           <div class="result-count">
-            총 <strong>{{ filteredDestinations.length }}</strong>개
+            총 <strong>{{ totalCount }}</strong>개
           </div>
         </div>
       </div>
     </section>
 
+    <!-- 로딩 -->
+    <div v-if="loading" class="loading-container">
+      <div class="loading-spinner"></div>
+      <p>데이터를 불러오는 중...</p>
+    </div>
+
     <!-- 여행지 리스트 -->
-    <section class="destinations-section">
+    <section class="destinations-section" v-else>
       <div class="container">
-        <div class="destinations-grid">
+        <div v-if="destinations.length === 0" class="no-results">
+          <p>검색 결과가 없습니다.</p>
+        </div>
+        <div v-else class="destinations-grid">
           <TravelCard
-            v-for="(destination, index) in paginatedDestinations"
+            v-for="(destination, index) in destinations"
             :key="index"
-            :destination="destination"
+            :destination="formatDestination(destination)"
             @click="handleCardClick(destination)"
           />
         </div>
@@ -140,15 +132,7 @@ import { ref, computed, onMounted } from 'vue'
 import NavigationBar from '@/components/common/NavigationBar.vue'
 import FooterSection from '@/components/common/FooterSection.vue'
 import TravelCard from '@/components/travel/TravelCard.vue'
-
-// Import images
-import avatar1 from '@/assets/avatar1.png'
-import avatar2 from '@/assets/avatar2.png'
-import avatar3 from '@/assets/avatar3.png'
-import mainImg from '@/assets/main.png'
-import footImg from '@/assets/footimg.jpg'
-import char3 from '@/assets/char3.png'
-import topbtn from '@/assets/topbtn.png'
+import api from '@/services/api'
 
 // TTS 상태
 const isTTSEnabled = ref(true)
@@ -178,148 +162,19 @@ const handleTTSFocus = (text) => {
 // 검색 및 필터 상태
 const searchQuery = ref('')
 const selectedRegion = ref('')
-const selectedCategory = ref('')
 const sortBy = ref('latest')
+
+// 데이터 상태
+const destinations = ref([])
+const loading = ref(false)
+const totalCount = ref(0)
 
 // 페이지네이션 상태
 const currentPage = ref(1)
-const itemsPerPage = 12
+const itemsPerPage = 20
 
-// 샘플 여행지 데이터
-const destinations = ref([
-  {
-    id: 1,
-    name: '부산 해운대',
-    region: '부산',
-    category: 'beach',
-    image: mainImg,
-    description: '아름다운 해변과 도시의 조화',
-    tags: ['해변', '서핑', '야경'],
-    rating: 4.8,
-    reviews: 1234
-  },
-  {
-    id: 2,
-    name: '제주 한라산',
-    region: '제주',
-    category: 'mountain',
-    image: avatar1,
-    description: '제주도의 상징, 백록담이 있는 명산',
-    tags: ['등산', '자연', '트레킹'],
-    rating: 4.9,
-    reviews: 2156
-  },
-  {
-    id: 3,
-    name: '경주 불국사',
-    region: '경북',
-    category: 'culture',
-    image: avatar2,
-    description: '신라 천년의 역사가 살아있는 곳',
-    tags: ['문화재', '사찰', '역사'],
-    rating: 4.7,
-    reviews: 987
-  },
-  {
-    id: 4,
-    name: '전주 한옥마을',
-    region: '전북',
-    category: 'food',
-    image: avatar3,
-    description: '전통과 맛이 어우러진 곳',
-    tags: ['한옥', '맛집', '전통'],
-    rating: 4.6,
-    reviews: 1567
-  },
-  {
-    id: 5,
-    name: '서울 경복궁',
-    region: '서울',
-    category: 'culture',
-    image: char3,
-    description: '조선왕조의 법궁',
-    tags: ['궁궐', '역사', '문화'],
-    rating: 4.8,
-    reviews: 3421
-  },
-  {
-    id: 6,
-    name: '강릉 경포대',
-    region: '강원',
-    category: 'beach',
-    image: topbtn,
-    description: '동해안의 아름다운 해변',
-    tags: ['해변', '일출', '카페'],
-    rating: 4.5,
-    reviews: 892
-  },
-  {
-    id: 7,
-    name: '설악산',
-    region: '강원',
-    category: 'mountain',
-    image: footImg,
-    description: '사계절 아름다운 명산',
-    tags: ['등산', '단풍', '케이블카'],
-    rating: 4.9,
-    reviews: 2345
-  },
-  {
-    id: 8,
-    name: '여수 밤바다',
-    region: '전남',
-    category: 'city',
-    image: mainImg,
-    description: '낭만적인 해안도시',
-    tags: ['야경', '맛집', '해변'],
-    rating: 4.7,
-    reviews: 1678
-  }
-])
-
-// 필터링된 여행지
-const filteredDestinations = computed(() => {
-  let result = destinations.value
-
-  // 검색어 필터
-  if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase()
-    result = result.filter(dest =>
-      dest.name.toLowerCase().includes(query) ||
-      dest.description.toLowerCase().includes(query) ||
-      dest.tags.some(tag => tag.toLowerCase().includes(query))
-    )
-  }
-
-  // 지역 필터
-  if (selectedRegion.value) {
-    result = result.filter(dest => dest.region === selectedRegion.value)
-  }
-
-  // 카테고리 필터
-  if (selectedCategory.value) {
-    result = result.filter(dest => dest.category === selectedCategory.value)
-  }
-
-  // 정렬
-  if (sortBy.value === 'popular') {
-    result = [...result].sort((a, b) => b.rating - a.rating)
-  } else if (sortBy.value === 'name') {
-    result = [...result].sort((a, b) => a.name.localeCompare(b.name))
-  }
-
-  return result
-})
-
-// 페이지네이션
 const totalPages = computed(() => {
-  return Math.ceil(filteredDestinations.value.length / itemsPerPage)
-})
-
-const paginatedDestinations = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage
-  const end = start + itemsPerPage
-  return filteredDestinations.value.slice(start, end)
+  return Math.ceil(totalCount.value / itemsPerPage)
 })
 
 const displayedPages = computed(() => {
@@ -339,23 +194,78 @@ const displayedPages = computed(() => {
   return pages
 })
 
-const changePage = (page) => {
-  if (page >= 1 && page <= totalPages.value) {
-    currentPage.value = page
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+// 여행지 데이터 포맷 변환
+const formatDestination = (destination) => {
+  return {
+    id: destination.contentid || destination.id,
+    name: destination.title || destination.name,
+    description: destination.addr1 || destination.address || '주소 정보 없음',
+    image: destination.firstimage || destination.image_url || 'https://via.placeholder.com/400x300?text=No+Image',
+    rating: destination.rating || 0,
+    reviews: destination.review_count || 0,
+    tags: []
+  }
+}
+
+// 데이터 로드
+const loadDestinations = async () => {
+  loading.value = true
+
+  try {
+    let response
+
+    if (searchQuery.value) {
+      // 키워드 검색
+      response = await api.searchTravelSpotsAPI(searchQuery.value, {
+        area_code: selectedRegion.value,
+        page: currentPage.value,
+        size: itemsPerPage
+      })
+    } else {
+      // 지역 기반 목록
+      response = await api.getTravelSpotsFromAPI({
+        area_code: selectedRegion.value,
+        page: currentPage.value,
+        size: itemsPerPage
+      })
+    }
+
+    if (response.data) {
+      destinations.value = response.data.results || []
+      totalCount.value = response.data.count || 0
+    }
+  } catch (error) {
+    console.error('데이터 로드 실패:', error)
+    destinations.value = []
+    totalCount.value = 0
+  } finally {
+    loading.value = false
   }
 }
 
 const handleSearch = () => {
   currentPage.value = 1
+  loadDestinations()
 }
 
 const handleFilterChange = () => {
   currentPage.value = 1
+  loadDestinations()
 }
 
 const handleSort = () => {
-  currentPage.value = 1
+  // 정렬 로직 (클라이언트 사이드)
+  if (sortBy.value === 'name') {
+    destinations.value.sort((a, b) => (a.title || a.name).localeCompare(b.title || b.name))
+  }
+}
+
+const changePage = (page) => {
+  if (page >= 1 && page <= totalPages.value) {
+    currentPage.value = page
+    loadDestinations()
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
 }
 
 const handleCardClick = (destination) => {
@@ -364,7 +274,7 @@ const handleCardClick = (destination) => {
 }
 
 onMounted(() => {
-  // 데이터 로딩 로직 추가 가능
+  loadDestinations()
 })
 </script>
 
@@ -490,6 +400,45 @@ onMounted(() => {
 .result-count strong {
   color: #667eea;
   font-size: 1.25rem;
+}
+
+/* 로딩 */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  min-height: 400px;
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #e5e7eb;
+  border-top-color: #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-container p {
+  margin-top: 1rem;
+  color: #6b7280;
+  font-size: 1.1rem;
+}
+
+/* 결과 없음 */
+.no-results {
+  text-align: center;
+  padding: 4rem 2rem;
+  font-size: 1.2rem;
+  color: #6b7280;
 }
 
 /* 여행지 리스트 */

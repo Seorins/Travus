@@ -1,7 +1,11 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(python manage.py startapp:*)",
+      "Bash(source venv/Scripts/activate)",
+      "Bash(python manage.py makemigrations:*)",
+      "Bash(python manage.py migrate:*)"
     ]
   }
 }
