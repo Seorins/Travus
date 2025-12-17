@@ -13,7 +13,6 @@ from .services.tour_api import tour_api_service
 
 
 class TravelSpotViewSet(viewsets.ReadOnlyModelViewSet):
-    """여행지 ViewSet"""
     queryset = TravelSpot.objects.filter(is_active=True)
     permission_classes = [IsAuthenticatedOrReadOnly]
 
@@ -41,7 +40,7 @@ class TravelSpotViewSet(viewsets.ReadOnlyModelViewSet):
 
     @action(detail=False, methods=['get'])
     def from_api(self, request):
-        """공공데이터 API에서 직접 데이터 가져오기"""
+
         area_code = request.query_params.get('area_code')
         sigungu_code = request.query_params.get('sigungu_code')
         content_type_id = request.query_params.get('content_type_id')
@@ -78,7 +77,7 @@ class TravelSpotViewSet(viewsets.ReadOnlyModelViewSet):
 
     @action(detail=False, methods=['get'])
     def search_api(self, request):
-        """공공데이터 API 키워드 검색"""
+
         keyword = request.query_params.get('keyword', '')
         area_code = request.query_params.get('area_code')
         page_no = int(request.query_params.get('page', 1))
