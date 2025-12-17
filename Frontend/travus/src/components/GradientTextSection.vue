@@ -22,10 +22,10 @@ const handleFocus = (event) => {
 
 <style scoped>
 .gradient-text-section {
-  min-height: 70vh;
+  min-height: 100vh;
   background: linear-gradient(
     to bottom,
-    #b4d5fe 0%,
+    #b4d5fe 0%,   
     #bcd6f3 22%,
     #c5d9ee 38%,
     #cedce9 52%,
@@ -59,7 +59,7 @@ const handleFocus = (event) => {
   font-size: 2rem;
   font-family: 'Noto Sans KR', sans-serif;
   font-weight: 700;
-  color: #52423b;
+  color: #312c29;
   line-height: 1.5;
   margin: 0;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);

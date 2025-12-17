@@ -101,8 +101,8 @@ const handleFocus = (text) => {
 }
 
 onMounted(() => {
-  // 각 섹션이 부드럽게 올라오는 애니메이션 (target-section, gradient-text, image-banner 제외)
-  const sections = document.querySelectorAll('.section:not([data-section="target"]):not([data-section="gradient-text"]):not([data-section="image-banner"])')
+  // 각 섹션이 부드럽게 올라오는 애니메이션 (target-section, destination, gradient-text, image-banner 제외)
+  const sections = document.querySelectorAll('.section:not([data-section="target"]):not([data-section="destination"]):not([data-section="gradient-text"]):not([data-section="image-banner"])')
 
   sections.forEach((section) => {
     gsap.fromTo(
@@ -126,10 +126,15 @@ onMounted(() => {
     )
   })
 
-  // target-section, gradient-text, image-banner는 즉시 보이도록
+  // target-section, destination, gradient-text, image-banner는 즉시 보이도록
   const targetSection = document.querySelector('.section[data-section="target"]')
   if (targetSection) {
     gsap.set(targetSection, { opacity: 1, y: 0 })
+  }
+
+  const destinationSection = document.querySelector('.section[data-section="destination"]')
+  if (destinationSection) {
+    gsap.set(destinationSection, { opacity: 1, y: 0 })
   }
 
   const gradientTextSection = document.querySelector('.section[data-section="gradient-text"]')
@@ -173,6 +178,13 @@ onUnmounted(() => {
 .section[data-section='target'] {
   opacity: 1;
   transform: none;
+}
+
+.section[data-section='destination'] {
+  opacity: 1;
+  transform: none;
+  min-height: 120vh !important;
+  height: auto !important;
 }
 
 .section[data-section='gradient-text'] {

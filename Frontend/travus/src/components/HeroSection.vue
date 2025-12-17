@@ -120,7 +120,7 @@ onUnmounted(() => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(90, 103, 216, 0.7); /* 단색 오버레이 */
+  background: rgba(0, 0, 0, 0.7); /* 단색 오버레이 */
 }
 
 .hero-content {
