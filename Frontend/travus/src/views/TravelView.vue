@@ -10,8 +10,8 @@
     <!-- 헤더 섹션 -->
     <section class="travel-header">
       <div class="container">
-        <h1 class="page-title">여행지 정보</h1>
-        <p class="page-subtitle">전국의 다양한 무장애 여행지를 찾아보세요</p>
+        <h1 class="page-title">{{ pageTitle }}</h1>
+        <p class="page-subtitle">{{ pageSubtitle }}</p>
 
         <!-- 검색바 -->
         <div class="search-bar">
@@ -31,40 +31,138 @@
       </div>
     </section>
 
-    <!-- 필터 섹션 -->
+    <!-- 무장애 검색 섹션 -->
     <section class="filter-section">
       <div class="container">
-        <div class="filter-container">
-          <!-- 지역 필터 -->
-          <div class="filter-group">
-            <label class="filter-label">지역</label>
-            <select v-model="selectedRegion" @change="handleFilterChange" class="filter-select">
-              <option value="">전체</option>
-              <option value="1">서울</option>
-              <option value="6">부산</option>
-              <option value="39">제주</option>
-              <option value="31">경기</option>
-              <option value="32">강원</option>
-              <option value="33">충북</option>
-              <option value="34">충남</option>
-              <option value="35">경북</option>
-              <option value="36">경남</option>
-              <option value="37">전북</option>
-              <option value="38">전남</option>
-            </select>
+        <div class="filter-card">
+          <h3 class="filter-main-title">무장애 검색</h3>
+
+          <!-- 무장애 유형 -->
+          <div class="filter-row">
+            <div class="filter-row-header">
+              <h4 class="filter-row-title">무장애 유형</h4>
+            </div>
+            <div class="accessibility-types">
+              <button
+                class="accessibility-type-btn"
+                :class="{ active: selectedAccessibilityTypes.includes('wheelchair') }"
+                @click="toggleAccessibilityType('wheelchair')"
+              >
+                <div class="icon-wrapper">
+                  <img src="@/assets/icon_body.png" alt="지체장애" />
+                </div>
+                <span>지체장애</span>
+              </button>
+
+              <button
+                class="accessibility-type-btn"
+                :class="{ active: selectedAccessibilityTypes.includes('visual') }"
+                @click="toggleAccessibilityType('visual')"
+              >
+                <div class="icon-wrapper">
+                  <img src="@/assets/icon_eye.png" alt="시각장애" />
+                </div>
+                <span>시각장애</span>
+              </button>
+
+              <button
+                class="accessibility-type-btn"
+                :class="{ active: selectedAccessibilityTypes.includes('hearing') }"
+                @click="toggleAccessibilityType('hearing')"
+              >
+                <div class="icon-wrapper">
+                  <img src="@/assets/icon_ear.png" alt="청각장애" />
+                </div>
+                <span>청각장애</span>
+              </button>
+
+              <button
+                class="accessibility-type-btn"
+                :class="{ active: selectedAccessibilityTypes.includes('family') }"
+                @click="toggleAccessibilityType('family')"
+              >
+                <div class="icon-wrapper">
+                  <img src="@/assets/icon_baby.png" alt="영유아 가족" />
+                </div>
+                <span>영유아 가족</span>
+              </button>
+
+              <button
+                class="accessibility-type-btn"
+                :class="{ active: selectedAccessibilityTypes.includes('senior') }"
+                @click="toggleAccessibilityType('senior')"
+              >
+                <div class="icon-wrapper">
+                  <img src="@/assets/icon_old.png" alt="고령자" />
+                </div>
+                <span>고령자</span>
+              </button>
+            </div>
           </div>
 
-          <!-- 정렬 -->
-          <div class="filter-group">
-            <label class="filter-label">정렬</label>
-            <select v-model="sortBy" @change="handleSort" class="filter-select">
-              <option value="latest">최신순</option>
-              <option value="name">이름순</option>
-            </select>
+          <!-- 시설 정보 -->
+          <div class="filter-row">
+            <div class="filter-row-header">
+              <h4 class="filter-row-title">시설 정보</h4>
+            </div>
+            <div class="facility-types">
+              <label class="facility-checkbox">
+                <input type="checkbox" value="parking" v-model="selectedFacilities">
+                <span>주차장</span>
+              </label>
+              <label class="facility-checkbox">
+                <input type="checkbox" value="restroom" v-model="selectedFacilities">
+                <span>화장실</span>
+              </label>
+              <label class="facility-checkbox">
+                <input type="checkbox" value="elevator" v-model="selectedFacilities">
+                <span>승강기</span>
+              </label>
+              <label class="facility-checkbox">
+                <input type="checkbox" value="route" v-model="selectedFacilities">
+                <span>이동경로</span>
+              </label>
+              <label class="facility-checkbox">
+                <input type="checkbox" value="exit" v-model="selectedFacilities">
+                <span>출입구</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- 지역 선택 및 검색 버튼 -->
+          <div class="filter-row">
+            <div class="filter-row-header">
+              <h4 class="filter-row-title">지역 선택</h4>
+            </div>
+            <div class="region-search-row">
+              <select v-model="selectedRegion" class="region-select">
+                <option value="">전체</option>
+                <option value="1">서울</option>
+                <option value="6">부산</option>
+                <option value="4">대구</option>
+                <option value="5">인천</option>
+                <option value="2">광주</option>
+                <option value="3">대전</option>
+                <option value="7">울산</option>
+                <option value="39">제주</option>
+                <option value="31">경기</option>
+                <option value="32">강원</option>
+                <option value="33">충북</option>
+                <option value="34">충남</option>
+                <option value="35">경북</option>
+                <option value="36">경남</option>
+                <option value="37">전북</option>
+                <option value="38">전남</option>
+              </select>
+
+              <button class="search-filter-btn" @click="handleFilterSearch">
+                검색
+              </button>
+            </div>
           </div>
 
           <!-- 결과 수 -->
-          <div class="result-count">
+          <div class="result-info">
             총 <strong>{{ totalCount }}</strong>개
           </div>
         </div>
@@ -128,11 +226,35 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import NavigationBar from '@/components/common/NavigationBar.vue'
 import FooterSection from '@/components/common/FooterSection.vue'
 import TravelCard from '@/components/travel/TravelCard.vue'
 import api from '@/services/api'
+
+// 라우트에서 카테고리 가져오기
+const route = useRoute()
+const contentTypeId = computed(() => route.query.category || '')
+
+// 페이지 타이틀 동적 변경
+const pageTitle = computed(() => {
+  switch (contentTypeId.value) {
+    case '12': return '관광지/명소'
+    case '32': return '숙박'
+    case '39': return '음식점'
+    default: return '여행지 정보'
+  }
+})
+
+const pageSubtitle = computed(() => {
+  switch (contentTypeId.value) {
+    case '12': return '전국의 무장애 관광지를 찾아보세요'
+    case '32': return '편안한 무장애 숙박시설을 찾아보세요'
+    case '39': return '접근 가능한 음식점을 찾아보세요'
+    default: return '전국의 다양한 무장애 여행지를 찾아보세요'
+  }
+})
 
 // TTS 상태
 const isTTSEnabled = ref(true)
@@ -161,6 +283,8 @@ const handleTTSFocus = (text) => {
 
 // 검색 및 필터 상태
 const searchQuery = ref('')
+const selectedAccessibilityTypes = ref([]) // 무장애 유형 (다중 선택)
+const selectedFacilities = ref([]) // 시설 정보 (다중 선택)
 const selectedRegion = ref('')
 const sortBy = ref('latest')
 
@@ -218,6 +342,7 @@ const loadDestinations = async () => {
       // 키워드 검색
       response = await api.searchTravelSpotsAPI(searchQuery.value, {
         area_code: selectedRegion.value,
+        content_type_id: contentTypeId.value,
         page: currentPage.value,
         size: itemsPerPage
       })
@@ -225,13 +350,34 @@ const loadDestinations = async () => {
       // 지역 기반 목록
       response = await api.getTravelSpotsFromAPI({
         area_code: selectedRegion.value,
+        content_type_id: contentTypeId.value,
         page: currentPage.value,
         size: itemsPerPage
       })
     }
 
     if (response.data) {
-      destinations.value = response.data.results || []
+      let results = response.data.results || []
+
+      // 클라이언트 사이드 필터링 (무장애 유형 & 시설)
+      if (selectedAccessibilityTypes.value.length > 0 || selectedFacilities.value.length > 0) {
+        results = results.filter(item => {
+          // 무장애 유형 필터
+          if (selectedAccessibilityTypes.value.length > 0) {
+            // API 응답에 무장애 정보가 있다고 가정
+            // 실제로는 백엔드에서 필터링하는 것이 더 좋음
+          }
+
+          // 시설 필터
+          if (selectedFacilities.value.length > 0) {
+            // API 응답에 시설 정보가 있다고 가정
+          }
+
+          return true
+        })
+      }
+
+      destinations.value = results
       totalCount.value = response.data.count || 0
     }
   } catch (error) {
@@ -248,16 +394,18 @@ const handleSearch = () => {
   loadDestinations()
 }
 
-const handleFilterChange = () => {
-  currentPage.value = 1
-  loadDestinations()
+const toggleAccessibilityType = (type) => {
+  const index = selectedAccessibilityTypes.value.indexOf(type)
+  if (index > -1) {
+    selectedAccessibilityTypes.value.splice(index, 1)
+  } else {
+    selectedAccessibilityTypes.value.push(type)
+  }
 }
 
-const handleSort = () => {
-  // 정렬 로직 (클라이언트 사이드)
-  if (sortBy.value === 'name') {
-    destinations.value.sort((a, b) => (a.title || a.name).localeCompare(b.title || b.name))
-  }
+const handleFilterSearch = () => {
+  currentPage.value = 1
+  loadDestinations()
 }
 
 const changePage = (page) => {
@@ -273,6 +421,16 @@ const handleCardClick = (destination) => {
   // 상세 페이지로 이동 로직 추가
 }
 
+// 카테고리 변경시 데이터 자동 새로고침
+watch(() => route.query.category, () => {
+  currentPage.value = 1
+  selectedRegion.value = ''
+  selectedAccessibilityTypes.value = []
+  selectedFacilities.value = []
+  searchQuery.value = ''
+  loadDestinations()
+})
+
 onMounted(() => {
   loadDestinations()
 })
@@ -286,7 +444,7 @@ onMounted(() => {
 
 /* 헤더 섹션 */
 .travel-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
   padding: 4rem 2rem 3rem;
   color: white;
 }
@@ -332,7 +490,7 @@ onMounted(() => {
 
 .search-btn {
   padding: 1rem 1.5rem;
-  background: #667eea;
+  background: #111827;
   border: none;
   color: white;
   cursor: pointer;
@@ -340,7 +498,7 @@ onMounted(() => {
 }
 
 .search-btn:hover {
-  background: #5568d3;
+  background: #1f2937;
 }
 
 /* 필터 섹션 */
@@ -348,57 +506,221 @@ onMounted(() => {
   background: white;
   padding: 2rem;
   border-bottom: 1px solid #e5e7eb;
+}
+
+.filter-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 2rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
-.filter-container {
+.filter-main-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #111827;
+}
+
+.filter-row {
+  margin-bottom: 2rem;
+}
+
+.filter-row:last-child {
+  margin-bottom: 0;
+}
+
+.filter-row-header {
+  margin-bottom: 1rem;
+}
+
+.filter-row-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 0;
+}
+
+/* 무장애 유형 버튼 */
+.accessibility-types {
   display: flex;
-  gap: 1.5rem;
-  align-items: center;
+  gap: 1rem;
   flex-wrap: wrap;
 }
 
-.filter-group {
+.accessibility-type-btn {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1.5rem 1rem;
+  background: white;
+  border: 2px solid #d1d5db;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 120px;
 }
 
-.filter-label {
-  font-size: 0.875rem;
+.accessibility-type-btn:hover {
+  border-color: #6b7280;
+  background: #f9fafb;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.accessibility-type-btn.active {
+  border-color: #111827;
+  background: #111827;
+  color: white;
+}
+
+.accessibility-type-btn.active:hover {
+  background: #1f2937;
+  border-color: #1f2937;
+}
+
+.accessibility-type-btn .icon-wrapper {
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f3f4f6;
+  border-radius: 50%;
+  color: #6b7280;
+  transition: all 0.3s ease;
+}
+
+.accessibility-type-btn .icon-wrapper img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+
+.accessibility-type-btn.active .icon-wrapper {
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+}
+
+.accessibility-type-btn span {
+  font-size: 0.95rem;
   font-weight: 600;
   color: #374151;
 }
 
-.filter-select {
-  padding: 0.75rem 1rem;
+.accessibility-type-btn.active span {
+  color: white;
+}
+
+/* 시설 정보 체크박스 */
+.facility-types {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.facility-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  padding: 0.75rem 1.25rem;
+  background: white;
   border: 1px solid #d1d5db;
   border-radius: 8px;
-  font-size: 0.95rem;
-  cursor: pointer;
-  background: white;
-  min-width: 150px;
   transition: all 0.2s ease;
 }
 
-.filter-select:hover {
+.facility-checkbox:hover {
+  border-color: #6b7280;
+  background: #f3f4f6;
+}
+
+.facility-checkbox input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: #111827;
+}
+
+.facility-checkbox input[type="checkbox"]:checked + span {
+  color: #111827;
+  font-weight: 600;
+}
+
+.facility-checkbox span {
+  font-size: 0.95rem;
+  color: #374151;
+  user-select: none;
+}
+
+/* 지역 선택 및 검색 버튼 */
+.region-search-row {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.region-select {
+  flex: 1;
+  padding: 0.875rem 1.25rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  background: white;
+  transition: all 0.2s ease;
+}
+
+.region-select:hover {
   border-color: #9ca3af;
 }
 
-.filter-select:focus {
-  outline: 2px solid #667eea;
+.region-select:focus {
+  outline: 2px solid #111827;
   outline-offset: 2px;
-  border-color: #667eea;
+  border-color: #111827;
 }
 
-.result-count {
-  margin-left: auto;
+.search-filter-btn {
+  padding: 0.875rem 3rem;
+  background: #111827;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.search-filter-btn:hover {
+  background: #1f2937;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+}
+
+.search-filter-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* 결과 정보 */
+.result-info {
+  text-align: right;
   font-size: 1rem;
   color: #6b7280;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
 }
 
-.result-count strong {
-  color: #667eea;
+.result-info strong {
+  color: #111827;
   font-size: 1.25rem;
 }
 
@@ -416,7 +738,7 @@ onMounted(() => {
   width: 50px;
   height: 50px;
   border: 4px solid #e5e7eb;
-  border-top-color: #667eea;
+  border-top-color: #111827;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -479,9 +801,9 @@ onMounted(() => {
 }
 
 .page-btn.active {
-  background: #667eea;
+  background: #111827;
   color: white;
-  border-color: #667eea;
+  border-color: #111827;
 }
 
 .page-btn:disabled {
@@ -499,16 +821,44 @@ onMounted(() => {
     font-size: 1rem;
   }
 
-  .filter-container {
+  .filter-card {
+    padding: 1.5rem;
+  }
+
+  .filter-main-title {
+    font-size: 1.25rem;
+  }
+
+  .accessibility-types {
     flex-direction: column;
-    align-items: stretch;
   }
 
-  .filter-select {
-    min-width: 100%;
+  .accessibility-type-btn {
+    width: 100%;
   }
 
-  .result-count {
+  .facility-types {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .facility-checkbox {
+    width: 100%;
+  }
+
+  .region-search-row {
+    flex-direction: column;
+  }
+
+  .region-select {
+    width: 100%;
+  }
+
+  .search-filter-btn {
+    width: 100%;
+  }
+
+  .result-info {
     margin-left: 0;
     text-align: center;
   }

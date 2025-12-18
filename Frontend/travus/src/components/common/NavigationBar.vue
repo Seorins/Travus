@@ -8,7 +8,28 @@
 
       <!-- 메뉴 -->
       <div class="navbar-menu">
-        <router-link to="/travel" class="menu-item" tabindex="0" @focus="handleFocus">여행</router-link>
+        <div
+          class="menu-item-wrapper"
+          @mouseenter="openMenu"
+          @mouseleave="closeMenu"
+        >
+          <span class="menu-item" tabindex="0" @click="toggleMenu" @focus="openMenu">
+            여행
+            <svg class="dropdown-arrow" :class="{ open: showTravelMenu }" width="16" height="16" viewBox="0 0 24 24" fill="none">
+              <path d="M7 10l5 5 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+          <div
+            class="dropdown-menu"
+            v-show="showTravelMenu"
+            @mouseenter="openMenu"
+            @mouseleave="closeMenu"
+          >
+            <router-link to="/travel?category=12" class="dropdown-item" tabindex="0" @focus="handleFocus" @click="closeMenuImmediate">관광지/명소</router-link>
+            <router-link to="/travel?category=32" class="dropdown-item" tabindex="0" @focus="handleFocus" @click="closeMenuImmediate">숙박</router-link>
+            <router-link to="/travel?category=39" class="dropdown-item" tabindex="0" @focus="handleFocus" @click="closeMenuImmediate">음식점</router-link>
+          </div>
+        </div>
         <router-link to="/ai" class="menu-item" tabindex="0" @focus="handleFocus">AI</router-link>
         <router-link to="/camera" class="menu-item" tabindex="0" @focus="handleFocus">카메라</router-link>
         <router-link to="/board" class="menu-item" tabindex="0" @focus="handleFocus">게시판</router-link>
@@ -79,6 +100,8 @@ const emit = defineEmits(['toggle-tts', 'font-size-change', 'focus'])
 const fontSize = ref(16)
 const minFontSize = 12
 const maxFontSize = 24
+const showTravelMenu = ref(false)
+let menuTimeout = null
 
 const increaseFontSize = () => {
   if (fontSize.value < maxFontSize) {
@@ -96,6 +119,32 @@ const decreaseFontSize = () => {
 
 const toggleTTS = () => {
   emit('toggle-tts')
+}
+
+const openMenu = () => {
+  if (menuTimeout) {
+    clearTimeout(menuTimeout)
+    menuTimeout = null
+  }
+  showTravelMenu.value = true
+}
+
+const closeMenu = () => {
+  menuTimeout = setTimeout(() => {
+    showTravelMenu.value = false
+  }, 150)
+}
+
+const toggleMenu = () => {
+  showTravelMenu.value = !showTravelMenu.value
+}
+
+const closeMenuImmediate = () => {
+  if (menuTimeout) {
+    clearTimeout(menuTimeout)
+    menuTimeout = null
+  }
+  showTravelMenu.value = false
 }
 
 const handleFocus = (event) => {
@@ -156,6 +205,10 @@ const handleFocus = (event) => {
   align-items: center;
 }
 
+.menu-item-wrapper {
+  position: relative;
+}
+
 .menu-item {
   color: #374151;
   text-decoration: none;
@@ -164,10 +217,22 @@ const handleFocus = (event) => {
   padding: 0.5rem 0;
   transition: all 0.2s ease;
   position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  cursor: pointer;
 }
 
 .menu-item:hover {
   color: #111827;
+}
+
+.dropdown-arrow {
+  transition: transform 0.3s ease;
+}
+
+.dropdown-arrow.open {
+  transform: rotate(180deg);
 }
 
 .menu-item::after {
@@ -198,6 +263,43 @@ const handleFocus = (event) => {
 
 .menu-item.router-link-active::after {
   width: 100%;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  margin-top: 0.5rem;
+  min-width: 180px;
+  padding: 0.5rem 0;
+  z-index: 1000;
+}
+
+.dropdown-item {
+  display: block;
+  color: #374151;
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 0.75rem 1.25rem;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.dropdown-item:hover,
+.dropdown-item:focus {
+  background: #f3f4f6;
+  color: #111827;
+  outline: none;
+}
+
+.dropdown-item.router-link-active {
+  background: #f3f4f6;
+  color: #667eea;
 }
 
 .navbar-controls {

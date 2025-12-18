@@ -119,7 +119,7 @@ class Command(BaseCommand):
         # 상세 정보 가져오기
         if with_details:
             self.stdout.write(self.style.SUCCESS('상세 정보를 가져오는 중...'))
-            self.stdout.write(self.style.WARNING('API Rate Limit 방지를 위해 요청 사이 0.5초 대기'))
+            self.stdout.write(self.style.WARNING('API Rate Limit 방지를 위해 요청 사이 1.5초 대기'))
 
             for idx, item in enumerate(item_list, 1):
                 content_id = item.get('contentid', '')
@@ -141,7 +141,7 @@ class Command(BaseCommand):
                                 item['overview'] = detail.get('overview', '')
                                 item['homepage'] = detail.get('homepage', '')
 
-                    time.sleep(0.5)  # 0.5초 대기
+                    time.sleep(1.5)  # 1.5초 대기
 
                     # 무장애 관광 정보
                     with_tour_result = tour_api_service.get_detail_with_tour(content_id)
@@ -164,7 +164,7 @@ class Command(BaseCommand):
                                     'routeinfo': with_tour.get('routeinfo', ''),
                                 }
 
-                    time.sleep(0.5)  # 0.5초 대기
+                    time.sleep(1.5)  # 1.5초 대기
 
                 except Exception as e:
                     self.stdout.write(self.style.WARNING(f'  ⚠ 상세 정보 가져오기 실패: {e}'))
