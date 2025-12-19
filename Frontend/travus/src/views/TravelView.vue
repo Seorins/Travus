@@ -35,135 +35,163 @@
     <section class="filter-section">
       <div class="container">
         <div class="filter-card">
-          <h3 class="filter-main-title">무장애 검색</h3>
-
-          <!-- 무장애 유형 -->
-          <div class="filter-row">
-            <div class="filter-row-header">
-              <h4 class="filter-row-title">무장애 유형</h4>
-            </div>
-            <div class="accessibility-types">
-              <button
-                class="accessibility-type-btn"
-                :class="{ active: selectedAccessibilityTypes.includes('wheelchair') }"
-                @click="toggleAccessibilityType('wheelchair')"
-              >
-                <div class="icon-wrapper">
-                  <img src="@/assets/icon_body.png" alt="지체장애" />
-                </div>
-                <span>지체장애</span>
-              </button>
-
-              <button
-                class="accessibility-type-btn"
-                :class="{ active: selectedAccessibilityTypes.includes('visual') }"
-                @click="toggleAccessibilityType('visual')"
-              >
-                <div class="icon-wrapper">
-                  <img src="@/assets/icon_eye.png" alt="시각장애" />
-                </div>
-                <span>시각장애</span>
-              </button>
-
-              <button
-                class="accessibility-type-btn"
-                :class="{ active: selectedAccessibilityTypes.includes('hearing') }"
-                @click="toggleAccessibilityType('hearing')"
-              >
-                <div class="icon-wrapper">
-                  <img src="@/assets/icon_ear.png" alt="청각장애" />
-                </div>
-                <span>청각장애</span>
-              </button>
-
-              <button
-                class="accessibility-type-btn"
-                :class="{ active: selectedAccessibilityTypes.includes('family') }"
-                @click="toggleAccessibilityType('family')"
-              >
-                <div class="icon-wrapper">
-                  <img src="@/assets/icon_baby.png" alt="영유아 가족" />
-                </div>
-                <span>영유아 가족</span>
-              </button>
-
-              <button
-                class="accessibility-type-btn"
-                :class="{ active: selectedAccessibilityTypes.includes('senior') }"
-                @click="toggleAccessibilityType('senior')"
-              >
-                <div class="icon-wrapper">
-                  <img src="@/assets/icon_old.png" alt="고령자" />
-                </div>
-                <span>고령자</span>
-              </button>
-            </div>
+          <!-- 무장애 검색 헤더 -->
+          <div class="filter-header" @click="toggleFilterCollapse">
+            <h3 class="filter-main-title">무장애 검색</h3>
+            <button class="collapse-btn">
+              <span v-if="isFilterCollapsed">▼</span>
+              <span v-else>▲</span>
+            </button>
           </div>
 
-          <!-- 시설 정보 -->
-          <div class="filter-row">
-            <div class="filter-row-header">
-              <h4 class="filter-row-title">시설 정보</h4>
-            </div>
-            <div class="facility-types">
-              <label class="facility-checkbox">
-                <input type="checkbox" value="parking" v-model="selectedFacilities">
-                <span>주차장</span>
-              </label>
-              <label class="facility-checkbox">
-                <input type="checkbox" value="restroom" v-model="selectedFacilities">
-                <span>화장실</span>
-              </label>
-              <label class="facility-checkbox">
-                <input type="checkbox" value="elevator" v-model="selectedFacilities">
-                <span>승강기</span>
-              </label>
-              <label class="facility-checkbox">
-                <input type="checkbox" value="route" v-model="selectedFacilities">
-                <span>이동경로</span>
-              </label>
-              <label class="facility-checkbox">
-                <input type="checkbox" value="exit" v-model="selectedFacilities">
-                <span>출입구</span>
-              </label>
-            </div>
-          </div>
+          <!-- 필터 내용 -->
+          <div v-show="!isFilterCollapsed" class="filter-content">
+            <!-- 무장애 유형 -->
+            <div class="filter-row">
+              <div class="accessibility-types">
+                <button
+                  class="accessibility-type-btn"
+                  :class="{ active: selectedAccessibilityTypes.includes('wheelchair') }"
+                  @click="toggleAccessibilityType('wheelchair')"
+                >
+                  <div class="icon-wrapper">
+                    <img src="@/assets/icon_body.png" alt="지체장애" />
+                  </div>
+                  <span>지체장애</span>
+                </button>
 
-          <!-- 지역 선택 및 검색 버튼 -->
-          <div class="filter-row">
-            <div class="filter-row-header">
-              <h4 class="filter-row-title">지역 선택</h4>
-            </div>
-            <div class="region-search-row">
-              <select v-model="selectedRegion" class="region-select">
-                <option value="">전체</option>
-                <option value="1">서울</option>
-                <option value="6">부산</option>
-                <option value="4">대구</option>
-                <option value="5">인천</option>
-                <option value="2">광주</option>
-                <option value="3">대전</option>
-                <option value="7">울산</option>
-                <option value="39">제주</option>
-                <option value="31">경기</option>
-                <option value="32">강원</option>
-                <option value="33">충북</option>
-                <option value="34">충남</option>
-                <option value="35">경북</option>
-                <option value="36">경남</option>
-                <option value="37">전북</option>
-                <option value="38">전남</option>
-              </select>
+                <button
+                  class="accessibility-type-btn"
+                  :class="{ active: selectedAccessibilityTypes.includes('visual') }"
+                  @click="toggleAccessibilityType('visual')"
+                >
+                  <div class="icon-wrapper">
+                    <img src="@/assets/icon_eye.png" alt="시각장애" />
+                  </div>
+                  <span>시각장애</span>
+                </button>
 
-              <button class="search-filter-btn" @click="handleFilterSearch">
-                검색
-              </button>
-            </div>
-          </div>
+                <button
+                  class="accessibility-type-btn"
+                  :class="{ active: selectedAccessibilityTypes.includes('hearing') }"
+                  @click="toggleAccessibilityType('hearing')"
+                >
+                  <div class="icon-wrapper">
+                    <img src="@/assets/icon_ear.png" alt="청각장애" />
+                  </div>
+                  <span>청각장애</span>
+                </button>
 
-          <!-- 결과 수 -->
-          <div class="result-info">
-            총 <strong>{{ totalCount }}</strong>개
+                <button
+                  class="accessibility-type-btn"
+                  :class="{ active: selectedAccessibilityTypes.includes('family') }"
+                  @click="toggleAccessibilityType('family')"
+                >
+                  <div class="icon-wrapper">
+                    <img src="@/assets/icon_baby.png" alt="영유아 가족" />
+                  </div>
+                  <span>영유아 가족</span>
+                </button>
+
+                <button
+                  class="accessibility-type-btn"
+                  :class="{ active: selectedAccessibilityTypes.includes('senior') }"
+                  @click="toggleAccessibilityType('senior')"
+                >
+                  <div class="icon-wrapper">
+                    <img src="@/assets/icon_old.png" alt="고령자" />
+                  </div>
+                  <span>고령자</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- 시설 정보 -->
+            <div class="filter-row">
+              <div class="facility-types">
+                <button
+                  class="facility-btn"
+                  :class="{ active: selectedFacilities.includes('all') }"
+                  @click="toggleFacility('all')"
+                >
+                  전체
+                </button>
+                <button
+                  class="facility-btn"
+                  :class="{ active: selectedFacilities.includes('parking') }"
+                  @click="toggleFacility('parking')"
+                >
+                  주차장
+                </button>
+                <button
+                  class="facility-btn"
+                  :class="{ active: selectedFacilities.includes('restroom') }"
+                  @click="toggleFacility('restroom')"
+                >
+                  화장실
+                </button>
+                <button
+                  class="facility-btn"
+                  :class="{ active: selectedFacilities.includes('elevator') }"
+                  @click="toggleFacility('elevator')"
+                >
+                  승강기
+                </button>
+                <button
+                  class="facility-btn"
+                  :class="{ active: selectedFacilities.includes('route') }"
+                  @click="toggleFacility('route')"
+                >
+                  이동경로
+                </button>
+                <button
+                  class="facility-btn"
+                  :class="{ active: selectedFacilities.includes('exit') }"
+                  @click="toggleFacility('exit')"
+                >
+                  출입구
+                </button>
+              </div>
+            </div>
+
+            <!-- 지역 선택 및 검색 -->
+            <div class="filter-row">
+              <div class="region-search-row">
+                <div class="region-select-wrapper">
+                  <label>지역선택</label>
+                  <select v-model="selectedRegion" class="region-select">
+                    <option value="">시도 선택</option>
+                    <option value="1">서울</option>
+                    <option value="6">부산</option>
+                    <option value="4">대구</option>
+                    <option value="5">인천</option>
+                    <option value="2">광주</option>
+                    <option value="3">대전</option>
+                    <option value="7">울산</option>
+                    <option value="39">제주</option>
+                    <option value="31">경기</option>
+                    <option value="32">강원</option>
+                    <option value="33">충북</option>
+                    <option value="34">충남</option>
+                    <option value="35">경북</option>
+                    <option value="36">경남</option>
+                    <option value="37">전북</option>
+                    <option value="38">전남</option>
+                  </select>
+                </div>
+
+                <div class="region-select-wrapper">
+                  <label>전체</label>
+                  <select class="region-select">
+                    <option value="">전체</option>
+                  </select>
+                </div>
+
+                <button class="search-filter-btn" @click="handleFilterSearch">
+                  검색
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -183,7 +211,7 @@
         </div>
         <div v-else class="destinations-grid">
           <TravelCard
-            v-for="(destination, index) in destinations"
+            v-for="(destination, index) in filteredDestinations"
             :key="index"
             :destination="formatDestination(destination)"
             @click="handleCardClick(destination)"
@@ -192,14 +220,27 @@
 
         <!-- 페이지네이션 -->
         <div class="pagination" v-if="totalPages > 1">
+          <!-- 이전 그룹 -->
           <button
-            class="page-btn"
-            :disabled="currentPage === 1"
-            @click="changePage(currentPage - 1)"
+            class="page-btn nav-btn"
+            :disabled="displayedPages[0] === 1"
+            @click="changePageGroup(-1)"
+            title="이전 그룹"
           >
-            이전
+            ◀◀
           </button>
 
+          <!-- 이전 -->
+          <button
+            class="page-btn nav-btn"
+            :disabled="currentPage === 1"
+            @click="changePage(currentPage - 1)"
+            title="이전"
+          >
+            ◀
+          </button>
+
+          <!-- 페이지 번호들 -->
           <button
             v-for="page in displayedPages"
             :key="page"
@@ -210,12 +251,24 @@
             {{ page }}
           </button>
 
+          <!-- 다음 -->
           <button
-            class="page-btn"
+            class="page-btn nav-btn"
             :disabled="currentPage === totalPages"
             @click="changePage(currentPage + 1)"
+            title="다음"
           >
-            다음
+            ▶
+          </button>
+
+          <!-- 다음 그룹 -->
+          <button
+            class="page-btn nav-btn"
+            :disabled="displayedPages[displayedPages.length - 1] === totalPages"
+            @click="changePageGroup(1)"
+            title="다음 그룹"
+          >
+            ▶▶
           </button>
         </div>
       </div>
@@ -287,6 +340,7 @@ const selectedAccessibilityTypes = ref([]) // 무장애 유형 (다중 선택)
 const selectedFacilities = ref([]) // 시설 정보 (다중 선택)
 const selectedRegion = ref('')
 const sortBy = ref('latest')
+const isFilterCollapsed = ref(false) // 필터 접기/펼치기 상태
 
 // 데이터 상태
 const destinations = ref([])
@@ -296,6 +350,7 @@ const totalCount = ref(0)
 // 페이지네이션 상태
 const currentPage = ref(1)
 const itemsPerPage = 20
+const fetchSize = 100 // 이미지 필터링을 고려하여 더 많이 가져오기
 
 const totalPages = computed(() => {
   return Math.ceil(totalCount.value / itemsPerPage)
@@ -304,18 +359,25 @@ const totalPages = computed(() => {
 const displayedPages = computed(() => {
   const pages = []
   const maxDisplayed = 5
-  let start = Math.max(1, currentPage.value - Math.floor(maxDisplayed / 2))
-  let end = Math.min(totalPages.value, start + maxDisplayed - 1)
 
-  if (end - start + 1 < maxDisplayed) {
-    start = Math.max(1, end - maxDisplayed + 1)
-  }
+  // 현재 페이지가 속한 그룹의 시작 페이지 계산
+  const groupStart = Math.floor((currentPage.value - 1) / maxDisplayed) * maxDisplayed + 1
+  const groupEnd = Math.min(groupStart + maxDisplayed - 1, totalPages.value)
 
-  for (let i = start; i <= end; i++) {
+  for (let i = groupStart; i <= groupEnd; i++) {
     pages.push(i)
   }
 
   return pages
+})
+
+// 이미지가 있는 여행지만 필터링하고 페이지당 정확히 itemsPerPage개만 표시
+const filteredDestinations = computed(() => {
+  const withImages = destinations.value.filter(destination => {
+    return destination.firstimage && destination.firstimage.trim() !== ''
+  })
+  // 최대 itemsPerPage개까지만 반환
+  return withImages.slice(0, itemsPerPage)
 })
 
 // 여행지 데이터 포맷 변환
@@ -344,7 +406,7 @@ const loadDestinations = async () => {
         area_code: selectedRegion.value,
         content_type_id: contentTypeId.value,
         page: currentPage.value,
-        size: itemsPerPage
+        size: fetchSize
       })
     } else {
       // 지역 기반 목록
@@ -352,7 +414,7 @@ const loadDestinations = async () => {
         area_code: selectedRegion.value,
         content_type_id: contentTypeId.value,
         page: currentPage.value,
-        size: itemsPerPage
+        size: fetchSize
       })
     }
 
@@ -403,6 +465,19 @@ const toggleAccessibilityType = (type) => {
   }
 }
 
+const toggleFacility = (facility) => {
+  const index = selectedFacilities.value.indexOf(facility)
+  if (index > -1) {
+    selectedFacilities.value.splice(index, 1)
+  } else {
+    selectedFacilities.value.push(facility)
+  }
+}
+
+const toggleFilterCollapse = () => {
+  isFilterCollapsed.value = !isFilterCollapsed.value
+}
+
 const handleFilterSearch = () => {
   currentPage.value = 1
   loadDestinations()
@@ -414,6 +489,21 @@ const changePage = (page) => {
     loadDestinations()
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
+}
+
+const changePageGroup = (direction) => {
+  const maxDisplayed = 5
+  let newPage
+
+  if (direction > 0) {
+    // 다음 그룹: 현재 표시된 마지막 페이지 + 1
+    newPage = displayedPages.value[displayedPages.value.length - 1] + 1
+  } else {
+    // 이전 그룹: 현재 표시된 첫 페이지 - maxDisplayed
+    newPage = displayedPages.value[0] - maxDisplayed
+  }
+
+  changePage(newPage)
 }
 
 const handleCardClick = (destination) => {
@@ -503,177 +593,208 @@ onMounted(() => {
 
 /* 필터 섹션 */
 .filter-section {
-  background: white;
+  background: #f3f4f6;
   padding: 2rem;
-  border-bottom: 1px solid #e5e7eb;
 }
 
 .filter-card {
   background: #ffffff;
-  border: 1px solid #e5e7eb;
   border-radius: 12px;
-  padding: 2rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.filter-header {
+  background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+  padding: 1.5rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.filter-header:hover {
+  background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
 }
 
 .filter-main-title {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #1f2937;
-  margin-bottom: 2rem;
-  padding-bottom: 1rem;
-  border-bottom: 2px solid #111827;
+  color: white;
+  margin: 0;
+}
+
+.collapse-btn {
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 1.25rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  transition: transform 0.3s ease;
+}
+
+.filter-content {
+  padding: 2rem;
+  background: #f9fafb;
 }
 
 .filter-row {
   margin-bottom: 2rem;
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .filter-row:last-child {
   margin-bottom: 0;
 }
 
-.filter-row-header {
-  margin-bottom: 1rem;
-}
-
-.filter-row-title {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #374151;
-  margin: 0;
-}
-
 /* 무장애 유형 버튼 */
 .accessibility-types {
   display: flex;
-  gap: 1rem;
+  gap: 1.5rem;
   flex-wrap: wrap;
+  justify-content: center;
 }
 
 .accessibility-type-btn {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.75rem;
-  padding: 1.5rem 1rem;
+  gap: 1rem;
+  padding: 2rem 1.5rem;
   background: white;
-  border: 2px solid #d1d5db;
-  border-radius: 12px;
+  border: 3px solid #e5e7eb;
+  border-radius: 16px;
   cursor: pointer;
   transition: all 0.3s ease;
-  min-width: 120px;
+  min-width: 140px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .accessibility-type-btn:hover {
-  border-color: #6b7280;
+  border-color: #9ca3af;
   background: #f9fafb;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(156, 163, 175, 0.15);
 }
 
 .accessibility-type-btn.active {
-  border-color: #111827;
-  background: #111827;
-  color: white;
+  border-color: #9ca3af;
+  background: #f9fafb;
+  position: relative;
 }
 
-.accessibility-type-btn.active:hover {
-  background: #1f2937;
-  border-color: #1f2937;
+.accessibility-type-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: -3px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  height: 6px;
+  background: #9ca3af;
+  border-radius: 3px 3px 0 0;
 }
 
 .accessibility-type-btn .icon-wrapper {
-  width: 60px;
-  height: 60px;
+  width: 80px;
+  height: 80px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: #f3f4f6;
   border-radius: 50%;
-  color: #6b7280;
   transition: all 0.3s ease;
 }
 
 .accessibility-type-btn .icon-wrapper img {
-  width: 40px;
-  height: 40px;
+  width: 50px;
+  height: 50px;
   object-fit: contain;
 }
 
 .accessibility-type-btn.active .icon-wrapper {
-  background: rgba(255, 255, 255, 0.15);
-  color: white;
+  background: #d1d5db;
 }
 
 .accessibility-type-btn span {
-  font-size: 0.95rem;
-  font-weight: 600;
+  font-size: 1rem;
+  font-weight: 700;
   color: #374151;
 }
 
 .accessibility-type-btn.active span {
-  color: white;
+  color: #6b7280;
 }
 
-/* 시설 정보 체크박스 */
+/* 시설 정보 버튼 */
 .facility-types {
   display: flex;
-  gap: 1.5rem;
+  gap: 1rem;
   flex-wrap: wrap;
+  justify-content: center;
 }
 
-.facility-checkbox {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  cursor: pointer;
-  padding: 0.75rem 1.25rem;
+.facility-btn {
+  padding: 0.875rem 2rem;
   background: white;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  transition: all 0.2s ease;
-}
-
-.facility-checkbox:hover {
-  border-color: #6b7280;
-  background: #f3f4f6;
-}
-
-.facility-checkbox input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
+  border: 2px solid #d1d5db;
+  border-radius: 50px;
   cursor: pointer;
-  accent-color: #111827;
-}
-
-.facility-checkbox input[type="checkbox"]:checked + span {
-  color: #111827;
+  font-size: 1rem;
   font-weight: 600;
+  color: #6b7280;
+  transition: all 0.3s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
-.facility-checkbox span {
-  font-size: 0.95rem;
-  color: #374151;
-  user-select: none;
+.facility-btn:hover {
+  border-color: #9ca3af;
+  background: #f3f4f6;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.facility-btn.active {
+  background: #9ca3af;
+  border-color: #9ca3af;
+  color: white;
 }
 
 /* 지역 선택 및 검색 버튼 */
 .region-search-row {
   display: flex;
   gap: 1rem;
-  align-items: center;
+  align-items: flex-end;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.region-select-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.region-select-wrapper label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #374151;
 }
 
 .region-select {
-  flex: 1;
-  padding: 0.875rem 1.25rem;
-  border: 1px solid #d1d5db;
+  padding: 0.875rem 1.5rem;
+  border: 2px solid #d1d5db;
   border-radius: 8px;
   font-size: 1rem;
   cursor: pointer;
   background: white;
   transition: all 0.2s ease;
+  min-width: 200px;
 }
 
 .region-select:hover {
@@ -681,26 +802,26 @@ onMounted(() => {
 }
 
 .region-select:focus {
-  outline: 2px solid #111827;
-  outline-offset: 2px;
-  border-color: #111827;
+  outline: none;
+  border-color: #6b7280;
+  box-shadow: 0 0 0 3px rgba(107, 114, 128, 0.1);
 }
 
 .search-filter-btn {
   padding: 0.875rem 3rem;
-  background: #111827;
+  background: linear-gradient(135deg, #374151 0%, #1f2937 100%);
   color: white;
   border: none;
   border-radius: 8px;
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .search-filter-btn:hover {
-  background: #1f2937;
+  background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
 }
@@ -710,19 +831,6 @@ onMounted(() => {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
-/* 결과 정보 */
-.result-info {
-  text-align: right;
-  font-size: 1rem;
-  color: #6b7280;
-  padding-top: 1rem;
-  border-top: 1px solid #e5e7eb;
-}
-
-.result-info strong {
-  color: #111827;
-  font-size: 1.25rem;
-}
 
 /* 로딩 */
 .loading-container {
