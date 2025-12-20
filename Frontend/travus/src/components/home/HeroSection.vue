@@ -121,7 +121,13 @@ const handleFocus = (event) => {
 }
 
 onMounted(() => {
-  // 자동 슬라이드 (5초마다)
+  // 이미지 미리 로드
+  images.value.forEach((src) => {
+    const img = new Image()
+    img.src = src
+  })
+
+  // 자동 슬라이드 (10초마다)
   slideInterval = setInterval(nextSlide, 10000)
 })
 
@@ -179,7 +185,7 @@ onUnmounted(() => {
   padding: 0 5%;
   max-width: 800px;
   margin-left: 5%;
-  animation: fadeInUp 2s ease-out;
+  animation: fadeInUp 0.8s ease-out;
 }
 
 .hero-badge {

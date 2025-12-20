@@ -15,6 +15,11 @@
         <HeroSection @focus="handleFocus" />
       </section>
 
+      <!-- 이번주 추천 섹션 -->
+      <section class="section scroll-snap-section" data-section="weekly">
+        <WeeklyRecommendSection @focus="handleFocus" />
+      </section>
+
       <!-- 여행 대상 섹션 -->
       <section class="section scroll-snap-section" data-section="target">
         <TravelTargetSection @focus="handleFocus" />
@@ -43,6 +48,7 @@ import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import NavigationBar from '@/components/common/NavigationBar.vue'
 import HeroSection from '@/components/home/HeroSection.vue'
+import WeeklyRecommendSection from '@/components/home/WeeklyRecommendSection.vue'
 import TravelTargetSection from '@/components/home/TravelTargetSection.vue'
 import DestinationSection from '@/components/home/DestinationSection.vue'
 import AICameraSection from '@/components/ai/AICameraSection.vue'
@@ -83,8 +89,8 @@ const handleFocus = (text) => {
 }
 
 onMounted(() => {
-  // 각 섹션이 부드럽게 올라오는 애니메이션 (target-section, destination 제외)
-  const sections = document.querySelectorAll('.section:not([data-section="target"]):not([data-section="destination"])')
+  // 각 섹션이 부드럽게 올라오는 애니메이션 (hero, target-section, destination, weekly 제외)
+  const sections = document.querySelectorAll('.section:not([data-section="hero"]):not([data-section="target"]):not([data-section="destination"]):not([data-section="weekly"])')
 
   sections.forEach((section) => {
     gsap.fromTo(
@@ -108,7 +114,12 @@ onMounted(() => {
     )
   })
 
-  // target-section, destination은 즉시 보이도록
+  // hero, target-section, destination, weekly는 즉시 보이도록
+  const heroSection = document.querySelector('.section[data-section="hero"]')
+  if (heroSection) {
+    gsap.set(heroSection, { opacity: 1, y: 0 })
+  }
+
   const targetSection = document.querySelector('.section[data-section="target"]')
   if (targetSection) {
     gsap.set(targetSection, { opacity: 1, y: 0 })
@@ -117,6 +128,11 @@ onMounted(() => {
   const destinationSection = document.querySelector('.section[data-section="destination"]')
   if (destinationSection) {
     gsap.set(destinationSection, { opacity: 1, y: 0 })
+  }
+
+  const weeklySection = document.querySelector('.section[data-section="weekly"]')
+  if (weeklySection) {
+    gsap.set(weeklySection, { opacity: 1, y: 0 })
   }
 })
 
@@ -147,6 +163,11 @@ onUnmounted(() => {
   will-change: transform, opacity;
 }
 
+.section[data-section='hero'] {
+  opacity: 1;
+  transform: none;
+}
+
 .section[data-section='target'] {
   opacity: 1;
   transform: none;
@@ -157,6 +178,11 @@ onUnmounted(() => {
   transform: none;
   min-height: 120vh !important;
   height: auto !important;
+}
+
+.section[data-section='weekly'] {
+  opacity: 1;
+  transform: none;
 }
 
 /* 전역 스타일 */

@@ -507,8 +507,8 @@ const changePageGroup = (direction) => {
 }
 
 const handleCardClick = (destination) => {
-  console.log('Clicked destination:', destination)
-  // 상세 페이지로 이동 로직 추가
+  // 상세 페이지로 이동
+  window.location.href = `/travel/${destination.contentid}`
 }
 
 // 카테고리 변경시 데이터 자동 새로고침

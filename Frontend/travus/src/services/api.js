@@ -32,6 +32,40 @@ export default {
     })
   },
 
+  // 공공데이터 API 특정 여행지 기본 정보 (detailCommon2)
+  getTravelSpotDetailCommon(contentId) {
+    return apiClient.get('/travel-spots/detail_common/', {
+      params: { content_id: contentId }
+    })
+  },
+
+  // 공공데이터 API 소개 정보 (detailIntro2)
+  getTravelSpotDetailIntro(contentId, contentTypeId = 12) {
+    return apiClient.get('/travel-spots/detail_intro/', {
+      params: {
+        content_id: contentId,
+        content_type_id: contentTypeId
+      }
+    })
+  },
+
+  // 공공데이터 API 반복 정보 (detailInfo2)
+  getTravelSpotDetailInfo(contentId, contentTypeId = 12) {
+    return apiClient.get('/travel-spots/detail_info/', {
+      params: {
+        content_id: contentId,
+        content_type_id: contentTypeId
+      }
+    })
+  },
+
+  // 공공데이터 API 이미지 정보 (detailImage2)
+  getTravelSpotDetailImages(contentId) {
+    return apiClient.get('/travel-spots/detail_image/', {
+      params: { content_id: contentId }
+    })
+  },
+
   // DB에서 여행지 목록 가져오기
   getTravelSpots(params = {}) {
     return apiClient.get('/travel-spots/', { params })
