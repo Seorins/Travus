@@ -59,7 +59,7 @@ const handleFocus = (event) => {
   font-size: 2rem;
   font-family: 'Noto Sans KR', sans-serif;
   font-weight: 700;
-  color: #312c29;
+  color: #32343f;
   line-height: 1.5;
   margin: 0;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);

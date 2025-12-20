@@ -8,6 +8,7 @@
 
       <!-- 메뉴 -->
       <div class="navbar-menu">
+        <router-link to="/about" class="menu-item" tabindex="0" @focus="handleFocus">소개</router-link>
         <div
           class="menu-item-wrapper"
           @mouseenter="openMenu"

@@ -15,11 +15,6 @@
         <HeroSection @focus="handleFocus" />
       </section>
 
-      <!-- About 섹션 -->
-      <section class="section scroll-snap-section" data-section="about">
-        <AboutSection @focus="handleFocus" />
-      </section>
-
       <!-- 여행 대상 섹션 -->
       <section class="section scroll-snap-section" data-section="target">
         <TravelTargetSection @focus="handleFocus" />
@@ -35,16 +30,6 @@
         <AICameraSection @focus="handleFocus" />
       </section>
 
-      <!-- 그라데이션 텍스트 섹션 -->
-      <section class="section scroll-snap-section" data-section="gradient-text">
-        <GradientTextSection @focus="handleFocus" />
-      </section>
-
-      <!-- 이미지 배너 섹션 -->
-      <section class="section scroll-snap-section" data-section="image-banner">
-        <ImageBannerSection @focus="handleFocus" />
-      </section>
-
       <!-- 푸터 -->
       <FooterSection @focus="handleFocus" />
     </main>
@@ -58,12 +43,9 @@ import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import NavigationBar from '@/components/common/NavigationBar.vue'
 import HeroSection from '@/components/home/HeroSection.vue'
-import AboutSection from '@/components/home/AboutSection.vue'
 import TravelTargetSection from '@/components/home/TravelTargetSection.vue'
 import DestinationSection from '@/components/home/DestinationSection.vue'
 import AICameraSection from '@/components/ai/AICameraSection.vue'
-import GradientTextSection from '@/components/home/GradientTextSection.vue'
-import ImageBannerSection from '@/components/home/ImageBannerSection.vue'
 import FooterSection from '@/components/common/FooterSection.vue'
 
 // GSAP ScrollTrigger 등록
@@ -101,8 +83,8 @@ const handleFocus = (text) => {
 }
 
 onMounted(() => {
-  // 각 섹션이 부드럽게 올라오는 애니메이션 (target-section, destination, gradient-text, image-banner 제외)
-  const sections = document.querySelectorAll('.section:not([data-section="target"]):not([data-section="destination"]):not([data-section="gradient-text"]):not([data-section="image-banner"])')
+  // 각 섹션이 부드럽게 올라오는 애니메이션 (target-section, destination 제외)
+  const sections = document.querySelectorAll('.section:not([data-section="target"]):not([data-section="destination"])')
 
   sections.forEach((section) => {
     gsap.fromTo(
@@ -126,7 +108,7 @@ onMounted(() => {
     )
   })
 
-  // target-section, destination, gradient-text, image-banner는 즉시 보이도록
+  // target-section, destination은 즉시 보이도록
   const targetSection = document.querySelector('.section[data-section="target"]')
   if (targetSection) {
     gsap.set(targetSection, { opacity: 1, y: 0 })
@@ -135,16 +117,6 @@ onMounted(() => {
   const destinationSection = document.querySelector('.section[data-section="destination"]')
   if (destinationSection) {
     gsap.set(destinationSection, { opacity: 1, y: 0 })
-  }
-
-  const gradientTextSection = document.querySelector('.section[data-section="gradient-text"]')
-  if (gradientTextSection) {
-    gsap.set(gradientTextSection, { opacity: 1, y: 0 })
-  }
-
-  const imageBannerSection = document.querySelector('.section[data-section="image-banner"]')
-  if (imageBannerSection) {
-    gsap.set(imageBannerSection, { opacity: 1, y: 0 })
   }
 })
 
@@ -185,10 +157,6 @@ onUnmounted(() => {
   transform: none;
   min-height: 120vh !important;
   height: auto !important;
-}
-
-.section[data-section='gradient-text'] {
-  min-height: auto;
 }
 
 /* 전역 스타일 */

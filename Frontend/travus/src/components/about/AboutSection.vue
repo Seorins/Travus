@@ -53,9 +53,9 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 80px 120px;
-  background-color: #f0c9bd;
-  min-height: 100vh;
+  padding: 120px 120px;
+  background-color: #b4d5fe;
+  min-height: 120vh;
   box-sizing: border-box;
   overflow: hidden;
 }
@@ -65,7 +65,7 @@
   position: absolute;
   font-size: 160px;
   font-weight: 800;
-  color: rgba(160, 128, 119, 0.12);
+  color: rgba(119, 120, 160, 0.12);
   top: 24%;
   left: 60%;
   transform: translate(-50%, -50%);
@@ -86,13 +86,13 @@
   font-size: 56px;
   font-weight: 700;
   line-height: 1.3;
-  color: #a08077;
+  color: #5f6f8d;
   margin-bottom: 40px;
 }
 
 .travus-text{
-  background-color: #a08077;
-  color: #f0c9bd;
+  background-color: #5f6f8d;
+  color: #b4d5fe;
   padding: 0px 5px;
 }
 
@@ -127,7 +127,7 @@
   object-position: center top;
   flex-shrink: 0;
   box-shadow: 0px 2px 6px rgba(0,0,0,0.1);
-  background-color: #88685f;
+  background-color: #5b6880;
 }
 
 .left-bubble {
@@ -138,7 +138,7 @@
   width: fit-content;
   font-size: 18px;
   font-weight: 500;
-  color: #a08077;
+  color: #5f6f8d;
   box-shadow: 0px 3px 6px rgba(0,0,0,0.1);
   animation: float 3s ease-in-out infinite;
   position: relative;
@@ -166,7 +166,7 @@
   width: fit-content;
   font-size: 18px;
   font-weight: 500;
-  color: #a08077;
+  color: #5f6f8d;
   box-shadow: 0px 3px 6px rgba(0,0,0,0.1);
   animation: float 3s ease-in-out infinite;
   position: relative;
@@ -189,12 +189,12 @@
 .description {
   font-size: 19px;
   line-height: 1.8;
-  color: #88685f;
+  color: #5f6f8d;
   letter-spacing: -0.5px;
 }
 
 .description span{
-  background-color: #88685f;
+  background-color: #5f6f8d;
   color: white;
   padding: 2px 5px;
 }

@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(move \"home\\\\AboutSection.vue\" \"about\\\\AboutSection.vue\")",
+      "Bash(move \"home\\\\GradientTextSection.vue\" \"about\\\\GradientTextSection.vue\")",
+      "Bash(move \"home\\\\ImageBannerSection.vue\" \"about\\\\ImageBannerSection.vue\")"
+    ]
+  }
+}
