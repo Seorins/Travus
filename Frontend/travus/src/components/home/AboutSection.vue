@@ -54,7 +54,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 80px 120px;
-  background-color: #f0c9bd;
+  background-color: #f5f5f5;
   min-height: 100vh;
   box-sizing: border-box;
   overflow: hidden;
