@@ -15,6 +15,11 @@
         <HeroSection @focus="handleFocus" />
       </section>
 
+      <!-- 카테고리 배지 섹션 -->
+      <section data-section="badge">
+        <BadgeSection @focus="handleFocus" />
+      </section>
+
       <!-- 이번주 추천 섹션 -->
       <section class="section scroll-snap-section" data-section="weekly">
         <WeeklyRecommendSection @focus="handleFocus" />
@@ -53,6 +58,7 @@ import TravelTargetSection from '@/components/home/TravelTargetSection.vue'
 import DestinationSection from '@/components/home/DestinationSection.vue'
 import AICameraSection from '@/components/ai/AICameraSection.vue'
 import FooterSection from '@/components/common/FooterSection.vue'
+import BadgeSection from '@/components/home/BadgeSection.vue'
 
 // GSAP ScrollTrigger 등록
 gsap.registerPlugin(ScrollTrigger)
