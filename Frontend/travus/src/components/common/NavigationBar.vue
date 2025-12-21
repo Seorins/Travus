@@ -55,7 +55,7 @@
         </button>
 
         <!-- 로그인 -->
-        <button class="icon-btn" tabindex="0" @focus="handleFocus" aria-label="로그인">
+        <button class="icon-btn" tabindex="0" @click="goLogin" @focus="handleFocus" aria-label="로그인">
           <svg class="icon-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" fill="currentColor"/>
           </svg>
@@ -67,6 +67,7 @@
 
 <script setup>
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 
 const props = defineProps({
   isTTSEnabled: {
@@ -76,6 +77,8 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['toggle-tts', 'font-size-change', 'focus'])
+
+const router = useRouter()
 
 const fontSize = ref(16)
 const minFontSize = 12
@@ -125,6 +128,10 @@ const closeMenuImmediate = () => {
     menuTimeout = null
   }
   showTravelMenu.value = false
+}
+
+const goLogin = () => {
+  router.push('/login')
 }
 
 const handleFocus = (event) => {
