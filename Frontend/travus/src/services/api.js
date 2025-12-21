@@ -20,7 +20,32 @@ apiClient.interceptors.response.use(
 )
 
 export default {
-  // 공공데이터 API에서 여행지 가져오기
+  // ==========================================
+  // 메인 API (DB 기반) - 우선 사용
+  // ==========================================
+
+  // DB에서 여행지 목록 가져오기
+  getTravelSpots(params = {}) {
+    return apiClient.get('/travel-spots/', { params })
+  },
+
+  // 여행지 상세 정보 (DB PK 기준)
+  getTravelSpotDetail(id) {
+    return apiClient.get(`/travel-spots/${id}/`)
+  },
+
+  // content_id로 여행지 조회 (공공데이터 API ID 기준)
+  getTravelSpotByContentId(contentId) {
+    return apiClient.get('/travel-spots/by_content_id/', {
+      params: { content_id: contentId }
+    })
+  },
+
+  // ==========================================
+  // 레거시 API (실시간 공공데이터 - 필요시만 사용)
+  // ==========================================
+
+  // 공공데이터 API에서 여행지 가져오기 (목록 또는 상세)
   getTravelSpotsFromAPI(params = {}) {
     return apiClient.get('/travel-spots/from_api/', { params })
   },
@@ -32,11 +57,13 @@ export default {
     })
   },
 
-  // 공공데이터 API 특정 여행지 기본 정보 (detailCommon2)
-  getTravelSpotDetailCommon(contentId) {
-    return apiClient.get('/travel-spots/detail_common/', {
-      params: { content_id: contentId }
-    })
+  // 공공데이터 API 특정 여행지 기본 정보 (detailCommon1)
+  getTravelSpotDetailCommon(contentId, contentTypeId = null) {
+    const params = { content_id: contentId }
+    if (contentTypeId) {
+      params.content_type_id = contentTypeId
+    }
+    return apiClient.get('/travel-spots/detail_common/', { params })
   },
 
   // 공공데이터 API 소개 정보 (detailIntro2)
@@ -66,15 +93,35 @@ export default {
     })
   },
 
-  // DB에서 여행지 목록 가져오기
-  getTravelSpots(params = {}) {
-    return apiClient.get('/travel-spots/', { params })
+  // 공공데이터 API 무장애 여행정보 (detailWithTour1)
+  getTravelSpotDetailWithTour(contentId) {
+    return apiClient.get('/travel-spots/detail_with_tour/', {
+      params: { content_id: contentId }
+    })
   },
 
-  // 여행지 상세 정보
-  getTravelSpotDetail(id) {
-    return apiClient.get(`/travel-spots/${id}/`)
+  // 공공데이터 API 지역코드 조회 (areaCode2)
+  getAreaCodes(areaCode = null) {
+    const params = {}
+    if (areaCode) params.area_code = areaCode
+    return apiClient.get('/travel-spots/area_code/', { params })
   },
+
+  // 공공데이터 API 서비스분류코드 조회 (categoryCode2)
+  getCategoryCodes(params = {}) {
+    return apiClient.get('/travel-spots/category_code/', { params })
+  },
+
+  // 공공데이터 API 위치기반 관광정보 조회 (locationBasedList2)
+  getTravelSpotsByLocation(mapx, mapy, params = {}) {
+    return apiClient.get('/travel-spots/location_based/', {
+      params: { mapx, mapy, ...params }
+    })
+  },
+
+  // ==========================================
+  // 기타 엔드포인트
+  // ==========================================
 
   // 카테고리 목록
   getCategories() {

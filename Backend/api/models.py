@@ -56,7 +56,7 @@ class TravelSpot(models.Model):
 
     # 상세 정보
     description = models.TextField(blank=True, null=True, verbose_name='설명')
-    tel = models.CharField(max_length=50, blank=True, null=True, verbose_name='전화번호')
+    tel = models.TextField(blank=True, null=True, verbose_name='전화번호')
     homepage = models.URLField(blank=True, null=True, verbose_name='홈페이지')
 
     # 이미지
@@ -104,32 +104,89 @@ class AccessibilityInfo(models.Model):
         verbose_name='여행지'
     )
 
-    # 접근성 정보 (공공데이터 API 기반)
+    # === 지체장애 (Physical Disability) ===
     parking = models.BooleanField(default=False, verbose_name='장애인 주차장')
-    route = models.BooleanField(default=False, verbose_name='대중교통 접근')
-    public_transport = models.BooleanField(default=False, verbose_name='무장애 이동경로')
-    restroom = models.BooleanField(default=False, verbose_name='장애인 화장실')
-    wheelchair = models.BooleanField(default=False, verbose_name='휠체어 대여')
-    exit = models.BooleanField(default=False, verbose_name='출입통로')
-    elevator = models.BooleanField(default=False, verbose_name='승강기')
-    audio_guide = models.BooleanField(default=False, verbose_name='음성안내')
-
-    # 상세 설명
     parking_info = models.TextField(blank=True, null=True, verbose_name='주차 정보')
-    route_info = models.TextField(blank=True, null=True, verbose_name='이동경로 정보')
-    restroom_info = models.TextField(blank=True, null=True, verbose_name='화장실 정보')
+
+    public_transport = models.BooleanField(default=False, verbose_name='대중교통')
+    public_transport_info = models.TextField(blank=True, null=True, verbose_name='대중교통 정보')
+
+    route = models.BooleanField(default=False, verbose_name='접근로')
+    route_info = models.TextField(blank=True, null=True, verbose_name='접근로 정보')
+
+    ticket_office = models.BooleanField(default=False, verbose_name='매표소')
+    ticket_office_info = models.TextField(blank=True, null=True, verbose_name='매표소 정보')
+
+    promotion = models.BooleanField(default=False, verbose_name='홍보물')
+    promotion_info = models.TextField(blank=True, null=True, verbose_name='홍보물 정보')
+
+    wheelchair = models.BooleanField(default=False, verbose_name='휠체어')
     wheelchair_info = models.TextField(blank=True, null=True, verbose_name='휠체어 정보')
-    exit_info = models.TextField(blank=True, null=True, verbose_name='출입구 정보')
-    elevator_info = models.TextField(blank=True, null=True, verbose_name='승강기 정보')
 
-    # 기타 정보
+    exit = models.BooleanField(default=False, verbose_name='출입통로')
+    exit_info = models.TextField(blank=True, null=True, verbose_name='출입통로 정보')
+
+    elevator = models.BooleanField(default=False, verbose_name='엘리베이터')
+    elevator_info = models.TextField(blank=True, null=True, verbose_name='엘리베이터 정보')
+
+    restroom = models.BooleanField(default=False, verbose_name='장애인 화장실')
+    restroom_info = models.TextField(blank=True, null=True, verbose_name='화장실 정보')
+
+    auditorium = models.BooleanField(default=False, verbose_name='관람석')
+    auditorium_info = models.TextField(blank=True, null=True, verbose_name='관람석 정보')
+
+    room = models.BooleanField(default=False, verbose_name='객실')
+    room_info = models.TextField(blank=True, null=True, verbose_name='객실 정보')
+
+    handicap_etc = models.TextField(blank=True, null=True, verbose_name='지체장애 기타 상세')
+
+    # === 시각장애 (Visual Disability) ===
     braile_block = models.BooleanField(default=False, verbose_name='점자블록')
-    help_dog = models.BooleanField(default=False, verbose_name='안내견 동반')
-    guide_system = models.BooleanField(default=False, verbose_name='유도 안내 설비')
+    braile_block_info = models.TextField(blank=True, null=True, verbose_name='점자블록 정보')
 
-    # 추가 접근성 정보
-    stroller = models.BooleanField(default=False, verbose_name='유모차 접근 가능')
+    help_dog = models.BooleanField(default=False, verbose_name='보조견 동반')
+    help_dog_info = models.TextField(blank=True, null=True, verbose_name='보조견 정보')
+
+    guide_human = models.BooleanField(default=False, verbose_name='안내요원')
+    guide_human_info = models.TextField(blank=True, null=True, verbose_name='안내요원 정보')
+
+    audio_guide = models.BooleanField(default=False, verbose_name='오디오 가이드')
+    audio_guide_info = models.TextField(blank=True, null=True, verbose_name='오디오 가이드 정보')
+
+    big_print = models.BooleanField(default=False, verbose_name='큰 활자 홍보물')
+    big_print_info = models.TextField(blank=True, null=True, verbose_name='큰 활자 홍보물 정보')
+
+    braile_promotion = models.BooleanField(default=False, verbose_name='점자 홍보물')
+    braile_promotion_info = models.TextField(blank=True, null=True, verbose_name='점자 홍보물 정보')
+
+    guide_system = models.BooleanField(default=False, verbose_name='유도 안내 설비')
+    guide_system_info = models.TextField(blank=True, null=True, verbose_name='유도 안내 설비 정보')
+
+    blind_handicap_etc = models.TextField(blank=True, null=True, verbose_name='시각장애 기타 상세')
+
+    # === 청각장애 (Hearing Disability) ===
+    sign_guide = models.BooleanField(default=False, verbose_name='수화 안내')
+    sign_guide_info = models.TextField(blank=True, null=True, verbose_name='수화 안내 정보')
+
+    video_guide = models.BooleanField(default=False, verbose_name='자막 비디오 가이드')
+    video_guide_info = models.TextField(blank=True, null=True, verbose_name='자막 비디오 가이드 정보')
+
+    hearing_room = models.BooleanField(default=False, verbose_name='청각장애 객실')
+    hearing_room_info = models.TextField(blank=True, null=True, verbose_name='청각장애 객실 정보')
+
+    hearing_handicap_etc = models.TextField(blank=True, null=True, verbose_name='청각장애 기타 상세')
+
+    # === 영유아가족 (Families with Infants) ===
+    stroller = models.BooleanField(default=False, verbose_name='유모차')
+    stroller_info = models.TextField(blank=True, null=True, verbose_name='유모차 정보')
+
     lactation_room = models.BooleanField(default=False, verbose_name='수유실')
+    lactation_room_info = models.TextField(blank=True, null=True, verbose_name='수유실 정보')
+
+    baby_spare_chair = models.BooleanField(default=False, verbose_name='유아용 보조의자')
+    baby_spare_chair_info = models.TextField(blank=True, null=True, verbose_name='유아용 보조의자 정보')
+
+    infants_family_etc = models.TextField(blank=True, null=True, verbose_name='영유아가족 기타 상세')
 
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='생성일')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='수정일')

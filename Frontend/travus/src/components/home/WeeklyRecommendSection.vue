@@ -2,10 +2,10 @@
   <section class="weekly-section">
     <div class="container">
       <div class="weekly-header">
-        <h2 class="weekly-title">이번주에 가볼 만한 곳</h2>
+        <h2 class="weekly-title"><span>지금</span> 떠나기 좋은 여행지 추천</h2>
         <div class="subtitle-container">
           <p class="weekly-subtitle">
-            '나의 성향에 따른 맞춤형 여행지'가 추천되고 있습니다.
+            모두가 편안하게 다녀올 수 있는 여행지를 골라봤습니다.
           </p>
         </div>
       </div>
@@ -92,7 +92,11 @@ const visibleCards = 4
 // 카드 클릭 핸들러
 const handleCardClick = (destination) => {
   // 상세 페이지로 이동 (Vue Router 사용)
-  router.push(`/travel/${destination.contentid}`)
+  // contentTypeId도 함께 전달하여 조회 안정성 향상
+  router.push({
+    path: `/travel/${destination.contentid}`,
+    query: { contentTypeId: destination.contenttypeid || '12' }
+  })
 }
 
 // 북마크 핸들러
@@ -177,49 +181,45 @@ const nextSlide = () => {
   }
 }
 
-// API에서 관광지 데이터 가져오기
+// DB에서 관광지 데이터 가져오기
 const fetchDestinations = async () => {
   try {
-    // 전체 데이터 개수를 먼저 확인
-    const initialResponse = await api.getTravelSpotsFromAPI({
-      content_type_id: 12,
-      page: 1,
-      size: 1
+    console.log('📍 DB에서 추천 여행지 조회')
+
+    // DB에서 관광지 (content_type_id=12) 가져오기
+    const response = await api.getTravelSpots({
+      content_type_id: '12',
+      page_size: 100,
+      ordering: '-view_count'  // 조회수 높은 순
     })
 
-    const totalCount = initialResponse.data.count || 3000
+    if (response.data && response.data.results) {
+      // DB 응답을 기존 형식으로 매핑
+      const results = response.data.results.map(item => ({
+        contentid: item.content_id,
+        contenttypeid: item.content_type_id,
+        title: item.name,
+        addr1: item.address,
+        areacode: item.area_code,
+        firstimage: item.image_url,
+        firstimage2: item.thumbnail_url
+      }))
 
-    // 랜덤하게 여러 구간에서 데이터 수집
-    const allItems = []
-    const numBatches = 3  // 3개의 다른 구간에서 데이터 가져오기
+      // 이미지가 있는 것만 필터링
+      const itemsWithImages = results.filter(item => item.firstimage && item.firstimage.trim() !== '')
 
-    for (let i = 0; i < numBatches; i++) {
-      const randomStart = Math.floor(Math.random() * (totalCount - 100))
-      const randomPage = Math.floor(randomStart / 100) + 1
-
-      const response = await api.getTravelSpotsFromAPI({
-        content_type_id: 12,
-        page: randomPage,
-        size: 100
-      })
-
-      if (response.data && response.data.results) {
-        const results = response.data.results || []
-        const itemsWithImages = results.filter(item => item.firstimage && item.firstimage.trim() !== '')
-        allItems.push(...itemsWithImages)
+      // Fisher-Yates 셔플 알고리즘으로 랜덤화
+      const shuffled = [...itemsWithImages]
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
       }
-    }
 
-    // Fisher-Yates 셔플 알고리즘으로 완전 랜덤화
-    const shuffled = [...allItems]
-    for (let i = shuffled.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+      destinations.value = shuffled.slice(0, 10)
+      console.log(`✅ ${destinations.value.length}개 추천 여행지 로드 완료`)
     }
-
-    destinations.value = shuffled.slice(0, 10)
   } catch (error) {
-    console.error('Failed to fetch destinations:', error)
+    console.error('❌ 추천 여행지 로드 실패:', error)
     destinations.value = []
   } finally {
     isLoading.value = false
@@ -251,22 +251,26 @@ onMounted(() => {
 }
 
 .weekly-title {
-  font-size: 2rem;
+  font-size: 1.5rem;
   font-weight: 700;
-  color: #667eea;
+  color: #1d1d1d;
   margin-bottom: 1rem;
+  letter-spacing: -1px;
+}
+
+.weekly-title span{
+  color: #394b9e;
 }
 
 .subtitle-container {
-  background: #f8f9fa;
+  background: #e7e7e7;
   padding: 1rem 1.5rem;
-  border-radius: 8px;
-  border-left: 4px solid #667eea;
+  border-radius: 3px;
 }
 
 .weekly-subtitle {
   font-size: 1rem;
-  color: #6c757d;
+  color: #242525;
   font-weight: 400;
   margin: 0;
 }
@@ -472,7 +476,7 @@ onMounted(() => {
 
 .indicator-progress {
   height: 100%;
-  background: #667eea;
+  background: #4e5da1;
   transition: width 0.5s ease;
 }
 

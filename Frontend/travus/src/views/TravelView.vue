@@ -162,13 +162,13 @@
                   <select v-model="selectedRegion" class="region-select">
                     <option value="">시도 선택</option>
                     <option value="1">서울</option>
-                    <option value="6">부산</option>
-                    <option value="4">대구</option>
-                    <option value="5">인천</option>
-                    <option value="2">광주</option>
+                    <option value="2">인천</option>
                     <option value="3">대전</option>
+                    <option value="4">대구</option>
+                    <option value="5">광주</option>
+                    <option value="6">부산</option>
                     <option value="7">울산</option>
-                    <option value="39">제주</option>
+                    <option value="8">세종</option>
                     <option value="31">경기</option>
                     <option value="32">강원</option>
                     <option value="33">충북</option>
@@ -177,6 +177,7 @@
                     <option value="36">경남</option>
                     <option value="37">전북</option>
                     <option value="38">전남</option>
+                    <option value="39">제주</option>
                   </select>
                 </div>
 
@@ -350,7 +351,6 @@ const totalCount = ref(0)
 // 페이지네이션 상태
 const currentPage = ref(1)
 const itemsPerPage = 20
-const fetchSize = 100 // 이미지 필터링을 고려하여 더 많이 가져오기
 
 const totalPages = computed(() => {
   return Math.ceil(totalCount.value / itemsPerPage)
@@ -359,6 +359,11 @@ const totalPages = computed(() => {
 const displayedPages = computed(() => {
   const pages = []
   const maxDisplayed = 5
+
+  // 전체 페이지가 없으면 빈 배열 반환
+  if (totalPages.value === 0) {
+    return pages
+  }
 
   // 현재 페이지가 속한 그룹의 시작 페이지 계산
   const groupStart = Math.floor((currentPage.value - 1) / maxDisplayed) * maxDisplayed + 1
@@ -371,13 +376,9 @@ const displayedPages = computed(() => {
   return pages
 })
 
-// 이미지가 있는 여행지만 필터링하고 페이지당 정확히 itemsPerPage개만 표시
+// 필터링된 여행지 (백엔드에서 이미 이미지 필터링됨)
 const filteredDestinations = computed(() => {
-  const withImages = destinations.value.filter(destination => {
-    return destination.firstimage && destination.firstimage.trim() !== ''
-  })
-  // 최대 itemsPerPage개까지만 반환
-  return withImages.slice(0, itemsPerPage)
+  return destinations.value
 })
 
 // 여행지 데이터 포맷 변환
@@ -393,57 +394,67 @@ const formatDestination = (destination) => {
   }
 }
 
-// 데이터 로드
+// 데이터 로드 (DB 기반)
 const loadDestinations = async () => {
   loading.value = true
 
   try {
-    let response
+    console.log('📍 DB에서 여행지 목록 조회')
 
-    if (searchQuery.value) {
-      // 키워드 검색
-      response = await api.searchTravelSpotsAPI(searchQuery.value, {
-        area_code: selectedRegion.value,
-        content_type_id: contentTypeId.value,
-        page: currentPage.value,
-        size: fetchSize
-      })
-    } else {
-      // 지역 기반 목록
-      response = await api.getTravelSpotsFromAPI({
-        area_code: selectedRegion.value,
-        content_type_id: contentTypeId.value,
-        page: currentPage.value,
-        size: fetchSize
-      })
+    // DB에서 여행지 목록 가져오기
+    const params = {
+      page: currentPage.value,
+      page_size: itemsPerPage
     }
+
+    // 지역 필터
+    if (selectedRegion.value) {
+      params.area_code = selectedRegion.value
+    }
+
+    // 카테고리 필터 (content_type_id)
+    if (contentTypeId.value) {
+      params.content_type_id = contentTypeId.value
+    }
+
+    // 검색어
+    if (searchQuery.value) {
+      params.search = searchQuery.value
+    }
+
+    // 정렬
+    if (sortBy.value === 'popular') {
+      params.ordering = 'popular'
+    } else if (sortBy.value === 'rating') {
+      params.ordering = 'rating'
+    }
+
+    const response = await api.getTravelSpots(params)
+    console.log('✅ DB 응답:', response.data)
 
     if (response.data) {
-      let results = response.data.results || []
-
-      // 클라이언트 사이드 필터링 (무장애 유형 & 시설)
-      if (selectedAccessibilityTypes.value.length > 0 || selectedFacilities.value.length > 0) {
-        results = results.filter(item => {
-          // 무장애 유형 필터
-          if (selectedAccessibilityTypes.value.length > 0) {
-            // API 응답에 무장애 정보가 있다고 가정
-            // 실제로는 백엔드에서 필터링하는 것이 더 좋음
-          }
-
-          // 시설 필터
-          if (selectedFacilities.value.length > 0) {
-            // API 응답에 시설 정보가 있다고 가정
-          }
-
-          return true
-        })
-      }
+      // DB 응답을 기존 API 형식에 맞게 매핑
+      let results = (response.data.results || []).map(item => ({
+        contentid: item.content_id,
+        contenttypeid: item.content_type_id,
+        title: item.name,
+        addr1: item.address,
+        areacode: item.area_code,
+        sigungucode: item.sigungu_code,
+        mapx: item.longitude,
+        mapy: item.latitude,
+        firstimage: item.image_url,
+        firstimage2: item.thumbnail_url,
+        overview: item.description,
+        tel: item.tel
+      }))
 
       destinations.value = results
-      totalCount.value = response.data.count || 0
+      totalCount.value = response.data.count || results.length
+      console.log(`✅ ${results.length}개 여행지 로드 완료`)
     }
   } catch (error) {
-    console.error('데이터 로드 실패:', error)
+    console.error('❌ 데이터 로드 실패:', error)
     destinations.value = []
     totalCount.value = 0
   } finally {
@@ -507,8 +518,9 @@ const changePageGroup = (direction) => {
 }
 
 const handleCardClick = (destination) => {
-  // 상세 페이지로 이동
-  window.location.href = `/travel/${destination.contentid}`
+  // 상세 페이지로 이동 (contentTypeId 포함하여 조회 안정성 향상)
+  const typeId = destination.contenttypeid || '12'
+  window.location.href = `/travel/${destination.contentid}?contentTypeId=${typeId}`
 }
 
 // 카테고리 변경시 데이터 자동 새로고침

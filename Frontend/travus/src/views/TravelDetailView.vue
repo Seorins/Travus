@@ -23,7 +23,7 @@
             <div class="header-top">
               <span class="category-badge">여행지</span>
               <div class="actions">
-                <button class="action-btn">
+                <button class="action-btn" @click="openShareModal">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                     <path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                   </svg>
@@ -165,34 +165,24 @@
           </div>
 
           <!-- 추천 여행지 -->
-          <div class="recommendations-section">
-            <h2 class="section-title">유사한 여행지</h2>
+          <div class="recommendations-section" v-if="recommendations.length > 0">
+            <h2 class="section-title">{{ getRegionName(destination.areacode) }} 추천 여행지</h2>
             <div class="recommendation-grid">
-              <div class="recommendation-card">
+              <div
+                v-for="rec in recommendations"
+                :key="rec.contentid"
+                class="recommendation-card"
+                @click="handleRecommendationClick(rec)"
+              >
                 <div class="recommendation-image">
-                  <img src="https://via.placeholder.com/300x200" alt="추천 여행지" />
+                  <img
+                    :src="rec.firstimage || rec.firstimage2 || 'https://via.placeholder.com/300x200'"
+                    :alt="rec.title"
+                  />
                 </div>
                 <div class="recommendation-info">
-                  <h3 class="recommendation-title">추천 여행지</h3>
-                  <p class="recommendation-location">{{ getRegionName(destination.areacode) }}</p>
-                </div>
-              </div>
-              <div class="recommendation-card">
-                <div class="recommendation-image">
-                  <img src="https://via.placeholder.com/300x200" alt="추천 여행지" />
-                </div>
-                <div class="recommendation-info">
-                  <h3 class="recommendation-title">추천 여행지</h3>
-                  <p class="recommendation-location">{{ getRegionName(destination.areacode) }}</p>
-                </div>
-              </div>
-              <div class="recommendation-card">
-                <div class="recommendation-image">
-                  <img src="https://via.placeholder.com/300x200" alt="추천 여행지" />
-                </div>
-                <div class="recommendation-info">
-                  <h3 class="recommendation-title">추천 여행지</h3>
-                  <p class="recommendation-location">{{ getRegionName(destination.areacode) }}</p>
+                  <h3 class="recommendation-title">{{ rec.title }}</h3>
+                  <p class="recommendation-location">{{ getRegionName(rec.areacode) }}</p>
                 </div>
               </div>
             </div>
@@ -200,6 +190,36 @@
         </div>
       </div>
     </main>
+
+    <!-- 공유 모달 -->
+    <div v-if="showShareModal" class="modal-overlay" @click="closeShareModal">
+      <div class="modal-content" @click.stop>
+        <div class="modal-header">
+          <h3>여행지 공유하기</h3>
+          <button class="modal-close-btn" @click="closeShareModal">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M18 6L6 18M6 6l12 12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p class="share-description">아래 링크를 복사하여 공유해보세요!</p>
+          <div class="url-container">
+            <input
+              ref="urlInput"
+              type="text"
+              :value="currentUrl"
+              readonly
+              class="url-input"
+            />
+            <button @click="copyToClipboard" class="copy-btn">
+              {{ copySuccess ? '복사됨!' : '복사' }}
+            </button>
+          </div>
+          <p v-if="copySuccess" class="copy-success-message">✓ 링크가 클립보드에 복사되었습니다</p>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -218,12 +238,19 @@ const destination = ref(null)
 const detailIntro = ref(null)
 const detailInfo = ref(null)
 const images = ref([])
+const recommendations = ref([])
 const accessibilityInfo = ref({
   wheelchair: '정보 준비 중입니다',
   parking: '정보 준비 중입니다',
   restroom: '정보 준비 중입니다',
   visual: '정보 준비 중입니다'
 })
+
+// 공유 모달 관련
+const showShareModal = ref(false)
+const copySuccess = ref(false)
+const urlInput = ref(null)
+const currentUrl = ref('')
 
 const regionMap = {
   '1': '서울',
@@ -247,6 +274,50 @@ const regionMap = {
 
 const getRegionName = (areacode) => {
   return regionMap[areacode] || '기타'
+}
+
+// 같은 지역 추천 여행지 가져오기
+const fetchRecommendations = async (areaCode, currentContentId) => {
+  try {
+    console.log('📍 같은 지역 추천 여행지 조회:', areaCode)
+
+    // 같은 지역의 관광지 가져오기
+    const response = await api.getTravelSpots({
+      area_code: areaCode,
+      content_type_id: '12', // 관광지만
+      page_size: 20 // 충분히 가져와서 랜덤 선택
+    })
+
+    if (response.data && response.data.results) {
+      // 현재 여행지 제외
+      let filtered = response.data.results.filter(item => item.content_id !== currentContentId)
+
+      // 이미지가 있는 것만 필터링
+      filtered = filtered.filter(item => item.image_url)
+
+      // 랜덤 셔플 (Fisher-Yates)
+      const shuffled = [...filtered]
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+      }
+
+      // 최대 6개만 선택
+      recommendations.value = shuffled.slice(0, 6).map(item => ({
+        contentid: item.content_id,
+        title: item.name,
+        addr1: item.address,
+        areacode: item.area_code,
+        firstimage: item.image_url,
+        firstimage2: item.thumbnail_url
+      }))
+
+      console.log(`✅ ${recommendations.value.length}개 추천 여행지 로드 완료`)
+    }
+  } catch (error) {
+    console.error('❌ 추천 여행지 로드 실패:', error)
+    recommendations.value = []
+  }
 }
 
 const initKakaoMap = () => {
@@ -308,83 +379,58 @@ const fetchDestinationDetail = async () => {
     isLoading.value = true
     error.value = null
     const contentId = route.params.id
-    console.log('Fetching detail for contentId:', contentId)
+    console.log('📍 DB에서 content_id로 여행지 조회:', contentId)
 
-    // 1. 기본 정보를 먼저 가져와서 contentTypeId 확인
-    let basicInfo = null
-    let typeId = '12' // 기본값 (관광지)
+    // DB에서 content_id로 여행지 조회
+    const response = await api.getTravelSpotByContentId(contentId)
+    console.log('✅ DB 응답:', response.data)
 
-    try {
-      // from_api로 기본 정보 호출 (detailCommon2 호출)
-      const commonRes = await api.getTravelSpotsFromAPI({ content_id: contentId })
+    const travelSpot = response.data
 
-      if (commonRes.data?.results?.[0]) {
-        basicInfo = commonRes.data.results[0]
-
-        // 실제 contentTypeId 저장
-        if (basicInfo.contenttypeid) {
-          typeId = basicInfo.contenttypeid
-        }
-        console.log('기본 정보 로드 성공, ContentTypeId:', typeId)
-      }
-    } catch (e) {
-      console.warn('기본 정보 로드 실패:', e)
+    // DB 응답을 기존 API 응답 형식에 맞게 매핑
+    destination.value = {
+      contentid: travelSpot.content_id,
+      contenttypeid: travelSpot.content_type_id,
+      title: travelSpot.name,
+      addr1: travelSpot.address,
+      areacode: travelSpot.area_code,
+      sigungucode: travelSpot.sigungu_code,
+      mapy: travelSpot.latitude,
+      mapx: travelSpot.longitude,
+      overview: travelSpot.description,
+      tel: travelSpot.tel,
+      homepage: travelSpot.homepage,
+      firstimage: travelSpot.image_url,
+      firstimage2: travelSpot.thumbnail_url,
+      // 무장애 정보가 있으면 포함
+      accessibility: travelSpot.accessibility
     }
 
-    // 기본 정보가 없으면 에러
-    if (!basicInfo) {
-      throw new Error('여행지 기본 정보를 찾을 수 없습니다.')
-    }
+    console.log('✅ 여행지 정보 로드 완료:', destination.value.title)
 
-    // destination 설정
-    destination.value = basicInfo
-    console.log('Destination loaded:', destination.value.title)
-
-    // 2. 상세 정보 & 이미지 병렬 호출 (확인된 typeId 사용)
-    const [introResponse, infoResponse, imageResponse] = await Promise.allSettled([
-      api.getTravelSpotDetailIntro(contentId, typeId),
-      api.getTravelSpotDetailInfo(contentId, typeId),
-      api.getTravelSpotDetailImages(contentId)
-    ])
-
-    // 2-1. 소개 정보 (Intro) 처리
-    if (introResponse.status === 'fulfilled' && introResponse.value.data) {
-      const items = introResponse.value.data.response?.body?.items?.item
-      if (items) {
-        detailIntro.value = Array.isArray(items) ? items[0] : items
-        console.log('Intro data loaded:', detailIntro.value)
-
-        // 무장애 정보 매핑
-        if (detailIntro.value) {
-          accessibilityInfo.value = {
-            wheelchair: detailIntro.value.chkbabycarriage || detailIntro.value.wheelchair || '정보 없음',
-            parking: detailIntro.value.parking || '정보 없음',
-            restroom: detailIntro.value.restroom || '정보 없음',
-            visual: detailIntro.value.expguide || '정보 없음'
-          }
-        }
+    // 무장애 정보 매핑 (DB에서 가져온 데이터 사용)
+    if (travelSpot.accessibility) {
+      const acc = travelSpot.accessibility
+      accessibilityInfo.value = {
+        wheelchair: acc.wheelchair ? '휠체어 이용 가능' : acc.wheelchair_info || '정보 없음',
+        parking: acc.parking ? '장애인 주차장 있음' : acc.parking_info || '정보 없음',
+        restroom: acc.restroom ? '장애인 화장실 있음' : acc.restroom_info || '정보 없음',
+        visual: acc.audio_guide ? '음성 안내 제공' : '정보 없음'
       }
     }
 
-    // 2-2. 상세 반복 정보 (Info) 처리
-    if (infoResponse.status === 'fulfilled' && infoResponse.value.data) {
-      const items = infoResponse.value.data.response?.body?.items?.item
-      if (items) {
-        detailInfo.value = Array.isArray(items) ? items : [items]
-        console.log('Info data loaded:', detailInfo.value)
-      }
+    // 이미지 정보 설정 (DB의 image_url 사용)
+    if (travelSpot.image_url) {
+      images.value = [{
+        originimgurl: travelSpot.image_url,
+        smallimageurl: travelSpot.thumbnail_url
+      }]
     }
 
-    // 2-3. 이미지 처리
-    if (imageResponse.status === 'fulfilled' && imageResponse.value.data) {
-      const items = imageResponse.value.data.response?.body?.items?.item
-      if (items) {
-        images.value = Array.isArray(items) ? items : [items]
-        console.log('Images loaded:', images.value.length)
-      }
-    }
+    // 같은 지역 추천 여행지 가져오기
+    await fetchRecommendations(travelSpot.area_code, contentId)
 
-    // 3. 지도 초기화 (데이터 로딩 완료 후)
+    // 지도 초기화 (데이터 로딩 완료 후)
     if (destination.value.mapx && destination.value.mapy) {
       try {
         await loadKakaoMapScript()
@@ -406,6 +452,49 @@ onMounted(() => {
   fetchDestinationDetail()
 })
 
+// 추천 여행지 클릭 핸들러
+const handleRecommendationClick = (rec) => {
+  router.push(`/travel/${rec.contentid}`)
+}
+
+// 공유 모달 열기
+const openShareModal = () => {
+  currentUrl.value = window.location.href
+  showShareModal.value = true
+  copySuccess.value = false
+}
+
+// 공유 모달 닫기
+const closeShareModal = () => {
+  showShareModal.value = false
+  copySuccess.value = false
+}
+
+// URL 복사
+const copyToClipboard = async () => {
+  try {
+    await navigator.clipboard.writeText(currentUrl.value)
+    copySuccess.value = true
+
+    // 3초 후 복사 성공 메시지 숨기기
+    setTimeout(() => {
+      copySuccess.value = false
+    }, 3000)
+  } catch (err) {
+    console.error('Failed to copy:', err)
+    // Fallback: input 선택 후 복사
+    if (urlInput.value) {
+      urlInput.value.select()
+      document.execCommand('copy')
+      copySuccess.value = true
+
+      setTimeout(() => {
+        copySuccess.value = false
+      }, 3000)
+    }
+  }
+}
+
 // route.params.id가 변경될 때마다 데이터 다시 가져오기
 watch(() => route.params.id, (newId, oldId) => {
   if (newId && newId !== oldId) {
@@ -415,6 +504,7 @@ watch(() => route.params.id, (newId, oldId) => {
     detailIntro.value = null
     detailInfo.value = null
     images.value = []
+    recommendations.value = []
     // 새 데이터 가져오기
     fetchDestinationDetail()
   }
@@ -566,12 +656,17 @@ watch(() => route.params.id, (newId, oldId) => {
   height: 600px;
   border-radius: 12px;
   overflow: hidden;
+  background: #f3f4f6; /* 이미지 로딩 전/없을 때 배경색 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .image-container img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain; /* cover → contain으로 변경 (화질 유지, 전체 이미지 표시) */
+  background: #ffffff;
 }
 
 .image-counter {
@@ -803,6 +898,146 @@ watch(() => route.params.id, (newId, oldId) => {
   font-size: 0.875rem;
   color: #6b7280;
   margin: 0;
+}
+
+/* 공유 모달 */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.modal-content {
+  background: white;
+  border-radius: 16px;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 1.5rem 1rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.modal-close-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #6b7280;
+  padding: 0.25rem;
+  border-radius: 6px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-close-btn:hover {
+  background: #f3f4f6;
+  color: #111827;
+}
+
+.modal-body {
+  padding: 1.5rem;
+}
+
+.share-description {
+  margin: 0 0 1rem;
+  color: #6b7280;
+  font-size: 0.95rem;
+}
+
+.url-container {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.url-input {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: #374151;
+  background: #f9fafb;
+  font-family: monospace;
+  transition: border-color 0.2s;
+}
+
+.url-input:focus {
+  outline: none;
+  border-color: #667eea;
+  background: white;
+}
+
+.copy-btn {
+  padding: 0.75rem 1.5rem;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.copy-btn:hover {
+  background: #5568d3;
+  transform: translateY(-1px);
+}
+
+.copy-btn:active {
+  transform: translateY(0);
+}
+
+.copy-success-message {
+  color: #10b981;
+  font-size: 0.9rem;
+  margin: 0.5rem 0 0;
+  font-weight: 500;
+  animation: fadeIn 0.3s ease;
 }
 
 /* 반응형 */

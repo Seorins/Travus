@@ -1,5 +1,5 @@
 <template>
-  <nav class="navbar" :style="{ fontSize: `${fontSize}px` }">
+  <nav class="navbar" :class="{ 'dark-mode': isDarkMode }" :style="{ fontSize: `${fontSize}px` }">
     <div class="navbar-container">
       <!-- 로고 -->
       <router-link to="/" class="navbar-logo" tabindex="0" @focus="handleFocus">
@@ -67,7 +67,10 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
 
 const props = defineProps({
   isTTSEnabled: {
@@ -83,6 +86,11 @@ const minFontSize = 12
 const maxFontSize = 24
 const showTravelMenu = ref(false)
 let menuTimeout = null
+
+// 상세 페이지 (/travel/:id) 감지
+const isDarkMode = computed(() => {
+  return route.path.startsWith('/travel/') && route.params.id
+})
 
 const increaseFontSize = () => {
   if (fontSize.value < maxFontSize) {
@@ -177,6 +185,16 @@ const handleFocus = (event) => {
   transform: translateY(-1px);
 }
 
+/* 상세 페이지일 때 검정색 */
+.navbar.dark-mode .navbar-logo h1 {
+  color: #111827;
+}
+
+.navbar.dark-mode .navbar-logo h1:hover,
+.navbar.dark-mode .navbar-logo:focus h1 {
+  color: #374151;
+}
+
 .navbar-logo:focus {
   outline: 2px solid #3b82f6;
   outline-offset: 4px;
@@ -209,6 +227,15 @@ const handleFocus = (event) => {
 
 .menu-item:hover {
   color: #111827;
+}
+
+/* 상세 페이지일 때 메뉴 글씨 검정색 */
+.navbar.dark-mode .menu-item {
+  color: #111827;
+}
+
+.navbar.dark-mode .menu-item:hover {
+  color: #667eea;
 }
 
 .dropdown-arrow {
@@ -247,6 +274,15 @@ const handleFocus = (event) => {
 
 .menu-item.router-link-active::after {
   width: 100%;
+}
+
+/* 상세 페이지일 때 underline 색상 */
+.navbar.dark-mode .menu-item::after {
+  background: #667eea;
+}
+
+.navbar.dark-mode .menu-item.router-link-active {
+  color: #667eea;
 }
 
 .dropdown-menu {
