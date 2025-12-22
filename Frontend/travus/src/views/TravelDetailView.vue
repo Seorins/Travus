@@ -122,44 +122,18 @@
             <span class="tag">#무장애여행</span>
           </div>
 
-          <!-- AI 요약 섹션 -->
-          <div class="ai-summary-section">
-            <div class="ai-summary-header">
-              <div class="ai-icon">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-                </svg>
-              </div>
-              <h3 class="ai-summary-title">AI가 빠르게 요약해주는 사용자 후기!</h3>
-            </div>
-            <div class="ai-summary-content">
-              <p>이 여행지는 {{ getRegionName(destination.areacode) }} 지역의 대표적인 관광명소로, 접근성이 좋고 다양한 편의시설을 갖추고 있습니다. 무장애 관광을 위한 시설이 잘 마련되어 있어 모든 분들이 편안하게 여행을 즐기실 수 있습니다.</p>
-            </div>
-          </div>
-
           <!-- 무장애 정보 -->
           <div class="accessibility-section">
             <h2 class="section-title">무장애 관광 정보</h2>
-            <div class="accessibility-grid">
-              <div class="accessibility-card">
-                <div class="accessibility-icon">♿</div>
-                <h3 class="accessibility-title">휠체어 접근</h3>
-                <p class="accessibility-text">{{ accessibilityInfo.wheelchair }}</p>
-              </div>
-              <div class="accessibility-card">
-                <div class="accessibility-icon">🅿️</div>
-                <h3 class="accessibility-title">주차 시설</h3>
-                <p class="accessibility-text">{{ accessibilityInfo.parking }}</p>
-              </div>
-              <div class="accessibility-card">
-                <div class="accessibility-icon">🚻</div>
-                <h3 class="accessibility-title">장애인 화장실</h3>
-                <p class="accessibility-text">{{ accessibilityInfo.restroom }}</p>
-              </div>
-              <div class="accessibility-card">
-                <div class="accessibility-icon">👁️</div>
-                <h3 class="accessibility-title">시각장애인 안내</h3>
-                <p class="accessibility-text">{{ accessibilityInfo.visual }}</p>
+            <div class="accessibility-icons-grid">
+              <div
+                class="accessibility-icon-item"
+                :class="{ 'active': isAccessibilityActive(icon.field) }"
+                v-for="icon in accessibilityIcons"
+                :key="icon.id"
+              >
+                <img :src="icon.image" :alt="icon.label" class="accessibility-icon-img">
+                <div class="accessibility-tooltip">{{ icon.label }}</div>
               </div>
             </div>
           </div>
@@ -184,6 +158,77 @@
                   <h3 class="recommendation-title">{{ rec.title }}</h3>
                   <p class="recommendation-location">{{ getRegionName(rec.areacode) }}</p>
                 </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- AI 요약 섹션 -->
+          <div class="ai-summary-section">
+            <div class="ai-summary-header">
+              <div class="ai-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                </svg>
+              </div>
+              <h3 class="ai-summary-title">AI가 빠르게 요약해주는 사용자 후기!</h3>
+              <button class="info-icon-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/>
+                  <path d="M12 16v-4M12 8h.01"/>
+                </svg>
+              </button>
+            </div>
+            <div class="ai-summary-content">
+              <h4 class="ai-summary-subtitle">구름포 일몰이 가득기리</h4>
+              <p>구름포 일몰이 가득기리는 아기자기한 일본식 원림에서 건축의 간결함 토목의 거장 명작, 도대관, 명암조, 명상, 호수의 색감 좋으며 조수로 유명한 가장새로운 색감 좋고, 금전이 빛도 수십낭 추천합니다. 포토존이 많이 사진 찍기 좋고, 근처의 맛도 수없습니다. 가이드와 어우러진 다미오는 하면서 맛지만, 개다서 바라면서 바른 이유식하는 것은 종찬해요 조심하세요.</p>
+            </div>
+          </div>
+
+          <!-- 댓글 섹션 -->
+          <div class="comments-section">
+            <div class="comments-header">
+              <h2 class="section-title">댓글 (0)</h2>
+            </div>
+
+            <!-- 댓글 작성 -->
+            <div class="comment-write-section">
+              <textarea
+                class="comment-textarea"
+                placeholder="로그인 후 댓글을 등록할 수 있습니다."
+                rows="4"
+              ></textarea>
+              <div class="comment-actions">
+                <button class="comment-action-btn">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <circle cx="12" cy="12" r="10" stroke-width="2"/>
+                    <path d="M12 16v-4M12 8h.01" stroke-width="2" stroke-linecap="round"/>
+                  </svg>
+                  유의사항
+                </button>
+                <div class="comment-submit-group">
+                  <button class="comment-btn-secondary">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                      <path d="M12 4v16m8-8H4" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                    사진
+                  </button>
+                  <button class="comment-btn-primary">등록</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- 댓글 정렬 (댓글이 있을 때만 표시) -->
+            <div v-if="false" class="comment-sort">
+              <button class="sort-btn active">최신순</button>
+              <span class="sort-divider">|</span>
+              <button class="sort-btn">추천순</button>
+            </div>
+
+            <!-- 댓글 리스트 -->
+            <div class="comment-list">
+              <!-- 댓글이 없을 때 -->
+              <div class="no-comments">
+                <p>첫 댓글을 남겨보세요!</p>
               </div>
             </div>
           </div>
@@ -245,6 +290,28 @@ const accessibilityInfo = ref({
   restroom: '정보 준비 중입니다',
   visual: '정보 준비 중입니다'
 })
+
+// 무장애 아이콘 데이터 (DB 필드와 매핑)
+const accessibilityIcons = ref([
+  { id: 1, image: new URL('@/assets/icon1.png', import.meta.url).href, label: '장애인 화장실', field: 'restroom' },
+  { id: 2, image: new URL('@/assets/icon2.png', import.meta.url).href, label: '장애인용 엘리베이터', field: 'elevator' },
+  { id: 3, image: new URL('@/assets/icon3.png', import.meta.url).href, label: '장애인 전용 주차구역', field: 'parking' },
+  { id: 4, image: new URL('@/assets/icon4.png', import.meta.url).href, label: '주출입구 단차없음', field: 'exit' },
+  { id: 5, image: new URL('@/assets/icon5.png', import.meta.url).href, label: '지하철 접근가능', field: 'public_transport' },
+  { id: 6, image: new URL('@/assets/icon6.png', import.meta.url).href, label: '저상버스 접근가능', field: 'route' },
+  { id: 7, image: new URL('@/assets/icon7.png', import.meta.url).href, label: '휠체어 대여', field: 'wheelchair' },
+  { id: 8, image: new URL('@/assets/icon8.png', import.meta.url).href, label: '시각장애인 편의서비스', field: 'audio_guide' },
+  { id: 9, image: new URL('@/assets/icon9.png', import.meta.url).href, label: '청각장애인 편의서비스', field: 'hearing_room' },
+  { id: 10, image: new URL('@/assets/icon10.png', import.meta.url).href, label: '수유실', field: 'lactation_room' },
+  { id: 11, image: new URL('@/assets/icon11.png', import.meta.url).href, label: '장애인 객실', field: 'hearing_room' },
+  { id: 12, image: new URL('@/assets/icon12.png', import.meta.url).href, label: '유모차 대여', field: 'stroller' }
+])
+
+// 무장애 시설 활성화 체크 함수
+const isAccessibilityActive = (field) => {
+  if (!destination.value?.accessibility) return false
+  return destination.value.accessibility[field] === true
+}
 
 // 공유 모달 관련
 const showShareModal = ref(false)
@@ -800,6 +867,31 @@ watch(() => route.params.id, (newId, oldId) => {
   font-weight: 700;
   color: #1e40af;
   margin: 0;
+  flex: 1;
+}
+
+.info-icon-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem;
+  color: #1e40af;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background 0.2s;
+}
+
+.info-icon-btn:hover {
+  background: rgba(30, 64, 175, 0.1);
+}
+
+.ai-summary-subtitle {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #1e40af;
+  margin: 0 0 0.75rem 0;
 }
 
 .ai-summary-content p {
@@ -814,36 +906,88 @@ watch(() => route.params.id, (newId, oldId) => {
   margin-bottom: 3rem;
 }
 
-.accessibility-grid {
+.accessibility-icons-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1.5rem;
-}
-
-.accessibility-card {
-  padding: 1.5rem;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 1rem;
+  padding: 2rem;
   background: #f9fafb;
   border-radius: 12px;
-  text-align: center;
 }
 
-.accessibility-icon {
-  font-size: 2.5rem;
-  margin-bottom: 1rem;
+.accessibility-icon-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem;
+  background: white;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
-.accessibility-title {
-  font-size: 1rem;
-  font-weight: 600;
-  color: #111827;
-  margin: 0 0 0.75rem 0;
+.accessibility-icon-item.active {
+  background: #374151;
+  border-color: #374151;
 }
 
-.accessibility-text {
-  font-size: 0.875rem;
-  color: #6b7280;
-  line-height: 1.6;
-  margin: 0;
+.accessibility-icon-item.active .accessibility-icon-img {
+  filter: brightness(0) invert(1);
+}
+
+.accessibility-icon-item:hover {
+  background: #374151;
+  border-color: #374151;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(55, 65, 81, 0.3);
+}
+
+.accessibility-icon-item:hover .accessibility-icon-img {
+  filter: brightness(0) invert(1);
+}
+
+.accessibility-icon-item:hover .accessibility-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, -10px);
+}
+
+.accessibility-icon-img {
+  width: 100%;
+  height: auto;
+  display: block;
+  transition: filter 0.3s ease;
+}
+
+.accessibility-tooltip {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translate(-50%, 0);
+  padding: 0.5rem 0.75rem;
+  background: #1f2937;
+  color: white;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  border-radius: 6px;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  pointer-events: none;
+  z-index: 10;
+  margin-bottom: 8px;
+}
+
+.accessibility-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: #1f2937;
 }
 
 /* 추천 여행지 */
@@ -1040,14 +1184,260 @@ watch(() => route.params.id, (newId, oldId) => {
   animation: fadeIn 0.3s ease;
 }
 
+/* 댓글 섹션 */
+.comments-section {
+  margin-bottom: 3rem;
+}
+
+.comments-header {
+  margin-bottom: 1.5rem;
+}
+
+/* 댓글 작성 */
+.comment-write-section {
+  background: #f9fafb;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.comment-textarea {
+  width: 100%;
+  padding: 1rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: inherit;
+  resize: vertical;
+  transition: border-color 0.2s;
+  margin-bottom: 1rem;
+}
+
+.comment-textarea:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.comment-textarea::placeholder {
+  color: #9ca3af;
+}
+
+.comment-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.comment-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: none;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  color: #6b7280;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.comment-action-btn:hover {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+}
+
+.comment-submit-group {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.comment-btn-secondary {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  color: #374151;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.comment-btn-secondary:hover {
+  background: #f9fafb;
+  border-color: #d1d5db;
+}
+
+.comment-btn-primary {
+  padding: 0.5rem 1.5rem;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.comment-btn-primary:hover {
+  background: #5568d3;
+}
+
+/* 댓글 정렬 */
+.comment-sort {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.sort-btn {
+  background: none;
+  border: none;
+  padding: 0.5rem 0.75rem;
+  color: #6b7280;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.sort-btn.active {
+  color: #111827;
+  font-weight: 600;
+}
+
+.sort-btn:hover:not(.active) {
+  color: #374151;
+}
+
+.sort-divider {
+  color: #d1d5db;
+  font-size: 0.875rem;
+}
+
+/* 댓글 리스트 */
+.comment-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.no-comments {
+  text-align: center;
+  padding: 3rem 1.5rem;
+  background: #f9fafb;
+  border-radius: 12px;
+}
+
+.no-comments p {
+  margin: 0;
+  color: #9ca3af;
+  font-size: 1rem;
+}
+
+.comment-item {
+  padding: 1.5rem;
+  background: #f9fafb;
+  border-radius: 12px;
+}
+
+.comment-user-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.user-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.user-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.comment-date {
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+
+.comment-content p {
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: #374151;
+  margin: 0;
+}
+
+.comment-footer {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.comment-reaction-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.75rem;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  color: #6b7280;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.comment-reaction-btn:hover {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+}
+
+.comment-reaction-btn svg {
+  stroke: #6b7280;
+}
+
+.comment-more-btn {
+  background: none;
+  border: none;
+  color: #9ca3af;
+  font-size: 0.875rem;
+  cursor: pointer;
+  padding: 0.375rem 0.5rem;
+  transition: color 0.2s;
+}
+
+.comment-more-btn:hover {
+  color: #6b7280;
+}
+
 /* 반응형 */
 @media (max-width: 1024px) {
   .info-grid-section {
     grid-template-columns: 1fr;
   }
 
-  .accessibility-grid {
-    grid-template-columns: repeat(2, 1fr);
+  .accessibility-icons-grid {
+    grid-template-columns: repeat(6, 1fr);
   }
 
   .recommendation-grid {
@@ -1064,7 +1454,12 @@ watch(() => route.params.id, (newId, oldId) => {
     height: 400px;
   }
 
-  .accessibility-grid,
+  .accessibility-icons-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.75rem;
+    padding: 1.5rem;
+  }
+
   .recommendation-grid {
     grid-template-columns: 1fr;
   }
@@ -1075,6 +1470,16 @@ watch(() => route.params.id, (newId, oldId) => {
 
   .tab-item {
     white-space: nowrap;
+  }
+
+  .comment-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .comment-submit-group {
+    justify-content: flex-end;
   }
 }
 </style>
