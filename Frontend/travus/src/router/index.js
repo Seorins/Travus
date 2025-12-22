@@ -3,6 +3,7 @@ import Home from '@/views/Home.vue'
 import About from '@/views/About.vue'
 import TravelView from '@/views/TravelView.vue'
 import TravelDetailView from '@/views/TravelDetailView.vue'
+import CourseView from '@/views/CourseView.vue'
 import LoginView from '@/views/LoginView.vue'
 import SignupView from '@/views/SignupView.vue'
 
@@ -28,6 +29,11 @@ const router = createRouter({
       path: '/travel/:id',
       name: 'travel-detail',
       component: TravelDetailView
+    },
+    {
+      path: '/course',
+      name: 'course',
+      component: CourseView
     },
     {
       path: '/login',
