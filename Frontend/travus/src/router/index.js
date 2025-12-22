@@ -28,6 +28,8 @@ const router = createRouter({
       path: '/travel/:id',
       name: 'travel-detail',
       component: TravelDetailView
+    },
+    {
       path: '/login',
       name: 'login',
       component: LoginView
