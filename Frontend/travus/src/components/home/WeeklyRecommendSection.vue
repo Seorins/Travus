@@ -419,6 +419,7 @@ onMounted(() => {
   border-radius: 12px;
   font-size: 0.75rem;
   font-weight: 600;
+  margin-bottom: 0.5rem;
 }
 
 /* 네비게이션 버튼 */
