@@ -111,12 +111,64 @@ class Command(BaseCommand):
                         if detail_list and len(detail_list) > 0:
                             detail = detail_list[0]
 
-                            # 상세 정보 업데이트
-                            travel_spot.description = detail.get('overview', '') or travel_spot.description
-                            travel_spot.homepage = detail.get('homepage', '') or travel_spot.homepage
-                            travel_spot.tel = detail.get('tel', '') or travel_spot.tel
-                            has_data = True
+                            # 상세 정보 업데이트 - API 명세의 모든 필드
+                            # 기본 정보
+                            if detail.get('overview'):
+                                travel_spot.overview = detail.get('overview', '')
+                            if detail.get('homepage'):
+                                travel_spot.homepage = detail.get('homepage', '')
+                            if detail.get('tel'):
+                                travel_spot.tel = detail.get('tel', '')
+                            if detail.get('telname'):
+                                travel_spot.tel_name = detail.get('telname', '')
 
+                            # 주소 정보
+                            if detail.get('addr1'):
+                                travel_spot.addr1 = detail.get('addr1', '')
+                                # 기존 address 필드도 업데이트
+                                travel_spot.address = detail.get('addr1', '')
+                            if detail.get('addr2'):
+                                travel_spot.addr2 = detail.get('addr2', '')
+                            if detail.get('zipcode'):
+                                travel_spot.zipcode = detail.get('zipcode', '')
+
+                            # 좌표 정보
+                            if detail.get('mapx'):
+                                travel_spot.longitude = detail.get('mapx', '')
+                            if detail.get('mapy'):
+                                travel_spot.latitude = detail.get('mapy', '')
+                            if detail.get('mlevel'):
+                                travel_spot.mlevel = detail.get('mlevel', '')
+
+                            # 분류 정보
+                            if detail.get('cat1'):
+                                travel_spot.cat1 = detail.get('cat1', '')
+                            if detail.get('cat2'):
+                                travel_spot.cat2 = detail.get('cat2', '')
+                            if detail.get('cat3'):
+                                travel_spot.cat3 = detail.get('cat3', '')
+
+                            # 이미지 정보
+                            if detail.get('firstimage'):
+                                travel_spot.image_url = detail.get('firstimage', '')
+                            if detail.get('firstimage2'):
+                                travel_spot.thumbnail_url = detail.get('firstimage2', '')
+
+                            # 메타 정보
+                            if detail.get('createdtime'):
+                                travel_spot.created_time = detail.get('createdtime', '')
+                            if detail.get('modifiedtime'):
+                                travel_spot.modified_time = detail.get('modifiedtime', '')
+                            if detail.get('cpyrhtDivCd'):
+                                travel_spot.cpyrht_div_cd = detail.get('cpyrhtDivCd', '')
+
+                            # 지역 정보 (이미 있는 필드들도 업데이트)
+                            if detail.get('areacode'):
+                                travel_spot.area_code = detail.get('areacode', '')
+                            if detail.get('sigungucode'):
+                                travel_spot.sigungu_code = detail.get('sigungucode', '')
+
+                            has_data = True
                             self.stdout.write(self.style.SUCCESS('  [완료] 상세 정보 업데이트 완료'))
 
                 time.sleep(1.5)  # Rate limit 방지

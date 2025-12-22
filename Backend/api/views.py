@@ -56,6 +56,18 @@ class TravelSpotViewSet(viewsets.ReadOnlyModelViewSet):
                 models.Q(description__icontains=search)
             )
 
+        # 무장애 시설 필터링
+        facilities = self.request.query_params.get('facilities')
+        if facilities:
+            # 쉼표로 구분된 시설 목록을 파싱
+            facility_list = [f.strip() for f in facilities.split(',') if f.strip()]
+
+            # 각 시설에 대해 필터링 (AND 조건)
+            for facility in facility_list:
+                # accessibility__ 프리픽스를 사용하여 관련 AccessibilityInfo 필드 필터링
+                filter_kwargs = {f'accessibility__{facility}': True}
+                queryset = queryset.filter(**filter_kwargs)
+
         # 정렬 (기본: 최신순, 옵션: 인기순, 평점순)
         ordering = self.request.query_params.get('ordering', '-created_at')
         if ordering == 'popular':
