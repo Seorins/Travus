@@ -486,7 +486,15 @@ const fetchDestinationDetail = async () => {
       }
     }
 
-    // 이미지 정보 설정 (DB의 image_url 사용)
+    // ==========================================
+    // 세부사항은 DB 데이터 사용 (API 429 에러 방지)
+    // ==========================================
+    console.log('ℹ️ API 429 에러로 인해 DB 데이터만 사용합니다')
+
+    // overview, tel, homepage는 이미 destination에 설정됨
+    // detailIntro는 null로 유지 (템플릿에서 v-if로 처리)
+
+    // 이미지 정보 설정 (DB의 image_url 우선 사용 - API 호출 최소화)
     if (travelSpot.image_url) {
       images.value = [{
         originimgurl: travelSpot.image_url,
