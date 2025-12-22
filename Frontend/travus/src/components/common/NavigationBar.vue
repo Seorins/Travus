@@ -68,15 +68,11 @@
 </template>
 
 <script setup>
-<<<<<<< HEAD
 import { ref, computed } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 
 const route = useRoute()
-=======
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
->>>>>>> 9897448f3a37c7ba2ed99e35245d8a3e3030527f
+const router = useRouter()
 
 const props = defineProps({
   isTTSEnabled: {
@@ -86,8 +82,6 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['toggle-tts', 'font-size-change', 'focus'])
-
-const router = useRouter()
 
 const fontSize = ref(16)
 const minFontSize = 12
