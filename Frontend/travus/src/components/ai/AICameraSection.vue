@@ -98,7 +98,7 @@ const handleFeatureFocus = (event) => {
 <style scoped>
 .ai-camera-section {
   min-height: 100vh;
-  background: #b4d5fe;
+  background: url('@/assets/ai-camera-bg.png') center/cover no-repeat;
   padding: 6rem 2rem;
   display: flex;
   align-items: center;
@@ -145,7 +145,7 @@ const handleFeatureFocus = (event) => {
   font-weight: 600;
   margin-bottom: 2rem;
   line-height: 1.4;
-  color: #4c51bf;
+  color: #ffffff;
 }
 
 .feature-list {

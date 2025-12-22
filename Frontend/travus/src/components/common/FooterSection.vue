@@ -24,28 +24,27 @@
         <!-- 메뉴 링크 -->
         <div class="footer-menu">
           <div class="menu-column">
-            <a href="#" class="menu-link">About Us</a>
-            <div class="sub-menu">
-              <a href="#">About 소이경</a>
-              <a href="#">소이경 사람들</a>
-              <a href="#">우리의 철학</a>
-              <a href="#">기업문화</a>
-            </div>
-          </div>
-          <div class="menu-column">
             <a href="#" class="menu-link">Services</a>
             <div class="sub-menu">
-              <a href="#">Portfolio</a>
-              <a href="#">AI Image</a>
-              <a href="#">기타 솔루션</a>
+              <a href="#">여행지 추천</a> 
+              <a href="#">AI 여행 도우미</a>
+              <a href="#">무장애 접근성 안내</a>
+  
             </div>
           </div>
           <div class="menu-column">
-            <a href="#" class="menu-link">Contact</a>
+            <a href="#" class="menu-link">Support</a>
             <div class="sub-menu">
-              <a href="#">프로젝트 문의</a>
               <a href="#">1:1문의</a>
               <a href="#">FAQ</a>
+              <a href="#">접근성 도움말</a>
+            </div>
+          </div>
+          <div class="menu-column">
+            <a href="#" class="menu-link">Policy</a>
+            <div class="sub-menu">
+              <a href="#">서비스 이용약관</a>
+              <a href="#">개인정보 처리방침</a>
             </div>
           </div>
         </div>

@@ -169,7 +169,7 @@ onUnmounted(() => {
 
 <style scoped>
 .travel-target-section {
-  background: #ff6714;
+  background: #f5f5f5;
   min-height: 100vh;
   padding: 5rem 2rem;
   position: relative;
@@ -189,7 +189,7 @@ onUnmounted(() => {
 }
 
 .text-box {
-  color: white;
+  color: #111827;
 }
 
 .subtitle {
@@ -211,17 +211,18 @@ onUnmounted(() => {
   align-items: center;
   gap: 1rem;
   padding: 1rem 2rem;
-  background: white;
+  background: #ffffff;
   border-radius: 50px;
   text-decoration: none;
-  color: #ff6714;
+  border: 2px solid rgba(154, 182, 243, 0.45);
+  color: #8aa6e8;
   font-weight: 600;
   transition: all 0.3s ease;
 }
 
 .main-btn:hover {
   transform: translateY(-3px);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 10px 30px rgba(154, 182, 243, 0.35);
 }
 
 .arrow {
@@ -241,24 +242,25 @@ onUnmounted(() => {
   gap: 2rem;
   align-items: center;
   padding: 2.5rem;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(10px);
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
   border-radius: 20px;
-  border: 2px solid rgba(255, 255, 255, 0.2);
+  border: 2px solid rgba(17, 24, 39, 0.08);
   transition: all 0.3s ease;
   opacity: 0.2;
 }
 
 .destination-item:hover {
-  background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.85);
+  border-color: rgba(154, 182, 243, 0.35);
   transform: translateX(10px);
 }
 
 .item-number {
   font-size: 3rem;
   font-weight: 900;
-  color: rgba(255, 255, 255, 0.3);
+  color: rgba(31, 41, 55, 0.35);
   font-family: 'Poppins', sans-serif;
 }
 
@@ -275,14 +277,14 @@ onUnmounted(() => {
   font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 2px;
-  color: rgba(255, 255, 255, 0.7);
+  color: #6b7280;
   margin-bottom: 0.5rem;
 }
 
 .item-title {
   font-size: 2rem;
   font-weight: 700;
-  color: white;
+  color: #1f2937;
   margin: 0.5rem 0 0 0;
 }
 
@@ -294,10 +296,10 @@ onUnmounted(() => {
 
 .feature-tag {
   padding: 0.4rem 1rem;
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(154, 182, 243, 0.18);
   border-radius: 20px;
   font-size: 0.85rem;
-  color: white;
+  color: #1f2937;
   font-weight: 500;
 }
 
@@ -311,8 +313,8 @@ onUnmounted(() => {
   width: 100px;
   height: 100px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.3);
-  border: 3px solid white;
+  background: rgba(154, 182, 243, 0.22);
+  border: 3px solid #9ab6f3;
   position: relative;
 }
 
@@ -323,7 +325,7 @@ onUnmounted(() => {
   left: 50%;
   transform: translate(-50%, -50%);
   font-size: 2.5rem;
-  color: white;
+  color: #1f2937;
   font-weight: 900;
 }
 
