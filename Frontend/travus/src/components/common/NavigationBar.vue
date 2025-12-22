@@ -31,6 +31,7 @@
             <router-link to="/travel?category=39" class="dropdown-item" tabindex="0" @focus="handleFocus" @click="closeMenuImmediate">음식점</router-link>
           </div>
         </div>
+        <router-link to="/course" class="menu-item" tabindex="0" @focus="handleFocus">여행 코스</router-link>
         <router-link to="/ai" class="menu-item" tabindex="0" @focus="handleFocus">AI</router-link>
         <router-link to="/camera" class="menu-item" tabindex="0" @focus="handleFocus">카메라</router-link>
         <router-link to="/board" class="menu-item" tabindex="0" @focus="handleFocus">게시판</router-link>

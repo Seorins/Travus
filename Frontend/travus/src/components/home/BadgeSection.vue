@@ -6,51 +6,51 @@
   </h2>
 
   <div class="service-hub-grid">
-    <div class="service-item">
+    <div class="service-item" @click="navigateTo('/travel?category=12')">
       <div class="icon-circle">
-        <img src="@/assets/travel_badge.png" alt="" />
+        <img src="@/assets/travel_badge.png" alt="여행지" />
       </div>
       <p class="service-label">여행지</p>
     </div>
 
-    <div class="service-item">
+    <div class="service-item" @click="navigateTo('/travel?category=32')">
       <div class="icon-circle">
-        <img src="@/assets/bed_badge.png" alt="" />
+        <img src="@/assets/bed_badge.png" alt="숙소" />
       </div>
       <p class="service-label">숙소</p>
     </div>
 
-    <div class="service-item">
+    <div class="service-item" @click="navigateTo('/travel?category=39')">
       <div class="icon-circle">
-        <img src="@/assets/food_badge.png" alt="" />
+        <img src="@/assets/food_badge.png" alt="음식점" />
       </div>
       <p class="service-label">음식점</p>
     </div>
 
-    <div class="service-item">
+    <div class="service-item" @click="navigateTo('/course')">
       <div class="icon-circle">
-        <img src="@/assets/course_badge.png" alt="" />
+        <img src="@/assets/course_badge.png" alt="코스 추천" />
       </div>
       <p class="service-label">코스 추천</p>
     </div>
 
-    <div class="service-item">
+    <div class="service-item" @click="navigateTo('/ai')">
       <div class="icon-circle">
-        <img src="@/assets/ai_badge.png" alt="" />
+        <img src="@/assets/ai_badge.png" alt="나만의 코스" />
       </div>
       <p class="service-label">나만의 코스</p>
     </div>
 
-    <div class="service-item">
+    <div class="service-item" @click="navigateTo('/camera')">
       <div class="icon-circle">
-        <img src="@/assets/camera_badge.png" alt="" />
+        <img src="@/assets/camera_badge.png" alt="AI 카메라" />
       </div>
       <p class="service-label">AI 카메라</p>
     </div>
 
-    <div class="service-item">
+    <div class="service-item" @click="navigateTo('/board')">
       <div class="icon-circle">
-        <img src="@/assets/board_badge.png" alt="" />
+        <img src="@/assets/board_badge.png" alt="게시판" />
       </div>
       <p class="service-label">게시판</p>
     </div>
@@ -62,7 +62,13 @@
 </template>
 
 <script setup>
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
+
+const navigateTo = (path) => {
+  router.push(path)
+}
 </script>
 
 <style scoped>

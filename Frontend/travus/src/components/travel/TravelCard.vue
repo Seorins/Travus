@@ -221,7 +221,7 @@ const handleClick = () => {
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem 1rem;
-  background: #667eea;
+  background: #111827;
   color: white;
   border: none;
   border-radius: 8px;
@@ -232,7 +232,8 @@ const handleClick = () => {
 }
 
 .card-btn:hover {
-  background: #5568d3;
+  background: #e4e4e4;
+  color: #111827;
   transform: translateX(2px);
 }
 
