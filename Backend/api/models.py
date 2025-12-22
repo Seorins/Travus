@@ -56,12 +56,26 @@ class TravelSpot(models.Model):
 
     # 상세 정보
     description = models.TextField(blank=True, null=True, verbose_name='설명')
-    tel = models.CharField(max_length=50, blank=True, null=True, verbose_name='전화번호')
-    homepage = models.URLField(blank=True, null=True, verbose_name='홈페이지')
+    overview = models.TextField(blank=True, null=True, verbose_name='개요')
+    tel = models.TextField(blank=True, null=True, verbose_name='전화번호')
+    tel_name = models.CharField(max_length=100, blank=True, null=True, verbose_name='전화번호명')
+    homepage = models.TextField(blank=True, null=True, verbose_name='홈페이지')
+    zipcode = models.CharField(max_length=10, blank=True, null=True, verbose_name='우편번호')
+    addr1 = models.CharField(max_length=300, blank=True, null=True, verbose_name='주소')
+    addr2 = models.CharField(max_length=300, blank=True, null=True, verbose_name='상세주소')
 
     # 이미지
     image_url = models.URLField(blank=True, null=True, verbose_name='대표 이미지 URL')
     thumbnail_url = models.URLField(blank=True, null=True, verbose_name='썸네일 이미지 URL')
+
+    # API 추가 정보
+    created_time = models.CharField(max_length=20, blank=True, null=True, verbose_name='API 등록일')
+    modified_time = models.CharField(max_length=20, blank=True, null=True, verbose_name='API 수정일')
+    cpyrht_div_cd = models.CharField(max_length=20, blank=True, null=True, verbose_name='저작권 유형')
+    cat1 = models.CharField(max_length=10, blank=True, null=True, verbose_name='대분류')
+    cat2 = models.CharField(max_length=10, blank=True, null=True, verbose_name='중분류')
+    cat3 = models.CharField(max_length=10, blank=True, null=True, verbose_name='소분류')
+    mlevel = models.CharField(max_length=10, blank=True, null=True, verbose_name='Map Level')
 
     # 평점 및 통계
     rating = models.DecimalField(
@@ -126,6 +140,11 @@ class AccessibilityInfo(models.Model):
     braile_block = models.BooleanField(default=False, verbose_name='점자블록')
     help_dog = models.BooleanField(default=False, verbose_name='안내견 동반')
     guide_system = models.BooleanField(default=False, verbose_name='유도 안내 설비')
+
+    # 청각장애 정보
+    sign_guide = models.BooleanField(default=False, verbose_name='수화 안내')
+    video_guide = models.BooleanField(default=False, verbose_name='자막 비디오 가이드')
+    hearing_room = models.BooleanField(default=False, verbose_name='청각장애 객실')
 
     # 추가 접근성 정보
     stroller = models.BooleanField(default=False, verbose_name='유모차 접근 가능')

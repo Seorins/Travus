@@ -8,8 +8,9 @@
     />
 
     <!-- 헤더 섹션 -->
-    <section class="travel-header">
-      <div class="container">
+    <section class="travel-header" :class="headerBackgroundClass">
+      <div class="header-overlay"></div>
+      <div class="container header-content">
         <h1 class="page-title">{{ pageTitle }}</h1>
         <p class="page-subtitle">{{ pageSubtitle }}</p>
 
@@ -106,51 +107,37 @@
               </div>
             </div>
 
-            <!-- 시설 정보 -->
-            <div class="filter-row">
-              <div class="facility-types">
-                <button
-                  class="facility-btn"
-                  :class="{ active: selectedFacilities.includes('all') }"
-                  @click="toggleFacility('all')"
-                >
-                  전체
-                </button>
-                <button
-                  class="facility-btn"
-                  :class="{ active: selectedFacilities.includes('parking') }"
-                  @click="toggleFacility('parking')"
-                >
-                  주차장
-                </button>
-                <button
-                  class="facility-btn"
-                  :class="{ active: selectedFacilities.includes('restroom') }"
-                  @click="toggleFacility('restroom')"
-                >
-                  화장실
-                </button>
-                <button
-                  class="facility-btn"
-                  :class="{ active: selectedFacilities.includes('elevator') }"
-                  @click="toggleFacility('elevator')"
-                >
-                  승강기
-                </button>
-                <button
-                  class="facility-btn"
-                  :class="{ active: selectedFacilities.includes('route') }"
-                  @click="toggleFacility('route')"
-                >
-                  이동경로
-                </button>
-                <button
-                  class="facility-btn"
-                  :class="{ active: selectedFacilities.includes('exit') }"
-                  @click="toggleFacility('exit')"
-                >
-                  출입구
-                </button>
+            <!-- 시설 정보 (무장애 유형별 동적 표시) -->
+            <div class="filter-row" v-if="selectedAccessibilityTypes.length > 0">
+              <h4 class="facility-title">시설 정보</h4>
+
+              <!-- 각 무장애 유형별로 그룹화 -->
+              <div v-for="(type, index) in selectedAccessibilityTypes" :key="type" class="facility-group">
+                <div class="facility-group-header">
+                  <span class="facility-group-icon">
+                    <img v-if="type === 'wheelchair'" src="@/assets/icon_body.png" alt="지체장애" />
+                    <img v-else-if="type === 'visual'" src="@/assets/icon_eye.png" alt="시각장애" />
+                    <img v-else-if="type === 'hearing'" src="@/assets/icon_ear.png" alt="청각장애" />
+                    <img v-else-if="type === 'family'" src="@/assets/icon_baby.png" alt="영유아가족" />
+                    <img v-else-if="type === 'senior'" src="@/assets/icon_old.png" alt="고령자" />
+                  </span>
+                  <span class="facility-group-label">{{ getAccessibilityLabel(type) }}</span>
+                </div>
+
+                <div class="facility-types">
+                  <button
+                    v-for="facility in facilityOptions[type]"
+                    :key="facility.value"
+                    class="facility-btn"
+                    :class="{ active: selectedFacilities.includes(facility.value) }"
+                    @click="toggleFacility(facility.value)"
+                  >
+                    {{ facility.label }}
+                  </button>
+                </div>
+
+                <!-- 구분선 (마지막 그룹 제외) -->
+                <div v-if="index < selectedAccessibilityTypes.length - 1" class="facility-divider"></div>
               </div>
             </div>
 
@@ -162,13 +149,13 @@
                   <select v-model="selectedRegion" class="region-select">
                     <option value="">시도 선택</option>
                     <option value="1">서울</option>
-                    <option value="6">부산</option>
-                    <option value="4">대구</option>
-                    <option value="5">인천</option>
-                    <option value="2">광주</option>
+                    <option value="2">인천</option>
                     <option value="3">대전</option>
+                    <option value="4">대구</option>
+                    <option value="5">광주</option>
+                    <option value="6">부산</option>
                     <option value="7">울산</option>
-                    <option value="39">제주</option>
+                    <option value="8">세종</option>
                     <option value="31">경기</option>
                     <option value="32">강원</option>
                     <option value="33">충북</option>
@@ -177,6 +164,7 @@
                     <option value="36">경남</option>
                     <option value="37">전북</option>
                     <option value="38">전남</option>
+                    <option value="39">제주</option>
                   </select>
                 </div>
 
@@ -309,6 +297,16 @@ const pageSubtitle = computed(() => {
   }
 })
 
+// 헤더 배경 이미지 클래스
+const headerBackgroundClass = computed(() => {
+  switch (contentTypeId.value) {
+    case '12': return 'header-beach'
+    case '32': return 'header-room'
+    case '39': return 'header-restaurant'
+    default: return 'header-default'
+  }
+})
+
 // TTS 상태
 const isTTSEnabled = ref(true)
 const synthesis = window.speechSynthesis
@@ -342,6 +340,54 @@ const selectedRegion = ref('')
 const sortBy = ref('latest')
 const isFilterCollapsed = ref(false) // 필터 접기/펼치기 상태
 
+// 무장애 유형별 시설 정보 매핑 (API 명세 기반)
+const facilityOptions = {
+  wheelchair: [ // 지체장애
+    { value: 'parking', label: '주차' },
+    { value: 'public_transport', label: '대중교통' },
+    { value: 'route', label: '접근로' },
+    { value: 'wheelchair', label: '휠체어' },
+    { value: 'exit', label: '출입통로' },
+    { value: 'elevator', label: '엘리베이터' },
+    { value: 'restroom', label: '화장실' }
+  ],
+  visual: [ // 시각장애
+    { value: 'braile_block', label: '점자블록' },
+    { value: 'help_dog', label: '보조견 동반' },
+    { value: 'audio_guide', label: '오디오가이드' },
+    { value: 'guide_system', label: '유도 안내 설비' }
+  ],
+  hearing: [ // 청각장애
+    { value: 'sign_guide', label: '수화 안내' },
+    { value: 'video_guide', label: '자막 비디오' },
+    { value: 'hearing_room', label: '객실' }
+  ],
+  family: [ // 영유아가족
+    { value: 'stroller', label: '유모차' },
+    { value: 'lactation_room', label: '수유실' }
+  ],
+  senior: [ // 고령자 (지체장애 시설 중 일부 적용)
+    { value: 'parking', label: '주차' },
+    { value: 'public_transport', label: '대중교통' },
+    { value: 'route', label: '접근로' },
+    { value: 'exit', label: '출입통로' },
+    { value: 'elevator', label: '엘리베이터' },
+    { value: 'restroom', label: '화장실' }
+  ]
+}
+
+// 무장애 유형 레이블 가져오기
+const getAccessibilityLabel = (type) => {
+  const labels = {
+    wheelchair: '지체장애',
+    visual: '시각장애',
+    hearing: '청각장애',
+    family: '영유아가족',
+    senior: '고령자'
+  }
+  return labels[type] || type
+}
+
 // 데이터 상태
 const destinations = ref([])
 const loading = ref(false)
@@ -350,7 +396,6 @@ const totalCount = ref(0)
 // 페이지네이션 상태
 const currentPage = ref(1)
 const itemsPerPage = 20
-const fetchSize = 100 // 이미지 필터링을 고려하여 더 많이 가져오기
 
 const totalPages = computed(() => {
   return Math.ceil(totalCount.value / itemsPerPage)
@@ -359,6 +404,11 @@ const totalPages = computed(() => {
 const displayedPages = computed(() => {
   const pages = []
   const maxDisplayed = 5
+
+  // 전체 페이지가 없으면 빈 배열 반환
+  if (totalPages.value === 0) {
+    return pages
+  }
 
   // 현재 페이지가 속한 그룹의 시작 페이지 계산
   const groupStart = Math.floor((currentPage.value - 1) / maxDisplayed) * maxDisplayed + 1
@@ -371,13 +421,9 @@ const displayedPages = computed(() => {
   return pages
 })
 
-// 이미지가 있는 여행지만 필터링하고 페이지당 정확히 itemsPerPage개만 표시
+// 필터링된 여행지 (백엔드에서 이미 이미지 필터링됨)
 const filteredDestinations = computed(() => {
-  const withImages = destinations.value.filter(destination => {
-    return destination.firstimage && destination.firstimage.trim() !== ''
-  })
-  // 최대 itemsPerPage개까지만 반환
-  return withImages.slice(0, itemsPerPage)
+  return destinations.value
 })
 
 // 여행지 데이터 포맷 변환
@@ -393,57 +439,72 @@ const formatDestination = (destination) => {
   }
 }
 
-// 데이터 로드
+// 데이터 로드 (DB 기반)
 const loadDestinations = async () => {
   loading.value = true
 
   try {
-    let response
+    console.log('📍 DB에서 여행지 목록 조회')
 
-    if (searchQuery.value) {
-      // 키워드 검색
-      response = await api.searchTravelSpotsAPI(searchQuery.value, {
-        area_code: selectedRegion.value,
-        content_type_id: contentTypeId.value,
-        page: currentPage.value,
-        size: fetchSize
-      })
-    } else {
-      // 지역 기반 목록
-      response = await api.getTravelSpotsFromAPI({
-        area_code: selectedRegion.value,
-        content_type_id: contentTypeId.value,
-        page: currentPage.value,
-        size: fetchSize
-      })
+    // DB에서 여행지 목록 가져오기
+    const params = {
+      page: currentPage.value,
+      page_size: itemsPerPage
     }
+
+    // 지역 필터
+    if (selectedRegion.value) {
+      params.area_code = selectedRegion.value
+    }
+
+    // 카테고리 필터 (content_type_id)
+    if (contentTypeId.value) {
+      params.content_type_id = contentTypeId.value
+    }
+
+    // 검색어
+    if (searchQuery.value) {
+      params.search = searchQuery.value
+    }
+
+    // 정렬
+    if (sortBy.value === 'popular') {
+      params.ordering = 'popular'
+    } else if (sortBy.value === 'rating') {
+      params.ordering = 'rating'
+    }
+
+    // 무장애 시설 필터
+    if (selectedFacilities.value.length > 0) {
+      params.facilities = selectedFacilities.value.join(',')
+    }
+
+    const response = await api.getTravelSpots(params)
+    console.log('✅ DB 응답:', response.data)
 
     if (response.data) {
-      let results = response.data.results || []
-
-      // 클라이언트 사이드 필터링 (무장애 유형 & 시설)
-      if (selectedAccessibilityTypes.value.length > 0 || selectedFacilities.value.length > 0) {
-        results = results.filter(item => {
-          // 무장애 유형 필터
-          if (selectedAccessibilityTypes.value.length > 0) {
-            // API 응답에 무장애 정보가 있다고 가정
-            // 실제로는 백엔드에서 필터링하는 것이 더 좋음
-          }
-
-          // 시설 필터
-          if (selectedFacilities.value.length > 0) {
-            // API 응답에 시설 정보가 있다고 가정
-          }
-
-          return true
-        })
-      }
+      // DB 응답을 기존 API 형식에 맞게 매핑
+      let results = (response.data.results || []).map(item => ({
+        contentid: item.content_id,
+        contenttypeid: item.content_type_id,
+        title: item.name,
+        addr1: item.address,
+        areacode: item.area_code,
+        sigungucode: item.sigungu_code,
+        mapx: item.longitude,
+        mapy: item.latitude,
+        firstimage: item.image_url,
+        firstimage2: item.thumbnail_url,
+        overview: item.description,
+        tel: item.tel
+      }))
 
       destinations.value = results
-      totalCount.value = response.data.count || 0
+      totalCount.value = response.data.count || results.length
+      console.log(`✅ ${results.length}개 여행지 로드 완료`)
     }
   } catch (error) {
-    console.error('데이터 로드 실패:', error)
+    console.error('❌ 데이터 로드 실패:', error)
     destinations.value = []
     totalCount.value = 0
   } finally {
@@ -463,6 +524,17 @@ const toggleAccessibilityType = (type) => {
   } else {
     selectedAccessibilityTypes.value.push(type)
   }
+
+  // 무장애 유형 변경 시 시설 정보 초기화
+  // 현재 선택된 시설 중 새로운 availableFacilities에 없는 것들 제거
+  const availableValues = new Set(
+    selectedAccessibilityTypes.value.flatMap(t =>
+      (facilityOptions[t] || []).map(f => f.value)
+    )
+  )
+  selectedFacilities.value = selectedFacilities.value.filter(f =>
+    availableValues.has(f)
+  )
 }
 
 const toggleFacility = (facility) => {
@@ -507,8 +579,9 @@ const changePageGroup = (direction) => {
 }
 
 const handleCardClick = (destination) => {
-  console.log('Clicked destination:', destination)
-  // 상세 페이지로 이동 로직 추가
+  // 상세 페이지로 이동 (contentTypeId 포함하여 조회 안정성 향상)
+  const typeId = destination.contenttypeid || '12'
+  window.location.href = `/travel/${destination.contentid}?contentTypeId=${typeId}`
 }
 
 // 카테고리 변경시 데이터 자동 새로고침
@@ -518,6 +591,12 @@ watch(() => route.query.category, () => {
   selectedAccessibilityTypes.value = []
   selectedFacilities.value = []
   searchQuery.value = ''
+  loadDestinations()
+})
+
+// 무장애 시설 필터 변경 시 검색
+watch(selectedFacilities, () => {
+  currentPage.value = 1
   loadDestinations()
 })
 
@@ -534,61 +613,111 @@ onMounted(() => {
 
 /* 헤더 섹션 */
 .travel-header {
-  background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
-  padding: 4rem 2rem 3rem;
+  position: relative;
+  padding: 8rem 2rem 6rem;
   color: white;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  min-height: 500px;
+  display: flex;
+  align-items: center;
+}
+
+/* 배경 이미지 */
+.header-beach {
+  background-image: url('@/assets/beach.jpg');
+}
+
+.header-room {
+  background-image: url('@/assets/room.jpg');
+}
+
+.header-restaurant {
+  background-image: url('@/assets/restaurant.jpg');
+}
+
+.header-default {
+  background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+}
+
+/* 어두운 오버레이 */
+.header-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1;
+}
+
+.header-content {
+  position: relative;
+  z-index: 2;
 }
 
 .container {
   max-width: 1400px;
   margin: 0 auto;
+  width: 100%;
 }
 
 .page-title {
-  font-size: 3rem;
+  font-size: 3.5rem;
   font-weight: 900;
-  margin: 0 0 1rem 0;
+  margin: 0 0 1.5rem 0;
   text-align: center;
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .page-subtitle {
-  font-size: 1.25rem;
+  font-size: 1.35rem;
   text-align: center;
-  margin: 0 0 2rem 0;
-  opacity: 0.9;
+  margin: 0 0 3rem 0;
+  opacity: 0.95;
+  text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.3);
 }
 
 /* 검색바 */
 .search-bar {
-  max-width: 600px;
+  max-width: 1000px;
+  width: 90%;
   margin: 0 auto;
   display: flex;
-  background: white;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
   border-radius: 50px;
   overflow: hidden;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 .search-input {
   flex: 1;
-  padding: 1rem 1.5rem;
+  padding: 1.25rem 2rem;
   border: none;
-  font-size: 1rem;
+  font-size: 1.1rem;
   outline: none;
-  color: #333;
+  color: #ffffff;
+  background: transparent;
+}
+
+.search-input::placeholder {
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .search-btn {
-  padding: 1rem 1.5rem;
-  background: #111827;
+  padding: 1.25rem 2rem;
+  background: rgba(255, 255, 255, 0.25);
   border: none;
   color: white;
   cursor: pointer;
-  transition: background 0.3s ease;
+  transition: all 0.3s ease;
 }
 
 .search-btn:hover {
-  background: #1f2937;
+  background: rgba(255, 255, 255, 0.35);
 }
 
 /* 필터 섹션 */
@@ -599,7 +728,7 @@ onMounted(() => {
 
 .filter-card {
   background: #ffffff;
-  border-radius: 12px;
+  border-radius: 5px;
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
@@ -668,7 +797,7 @@ onMounted(() => {
   padding: 2rem 1.5rem;
   background: white;
   border: 3px solid #e5e7eb;
-  border-radius: 16px;
+  border-radius: 7%;
   cursor: pointer;
   transition: all 0.3s ease;
   min-width: 140px;
@@ -707,7 +836,7 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   background: #f3f4f6;
-  border-radius: 50%;
+  border-radius: 15%;
   transition: all 0.3s ease;
 }
 
@@ -731,12 +860,68 @@ onMounted(() => {
   color: #6b7280;
 }
 
+/* 시설 정보 섹션 */
+.facility-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #374151;
+  margin: 0 0 2rem 0;
+  text-align: center;
+}
+
+/* 시설 정보 그룹 */
+.facility-group {
+  margin-bottom: 2rem;
+}
+
+.facility-group:last-child {
+  margin-bottom: 0;
+}
+
+.facility-group-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.facility-group-icon {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f3f4f6;
+  border-radius: 50%;
+  padding: 0.4rem;
+}
+
+.facility-group-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.facility-group-label {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.facility-divider {
+  height: 1px;
+  background: linear-gradient(to right, transparent, #d1d5db, transparent);
+  margin: 2rem 0;
+}
+
 /* 시설 정보 버튼 */
 .facility-types {
   display: flex;
   gap: 1rem;
   flex-wrap: wrap;
-  justify-content: center;
+  justify-content: flex-start;
 }
 
 .facility-btn {

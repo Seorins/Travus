@@ -154,8 +154,8 @@ REST_FRAMEWORK = {
     ],
 }
 
-# Korean Tourism API Settings
-TOUR_API_BASE_URL = os.getenv('TOUR_API_BASE_URL', 'http://apis.data.go.kr/B551011/KorWithService1')
+# Korean Tourism API Settings (무장애 여행 API는 Service2 사용)
+TOUR_API_BASE_URL = os.getenv('TOUR_API_BASE_URL', 'http://apis.data.go.kr/B551011/KorWithService2')
 TOUR_API_KEY = os.getenv('TOUR_API_KEY', '')
 TOUR_API_MOBILE_OS = os.getenv('TOUR_API_MOBILE_OS', 'ETC')
 TOUR_API_MOBILE_APP = os.getenv('TOUR_API_MOBILE_APP', 'TravUs')
@@ -164,3 +164,18 @@ TOUR_API_MOBILE_APP = os.getenv('TOUR_API_MOBILE_APP', 'TravUs')
 REDIS_HOST = os.getenv('REDIS_HOST', 'localhost')
 REDIS_PORT = int(os.getenv('REDIS_PORT', 6379))
 REDIS_DB = int(os.getenv('REDIS_DB', 0))
+
+# Mysql 설정
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'travus',
+        'USER': 'root',
+        'PASSWORD': '1234',
+        'HOST': '127.0.0.1',   # MySQL 호스트
+        'PORT': '3306',        # MySQL 포트 (기본값은 3306)
+        'OPTIONS': {
+            'charset': 'utf8mb4',
+        },
+    }
+}

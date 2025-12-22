@@ -15,9 +15,14 @@
         <HeroSection @focus="handleFocus" />
       </section>
 
-      <!-- About 섹션 -->
-      <section class="section scroll-snap-section" data-section="about">
-        <AboutSection @focus="handleFocus" />
+      <!-- 카테고리 배지 섹션 -->
+      <section data-section="badge">
+        <BadgeSection @focus="handleFocus" />
+      </section>
+
+      <!-- 이번주 추천 섹션 -->
+      <section class="section scroll-snap-section" data-section="weekly">
+        <WeeklyRecommendSection @focus="handleFocus" />
       </section>
 
       <!-- 여행 대상 섹션 -->
@@ -35,16 +40,6 @@
         <AICameraSection @focus="handleFocus" />
       </section>
 
-      <!-- 그라데이션 텍스트 섹션 -->
-      <section class="section scroll-snap-section" data-section="gradient-text">
-        <GradientTextSection @focus="handleFocus" />
-      </section>
-
-      <!-- 이미지 배너 섹션 -->
-      <section class="section scroll-snap-section" data-section="image-banner">
-        <ImageBannerSection @focus="handleFocus" />
-      </section>
-
       <!-- 푸터 -->
       <FooterSection @focus="handleFocus" />
     </main>
@@ -58,13 +53,12 @@ import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import NavigationBar from '@/components/common/NavigationBar.vue'
 import HeroSection from '@/components/home/HeroSection.vue'
-import AboutSection from '@/components/home/AboutSection.vue'
+import WeeklyRecommendSection from '@/components/home/WeeklyRecommendSection.vue'
 import TravelTargetSection from '@/components/home/TravelTargetSection.vue'
 import DestinationSection from '@/components/home/DestinationSection.vue'
 import AICameraSection from '@/components/ai/AICameraSection.vue'
-import GradientTextSection from '@/components/home/GradientTextSection.vue'
-import ImageBannerSection from '@/components/home/ImageBannerSection.vue'
 import FooterSection from '@/components/common/FooterSection.vue'
+import BadgeSection from '@/components/home/BadgeSection.vue'
 
 // GSAP ScrollTrigger 등록
 gsap.registerPlugin(ScrollTrigger)
@@ -101,8 +95,8 @@ const handleFocus = (text) => {
 }
 
 onMounted(() => {
-  // 각 섹션이 부드럽게 올라오는 애니메이션 (target-section, destination, gradient-text, image-banner 제외)
-  const sections = document.querySelectorAll('.section:not([data-section="target"]):not([data-section="destination"]):not([data-section="gradient-text"]):not([data-section="image-banner"])')
+  // 각 섹션이 부드럽게 올라오는 애니메이션 (hero, target-section, destination, weekly 제외)
+  const sections = document.querySelectorAll('.section:not([data-section="hero"]):not([data-section="target"]):not([data-section="destination"]):not([data-section="weekly"])')
 
   sections.forEach((section) => {
     gsap.fromTo(
@@ -126,7 +120,12 @@ onMounted(() => {
     )
   })
 
-  // target-section, destination, gradient-text, image-banner는 즉시 보이도록
+  // hero, target-section, destination, weekly는 즉시 보이도록
+  const heroSection = document.querySelector('.section[data-section="hero"]')
+  if (heroSection) {
+    gsap.set(heroSection, { opacity: 1, y: 0 })
+  }
+
   const targetSection = document.querySelector('.section[data-section="target"]')
   if (targetSection) {
     gsap.set(targetSection, { opacity: 1, y: 0 })
@@ -137,14 +136,9 @@ onMounted(() => {
     gsap.set(destinationSection, { opacity: 1, y: 0 })
   }
 
-  const gradientTextSection = document.querySelector('.section[data-section="gradient-text"]')
-  if (gradientTextSection) {
-    gsap.set(gradientTextSection, { opacity: 1, y: 0 })
-  }
-
-  const imageBannerSection = document.querySelector('.section[data-section="image-banner"]')
-  if (imageBannerSection) {
-    gsap.set(imageBannerSection, { opacity: 1, y: 0 })
+  const weeklySection = document.querySelector('.section[data-section="weekly"]')
+  if (weeklySection) {
+    gsap.set(weeklySection, { opacity: 1, y: 0 })
   }
 })
 
@@ -175,6 +169,11 @@ onUnmounted(() => {
   will-change: transform, opacity;
 }
 
+.section[data-section='hero'] {
+  opacity: 1;
+  transform: none;
+}
+
 .section[data-section='target'] {
   opacity: 1;
   transform: none;
@@ -187,8 +186,9 @@ onUnmounted(() => {
   height: auto !important;
 }
 
-.section[data-section='gradient-text'] {
-  min-height: auto;
+.section[data-section='weekly'] {
+  opacity: 1;
+  transform: none;
 }
 
 /* 전역 스타일 */
