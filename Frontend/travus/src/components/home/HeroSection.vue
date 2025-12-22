@@ -12,7 +12,7 @@
             <div class="hero-badge">
               <span class="badge-text">{{ content.badge }}</span>
             </div>
-            <h1 class="hero-title" data-text="모두를 위한 여행, TravUs">
+            <h1 class="hero-title" data-text="모두를 위한 여행, TRAVUS">
               {{ content.title }}
             </h1>
             <p class="hero-subtitle">{{ content.subtitle }}</p>
@@ -77,10 +77,10 @@ const images = ref([hero1, hero2])
 
 // 고정된 텍스트 콘텐츠
 const content = {
-  badge: '모두를 위한 여행, Travus',
+  badge: '모두를 위한 여행, TRAVUS',
   title: '함께라서 더 넓은 여행',
   subtitle: '걸음의 속도가 달라도,\n바라보는 높이가 달라도 괜찮습니다.\nTravUs가 여행의 모든 순간을 함께할게요.',
-  ctaText: 'TravUs 시작하기'
+  ctaText: 'TRAVUS와 함께하기'
 }
 
 const currentSlide = ref(0)
