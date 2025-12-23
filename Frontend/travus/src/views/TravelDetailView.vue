@@ -649,6 +649,25 @@ const fetchDestinationDetail = async () => {
 
   } catch (err) {
     console.error('Failed to fetch destination detail:', err)
+
+    // 404 에러인 경우 에러 페이지로 리다이렉트
+    if (err.response?.status === 404) {
+      router.push({ name: 'error', query: { type: '404' } })
+      return
+    }
+
+    // 500 서버 에러인 경우
+    if (err.response?.status >= 500) {
+      router.push({ name: 'error', query: { type: '500' } })
+      return
+    }
+
+    // 네트워크 에러인 경우
+    if (!err.response) {
+      router.push({ name: 'error', query: { type: 'network' } })
+      return
+    }
+
     error.value = err.message || '여행지 정보를 불러오는데 실패했습니다.'
   } finally {
     isLoading.value = false

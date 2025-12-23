@@ -9,6 +9,7 @@ import SignupView from '@/views/SignupView.vue'
 import MyPageView from '@/views/MyPageView.vue'
 import PersonalInfoView from '@/views/PersonalInfoView.vue'
 import CommentsView from '@/views/CommentsView.vue'
+import ErrorView from '@/views/ErrorView.vue'
 import { useAuthStore } from '@/stores/auth'
 
 const router = createRouter({
@@ -66,6 +67,16 @@ const router = createRouter({
       name: 'mypage-comments',
       component: CommentsView,
       meta: { requiresAuth: true }
+    },
+    {
+      path: '/error',
+      name: 'error',
+      component: ErrorView
+    },
+    {
+      path: '/:pathMatch(.*)*',
+      name: 'not-found',
+      component: ErrorView
     }
   ]
 })

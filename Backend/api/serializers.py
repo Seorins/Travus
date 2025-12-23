@@ -1,10 +1,9 @@
 from rest_framework import serializers
 from .models import (
     TravelSpotCategory, TravelSpot, AccessibilityInfo,
-    Bookmark, Course, CourseSpot, Review
+    Bookmark, Course, CourseSpot, Review, CourseComment
 )
 from django.contrib.auth import authenticate, get_user_model
-from rest_framework import serializers
 
 User = get_user_model()
 
@@ -133,3 +132,27 @@ class LoginSerializer(serializers.Serializer):
             raise serializers.ValidationError("아이디 또는 비밀번호가 올바르지 않습니다.")
         data["user"] = user
         return data
+
+
+class CourseCommentSerializer(serializers.ModelSerializer):
+    """코스 댓글 Serializer"""
+    username = serializers.CharField(source='user.username', read_only=True)
+    replies_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = CourseComment
+        fields = [
+            'id', 'user', 'username', 'course', 'content',
+            'parent', 'replies_count', 'created_at', 'updated_at'
+        ]
+        read_only_fields = ['user', 'created_at', 'updated_at']
+
+    def get_replies_count(self, obj):
+        return obj.replies.count()
+
+
+class CourseCommentCreateSerializer(serializers.ModelSerializer):
+    """코스 댓글 생성용 Serializer"""
+    class Meta:
+        model = CourseComment
+        fields = ['content', 'parent']
