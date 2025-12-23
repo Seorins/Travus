@@ -1,6 +1,16 @@
 <template>
   <div class="region-select">
-    <div class="background-illustration"></div>
+    <!-- 배경 이미지 -->
+    <div class="background-wrapper"></div>
+
+    <!-- 구름 애니메이션 -->
+    <div class="clouds-container">
+      <img src="@/assets/img_cloud1.png" alt="cloud" class="cloud cloud1" />
+      <img src="@/assets/img_cloud2.png" alt="cloud" class="cloud cloud2" />
+      <img src="@/assets/img_cloud4.png" alt="cloud" class="cloud cloud4" />
+      <img src="@/assets/img_cloud5.png" alt="cloud" class="cloud cloud5" />
+    </div>
+
     <div class="content-card">
       <div class="card-content">
         <div class="text-section">
@@ -12,24 +22,24 @@
               v-for="region in regions"
               :key="region.code"
               class="region-btn"
-              :class="{ selected: selectedRegions.includes(region.code) }"
-              @click="toggleRegion(region.code)"
+              :class="{ selected: selectedRegion === region.code }"
+              @click="selectRegion(region.code)"
             >
               {{ region.name }}
             </button>
           </div>
 
           <p class="hint">
-            지역을 기반으로 TRAVUS가 동선을 고려해 추천해드려요.
+            하나의 지역을 선택하시면 TRAVUS가 동선을 고려해 추천해드려요.
           </p>
 
           <div class="button-group">
-            <button class="btn-back" @click="$emit('back')">
+            <button class="btn-back" @click="emit('back')">
               이전
             </button>
             <button
               class="btn-next"
-              :disabled="selectedRegions.length === 0"
+              :disabled="!selectedRegion"
               @click="handleNext"
             >
               다음
@@ -39,8 +49,11 @@
 
       </div>
     </div>
+
+    <!-- 캐릭터 -->
     <div class="character-wrapper">
-      <img src='@/assets/select1.png' alt="TravUs AI 캐릭터" />
+      <img src='@/assets/select1.png' alt="TravUs AI 캐릭터" class="character-img" />
+      <div class="character-shadow"></div>
     </div>
   </div>
 </template>
@@ -70,20 +83,22 @@ const regions = [
   { code: '39', name: '제주' }
 ]
 
-const selectedRegions = ref([])
+// 단일 선택으로 변경
+const selectedRegion = ref(null)
 
-const toggleRegion = (code) => {
-  const index = selectedRegions.value.indexOf(code)
-  if (index > -1) {
-    selectedRegions.value.splice(index, 1)
+const selectRegion = (code) => {
+  // 이미 선택된 지역을 다시 클릭하면 선택 해제
+  if (selectedRegion.value === code) {
+    selectedRegion.value = null
   } else {
-    selectedRegions.value.push(code)
+    selectedRegion.value = code
   }
 }
 
 const handleNext = () => {
-  if (selectedRegions.value.length > 0) {
-    emit('next', selectedRegions.value)
+  if (selectedRegion.value) {
+    // 배열 형태로 전달 (기존 API 호환성 유지)
+    emit('next', [selectedRegion.value])
   }
 }
 </script>
@@ -95,20 +110,86 @@ const handleNext = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #9fc5f8;
   padding: 100px 20px 40px;
   position: relative;
   overflow: hidden;
+  background: linear-gradient(to bottom, #87CEEB 0%, #A0D3F0 50%, #B8DFF5 100%);
 }
 
-.background-illustration {
+/* 배경 이미지 - course_background 사용 */
+.background-wrapper {
   position: absolute;
   inset: 0;
-  background-image: url('/cloud-bg.svg');
+  background-image: url('@/assets/course_background.png');
   background-repeat: no-repeat;
-  background-position: center;
-  background-size: cover;
+  background-position: bottom right;
+  background-size: auto 100%;
   z-index: 0;
+}
+
+.background-wrapper::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 30%;
+  background: linear-gradient(to bottom, #87CEEB 0%, #9fc5f8 50%, transparent 100%);
+  z-index: 1;
+}
+
+/* 구름 애니메이션 */
+.clouds-container {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.cloud {
+  position: absolute;
+  opacity: 0;
+  animation: cloudFloat 3s ease-out forwards;
+}
+
+.cloud1 {
+  top: 10%;
+  left: 10%;
+  width: 120px;
+  animation-delay: 0.2s;
+}
+
+.cloud2 {
+  top: 20%;
+  right: 15%;
+  width: 150px;
+  animation-delay: 0.5s;
+}
+
+.cloud4 {
+  top: 50%;
+  left: 5%;
+  width: 100px;
+  animation-delay: 0.8s;
+}
+
+.cloud5 {
+  top: 60%;
+  right: 10%;
+  width: 130px;
+  animation-delay: 1.1s;
+}
+
+@keyframes cloudFloat {
+  0% {
+    opacity: 0;
+    transform: translateY(-50px);
+  }
+  100% {
+    opacity: 0.8;
+    transform: translateY(0);
+  }
 }
 
 .content-card {
@@ -119,18 +200,28 @@ const handleNext = () => {
   border-radius: 5px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
   padding: 3rem;
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
 }
 
 .card-content {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 3rem;
-  align-items: center;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
 }
 
 .text-section {
   display: flex;
   flex-direction: column;
+  flex: 1;
+}
+
+.subtitle {
+  font-size: 1.125rem;
+  color: #718096;
+  margin-bottom: 0.5rem;
 }
 
 .title {
@@ -142,18 +233,8 @@ const handleNext = () => {
 
 .nxttitle {
   font-size: 2rem;
-  font-weight: lighter;
+  font-weight: 300;
   color: #1a202c;
-  /* margin: 0 0 2rem 0; */
-}
-
-.card-content {
-  display: block;
-}
-
-.subtitle {
-  font-size: 1.125rem;
-  color: #718096;
 }
 
 .regions-grid {
@@ -191,18 +272,43 @@ const handleNext = () => {
   border-color: #667eea;
 }
 
+/* 캐릭터 */
 .character-wrapper {
   position: absolute;
   right: 6%;
   bottom: 8%;
-  z-index: 1;
-  pointer-events: none; 
+  z-index: 3;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-.character-wrapper img {
-  width: 250px;   
+.character-img {
+  width: 250px;
   height: auto;
-  opacity: 0.95;
+  position: relative;
+  z-index: 2;
+  animation: floatCharacter 3s ease-in-out infinite;
+  margin-bottom: -50px;
+}
+
+.character-shadow {
+  width: 180px;
+  height: 30px;
+  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.1) 40%, transparent 70%);
+  border-radius: 50%;
+  z-index: 1;
+  filter: blur(8px);
+}
+
+@keyframes floatCharacter {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
 }
 
 .hint {
@@ -215,7 +321,8 @@ const handleNext = () => {
 .button-group {
   display: flex;
   gap: 1rem;
-  margin-top: 10px;
+  margin-top: auto;
+  padding-top: 2rem;
 }
 
 .btn-back,
@@ -260,12 +367,21 @@ const handleNext = () => {
 
 
 @media (max-width: 1024px) {
-  .card-content {
-    grid-template-columns: 1fr;
+  .character-wrapper {
+    right: 3%;
+    bottom: 5%;
   }
 
-  .illustration-section {
-    display: none;
+  .character-img {
+    width: 200px;
+  }
+
+  .character-shadow {
+    width: 150px;
+  }
+
+  .cloud1, .cloud2, .cloud4, .cloud5 {
+    width: 80px;
   }
 }
 
@@ -278,6 +394,10 @@ const handleNext = () => {
     font-size: 1.5rem;
   }
 
+  .nxttitle {
+    font-size: 1.5rem;
+  }
+
   .subtitle {
     font-size: 1rem;
   }
@@ -287,8 +407,17 @@ const handleNext = () => {
   }
 
   .region-btn {
-    padding: 0.75rem;
+    width: 70px;
+    height: 70px;
     font-size: 0.875rem;
+  }
+
+  .character-wrapper {
+    display: none;
+  }
+
+  .cloud {
+    width: 60px !important;
   }
 }
 </style>

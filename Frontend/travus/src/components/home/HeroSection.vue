@@ -1,7 +1,7 @@
 <template>
   <section class="hero-section" tabindex="0" @focus="handleFocus">
     <div class="hero-slider">
-      <transition name="fade" mode="out-in">
+      <transition name="fade">
         <div
           :key="currentSlide"
           class="hero-slide"
@@ -144,20 +144,24 @@ onUnmounted(() => {
   width: 100%;
   height: 100vh;
   overflow: hidden;
+  background-color: #000; /* 검은색 배경으로 변경 */
 }
 
 .hero-slider {
   width: 100%;
   height: 100%;
+  position: relative;
 }
 
 .hero-slide {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  position: relative;
   display: flex;
   align-items: center;
   justify-content: flex-start;
@@ -351,15 +355,29 @@ onUnmounted(() => {
   font-size: 1.5rem;
 }
 
-/* 페이드 트랜지션 */
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 1s ease;
+/* 페이드 트랜지션 - 크로스페이드로 빠르게 전환 */
+.fade-enter-active {
+  transition: opacity 0.5s ease-in;
 }
 
-.fade-enter-from,
+.fade-leave-active {
+  transition: opacity 0.5s ease-out;
+}
+
+.fade-enter-from {
+  opacity: 0;
+}
+
 .fade-leave-to {
   opacity: 0;
+}
+
+.fade-enter-to {
+  opacity: 1;
+}
+
+.fade-leave-from {
+  opacity: 1;
 }
 
 /* 애니메이션 */

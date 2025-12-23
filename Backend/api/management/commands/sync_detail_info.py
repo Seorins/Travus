@@ -171,7 +171,7 @@ class Command(BaseCommand):
                             has_data = True
                             self.stdout.write(self.style.SUCCESS('  [완료] 상세 정보 업데이트 완료'))
 
-                time.sleep(1.5)  # Rate limit 방지
+                time.sleep(3)  # Rate limit 방지
 
                 # 2. 소개 정보 (detailIntro1)
                 self.stdout.write('  [소개] 소개 정보 가져오는 중...')
@@ -202,7 +202,7 @@ class Command(BaseCommand):
 
                             self.stdout.write(self.style.SUCCESS('  [완료] 소개 정보 업데이트 완료'))
 
-                time.sleep(1.5)  # Rate limit 방지
+                time.sleep(3)  # Rate limit 방지
 
                 # 3. 무장애 관광 정보 (detailWithTour2)
                 self.stdout.write('  [무장애] 무장애 정보 가져오는 중...')
@@ -274,7 +274,7 @@ class Command(BaseCommand):
                             self.stdout.write(self.style.SUCCESS(f'  [완료] 무장애 정보 {action} 완료'))
                             has_data = True
 
-                time.sleep(1.5)  # Rate limit 방지
+                time.sleep(3)  # Rate limit 방지
 
                 # 데이터가 있는 경우에만 저장
                 if has_data:

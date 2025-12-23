@@ -1,47 +1,8 @@
 <template>
   <div class="course-loading">
     <div class="loading-content">
-      <div class="robot-animation">
-        <svg viewBox="0 0 200 250" xmlns="http://www.w3.org/2000/svg">
-          <!-- 로봇 몸체 -->
-          <g class="robot-body">
-            <!-- 그림자 -->
-            <ellipse cx="100" cy="220" rx="60" ry="12" fill="#E0E7FF" opacity="0.5"/>
-
-            <!-- 머리 -->
-            <rect x="70" y="50" width="60" height="70" rx="30" fill="white" stroke="#667eea" stroke-width="3"/>
-
-            <!-- 안테나 -->
-            <line x1="100" y1="50" x2="100" y2="35" stroke="#667eea" stroke-width="3" class="antenna"/>
-            <circle cx="100" cy="35" r="5" fill="#667eea" class="antenna-tip"/>
-
-            <!-- 눈 (깜빡임) -->
-            <g class="eyes">
-              <circle cx="85" cy="75" r="6" fill="#667eea"/>
-              <circle cx="115" cy="75" r="6" fill="#667eea"/>
-            </g>
-
-            <!-- 입 -->
-            <path d="M 80 95 Q 100 105 120 95" stroke="#667eea" stroke-width="3" fill="none"/>
-
-            <!-- 몸통 -->
-            <rect x="65" y="125" width="70" height="80" rx="10" fill="white" stroke="#667eea" stroke-width="3"/>
-
-            <!-- 팔 -->
-            <g class="arms">
-              <rect x="50" y="135" width="15" height="40" rx="7" fill="white" stroke="#667eea" stroke-width="2" class="left-arm"/>
-              <rect x="135" y="135" width="15" height="40" rx="7" fill="white" stroke="#667eea" stroke-width="2" class="right-arm"/>
-            </g>
-
-            <!-- 다리 -->
-            <rect x="75" y="205" width="20" height="30" rx="5" fill="white" stroke="#667eea" stroke-width="2"/>
-            <rect x="105" y="205" width="20" height="30" rx="5" fill="white" stroke="#667eea" stroke-width="2"/>
-
-            <!-- 디테일 -->
-            <circle cx="100" cy="150" r="8" fill="#667eea" opacity="0.3"/>
-            <circle cx="100" cy="175" r="5" fill="#667eea" opacity="0.3"/>
-          </g>
-        </svg>
+      <div class="loading-animation">
+        <img src="@/assets/loading.png" alt="로딩 중" class="loading-img" />
       </div>
 
       <h2 class="loading-title">AI가 여행 코스를 생성하고 있어요</h2>
@@ -102,99 +63,28 @@ onMounted(() => {
   color: white;
 }
 
-.robot-animation {
-  width: 200px;
-  height: 250px;
+.loading-animation {
+  width: 300px;
+  height: 300x;
   margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.robot-animation svg {
+.loading-img {
   width: 100%;
   height: 100%;
+  object-fit: contain;
+  animation: float-spin 3s ease-in-out infinite;
 }
 
-/* 로봇 애니메이션 */
-.robot-body {
-  animation: float 3s ease-in-out infinite;
-}
-
-@keyframes float {
+@keyframes float-spin {
   0%, 100% {
     transform: translateY(0);
   }
   50% {
     transform: translateY(-20px);
-  }
-}
-
-.antenna {
-  animation: antenna-wave 2s ease-in-out infinite;
-  transform-origin: 100px 50px;
-}
-
-@keyframes antenna-wave {
-  0%, 100% {
-    transform: rotate(0deg);
-  }
-  25% {
-    transform: rotate(-10deg);
-  }
-  75% {
-    transform: rotate(10deg);
-  }
-}
-
-.antenna-tip {
-  animation: antenna-glow 1.5s ease-in-out infinite;
-}
-
-@keyframes antenna-glow {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.3;
-  }
-}
-
-.eyes {
-  animation: blink 4s infinite;
-}
-
-@keyframes blink {
-  0%, 48%, 52%, 100% {
-    transform: scaleY(1);
-  }
-  50% {
-    transform: scaleY(0.1);
-  }
-}
-
-.left-arm {
-  animation: wave-left 2s ease-in-out infinite;
-  transform-origin: 57.5px 155px;
-}
-
-.right-arm {
-  animation: wave-right 2s ease-in-out infinite;
-  transform-origin: 142.5px 155px;
-}
-
-@keyframes wave-left {
-  0%, 100% {
-    transform: rotate(0deg);
-  }
-  50% {
-    transform: rotate(-15deg);
-  }
-}
-
-@keyframes wave-right {
-  0%, 100% {
-    transform: rotate(0deg);
-  }
-  50% {
-    transform: rotate(15deg);
   }
 }
 
@@ -282,9 +172,9 @@ onMounted(() => {
 }
 
 @media (max-width: 768px) {
-  .robot-animation {
-    width: 150px;
-    height: 187.5px;
+  .loading-animation {
+    width: 180px;
+    height: 180px;
   }
 
   .loading-title {
