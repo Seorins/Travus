@@ -786,6 +786,35 @@ class ReviewViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
+class CheckUsernameView(APIView):
+    """아이디 중복 체크"""
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request):
+        username = request.query_params.get('username', '').strip()
+
+        if not username:
+            return Response({
+                'available': False,
+                'message': '아이디를 입력해주세요.'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # 아이디 길이 및 형식 검증
+        if len(username) < 4 or len(username) > 20:
+            return Response({
+                'available': False,
+                'message': '아이디는 4-20자여야 합니다.'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # 아이디 사용 가능 여부 확인
+        exists = User.objects.filter(username=username).exists()
+
+        return Response({
+            'available': not exists,
+            'message': '사용 가능한 아이디입니다.' if not exists else '이미 사용중인 아이디입니다.'
+        })
+
+
 class SignupView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = SignupSerializer

@@ -10,6 +10,21 @@ const apiClient = axios.create({
   }
 })
 
+// 요청 인터셉터 (JWT 토큰 자동 추가)
+apiClient.interceptors.request.use(
+  (config) => {
+    // localStorage에서 토큰 가져오기
+    const token = localStorage.getItem('access_token')
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`
+    }
+    return config
+  },
+  (error) => {
+    return Promise.reject(error)
+  }
+)
+
 // 응답 인터셉터 (에러 처리)
 apiClient.interceptors.response.use(
   (response) => response,
