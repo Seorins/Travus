@@ -34,7 +34,7 @@ class TravelSpotListSerializer(serializers.ModelSerializer):
     class Meta:
         model = TravelSpot
         fields = [
-            'id', 'content_id', 'name', 'category', 'category_name',
+            'id', 'content_id', 'name', 'category_name',
             'address', 'area_code', 'image_url', 'thumbnail_url',
             'rating', 'review_count', 'view_count', 'bookmark_count'
         ]

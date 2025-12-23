@@ -1,4 +1,5 @@
 from django.urls import path, include
+from .views import analyze_image, chat_ai
 from rest_framework.routers import DefaultRouter
 from .views import (
     TravelSpotViewSet, TravelSpotCategoryViewSet,
@@ -28,3 +29,4 @@ urlpatterns = [
     path('comments/<int:pk>/', CourseCommentDetailView.as_view(), name='course-comment-detail'),
     path('comments/<int:comment_id>/replies/', CourseCommentRepliesView.as_view(), name='course-comment-replies'),
 ]
+
