@@ -1,8 +1,9 @@
 from django.db import models
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, generics, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.views import APIView
 from .models import TravelSpot, TravelSpotCategory, Bookmark, Course, Review
 from .serializers import (
     TravelSpotListSerializer, TravelSpotDetailSerializer,
@@ -10,6 +11,13 @@ from .serializers import (
     CourseSerializer, ReviewSerializer
 )
 from .services.tour_api import tour_api_service
+from django.contrib.auth import get_user_model
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.exceptions import TokenError
+from .serializers import SignupSerializer, LoginSerializer
+
+User = get_user_model()
+
 
 
 class TravelSpotViewSet(viewsets.ReadOnlyModelViewSet):
@@ -558,3 +566,64 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+class SignupView(generics.CreateAPIView):
+    queryset = User.objects.all()
+    serializer_class = SignupSerializer
+    permission_classes = [permissions.AllowAny]
+
+class LoginView(generics.GenericAPIView):
+    serializer_class = LoginSerializer
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data["user"]
+        refresh = RefreshToken.for_user(user)
+        return Response({
+            "access": str(refresh.access_token),
+            "refresh": str(refresh),
+            "user": {
+                "id": user.id,
+                "username": user.username,
+                "email": user.email,
+                "first_name": user.first_name,
+                "last_name": user.last_name,
+                "phone": getattr(user, "phone", ""),
+                "disability_type": getattr(user, "disability_type", "NONE"),
+                "preferred_accessibility": getattr(user, "preferred_accessibility", {}),
+            },
+        })
+
+class LogoutView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        refresh_token = request.data.get('refresh')
+        if not refresh_token:
+            return Response({'detail': 'refresh 토큰이 필요합니다.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+        except TokenError:
+            return Response({'detail': '유효하지 않은 토큰입니다.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response({'detail': '로그아웃되었습니다.'}, status=status.HTTP_205_RESET_CONTENT)
+
+class MeView(generics.RetrieveAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        return Response({
+            "id": user.id,
+            "username": user.username,
+            "email": user.email,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "phone": getattr(user, "phone", ""),
+            "disability_type": getattr(user, "disability_type", "NONE"),
+            "preferred_accessibility": getattr(user, "preferred_accessibility", {}),
+        })

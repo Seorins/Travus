@@ -172,7 +172,7 @@ const handleSubmit = () => {
 
 .login-input:focus {
   outline: none;
-  border-color: #2f9e44;
+  border-color: #a08077;
   box-shadow: 0 0 0 2px rgba(47, 158, 68, 0.15);
 }
 
@@ -232,7 +232,7 @@ const handleSubmit = () => {
   padding: 1.35rem 1.5rem;
   border: none;
   border-radius: 12px;
-  background: #9ca3af;
+  background: #a08077;
   color: #ffffff;
   font-size: 1.25rem;
   font-weight: 600;
