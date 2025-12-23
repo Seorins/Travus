@@ -215,7 +215,10 @@ const handleSubmit = () => {
     username: form.username.trim(),
     password: form.password,
     name: form.name,
-    phone: form.phone
+    phone: form.phone,
+    email: form.email,
+    birth: form.birth.trim(),
+    gender: form.gender
   })
 
   if (!result.ok) {
@@ -306,15 +309,9 @@ const handleSubmit = () => {
 }
 
 .gender-btn.active {
-  border-color: #2f9e44;
-  color: #2f9e44;
+  border-color: #a08077;
+  color: #a08077;
   font-weight: 700;
-}
-
-.signup-note {
-  font-size: 0.8rem;
-  color: #2f9e44;
-  margin: 0.2rem 0 0.6rem;
 }
 
 .signup-error {
@@ -328,7 +325,7 @@ const handleSubmit = () => {
   padding: 0.85rem 1rem;
   border: none;
   border-radius: 10px;
-  background: #2f9e44;
+  background: #a08077;
   color: #ffffff;
   font-size: 1rem;
   font-weight: 700;

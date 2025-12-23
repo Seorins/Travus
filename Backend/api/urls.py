@@ -2,7 +2,8 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import (
     TravelSpotViewSet, TravelSpotCategoryViewSet,
-    BookmarkViewSet, CourseViewSet, ReviewViewSet
+    BookmarkViewSet, CourseViewSet, ReviewViewSet,
+    SignupView, LoginView, LogoutView, MeView
 )
 
 router = DefaultRouter()
@@ -12,6 +13,11 @@ router.register(r'bookmarks', BookmarkViewSet, basename='bookmark')
 router.register(r'courses', CourseViewSet, basename='course')
 router.register(r'reviews', ReviewViewSet, basename='review')
 
+# 인증 관련 기능 auth로 묶음
 urlpatterns = [
     path('', include(router.urls)),
+    path('auth/signup/', SignupView.as_view()),
+    path('auth/login/', LoginView.as_view()),
+    path('auth/logout/', LogoutView.as_view()),
+    path('auth/me/', MeView.as_view()),
 ]

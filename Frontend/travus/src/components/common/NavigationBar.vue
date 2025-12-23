@@ -1,5 +1,10 @@
 <template>
   <nav class="navbar" :class="{ 'dark-mode': isDarkMode }" :style="{ fontSize: `${fontSize}px` }">
+  <nav
+    class="navbar"
+    :class="{ 'auth-mode': isAuthPage }"
+    :style="{ fontSize: `${fontSize}px` }"
+  >
     <div class="navbar-container">
       <!-- 로고 -->
       <router-link to="/" class="navbar-logo" tabindex="0" @focus="handleFocus">
@@ -65,14 +70,14 @@
       </div>
     </div>
   </nav>
+  </nav>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
 
-const route = useRoute()
-const router = useRouter()
+import { computed, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
 
 const props = defineProps({
   isTTSEnabled: {
@@ -82,6 +87,13 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['toggle-tts', 'font-size-change', 'focus'])
+
+const router = useRouter()
+const route = useRoute()
+const authStore = useAuthStore()
+
+// 상단바 글씨색 검정색으로 바뀜!
+const isAuthPage = computed(() => ['login', 'signup', 'mypage', 'mypage-info', 'mypage-comments'].includes(route.name))
 
 const fontSize = ref(16)
 const minFontSize = 12
@@ -139,6 +151,10 @@ const closeMenuImmediate = () => {
 }
 
 const goLogin = () => {
+  if (authStore.isLoggedIn) {
+    router.push('/mypage')
+    return
+  }
   router.push('/login')
 }
 
@@ -207,6 +223,12 @@ const handleFocus = (event) => {
   border-radius: 8px;
 }
 
+.navbar.auth-mode .navbar-logo h1,
+.navbar.auth-mode .navbar-logo h1:hover,
+.navbar.auth-mode .navbar-logo:focus h1 {
+  color: #111827;
+}
+
 .navbar-menu {
   display: flex;
   gap: 2rem;
@@ -229,6 +251,10 @@ const handleFocus = (event) => {
   align-items: center;
   gap: 0.25rem;
   cursor: pointer;
+}
+
+.navbar.auth-mode .menu-item {
+  color: #111827;
 }
 
 .menu-item:hover {

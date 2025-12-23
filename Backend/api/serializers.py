@@ -3,6 +3,10 @@ from .models import (
     TravelSpotCategory, TravelSpot, AccessibilityInfo,
     Bookmark, Course, CourseSpot, Review
 )
+from django.contrib.auth import authenticate, get_user_model
+from rest_framework import serializers
+
+User = get_user_model()
 
 
 class TravelSpotCategorySerializer(serializers.ModelSerializer):
@@ -94,3 +98,38 @@ class ReviewSerializer(serializers.ModelSerializer):
             'rating', 'content', 'accessibility_rating',
             'images', 'like_count', 'created_at', 'updated_at'
         ]
+
+
+class SignupSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True, min_length=8)
+
+    class Meta:
+        model = User
+        fields = [
+            "id", "username", "email", "password",
+            "first_name", "last_name", "phone",
+            "disability_type", "preferred_accessibility",
+        ]
+        extra_kwargs = {
+            "email": {"required": False, "allow_blank": True},
+            "first_name": {"required": False, "allow_blank": True},
+            "last_name": {"required": False, "allow_blank": True},
+            "phone": {"required": False, "allow_blank": True},
+        }
+
+    def create(self, validated_data):
+        return User.objects.create_user(**validated_data)
+
+class LoginSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    password = serializers.CharField(write_only=True)
+
+    def validate(self, data):
+        user = authenticate(
+            username=data.get("username"),
+            password=data.get("password")
+        )
+        if not user:
+            raise serializers.ValidationError("아이디 또는 비밀번호가 올바르지 않습니다.")
+        data["user"] = user
+        return data

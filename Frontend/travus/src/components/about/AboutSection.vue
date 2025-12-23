@@ -90,6 +90,7 @@
   margin-bottom: 40px;
 }
 
+/* travus 글씨배경 */
 .travus-text{
   background-color: #5f6f8d;
   color: #b4d5fe;
