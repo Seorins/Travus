@@ -4,11 +4,11 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.views import APIView
-from .models import TravelSpot, TravelSpotCategory, Bookmark, Course, Review
+from .models import TravelSpot, TravelSpotCategory, Bookmark, Course, Review, CourseComment, CourseLike
 from .serializers import (
     TravelSpotListSerializer, TravelSpotDetailSerializer,
     TravelSpotCategorySerializer, BookmarkSerializer,
-    CourseSerializer, ReviewSerializer
+    CourseSerializer, ReviewSerializer, CourseCommentSerializer
 )
 from .services.tour_api import tour_api_service
 from django.contrib.auth import get_user_model
@@ -710,6 +710,64 @@ class CourseViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
+    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
+    def toggle_like(self, request, pk=None):
+        """
+        코스 좋아요 토글
+
+        이미 좋아요한 경우: 좋아요 취소
+        좋아요하지 않은 경우: 좋아요 추가
+
+        Response:
+            - liked: 현재 좋아요 상태 (boolean)
+            - like_count: 현재 총 좋아요 수
+        """
+        course = self.get_object()
+        user = request.user
+
+        like_obj, created = CourseLike.objects.get_or_create(
+            user=user,
+            course=course
+        )
+
+        if created:
+            # 좋아요 추가
+            course.like_count = models.F('like_count') + 1
+            course.save(update_fields=['like_count'])
+            course.refresh_from_db()
+            liked = True
+        else:
+            # 좋아요 취소
+            like_obj.delete()
+            course.like_count = models.F('like_count') - 1
+            course.save(update_fields=['like_count'])
+            course.refresh_from_db()
+            liked = False
+
+        return Response({
+            'liked': liked,
+            'like_count': course.like_count
+        })
+
+    @action(detail=True, methods=['get'], permission_classes=[permissions.IsAuthenticated])
+    def like_status(self, request, pk=None):
+        """
+        현재 사용자의 코스 좋아요 상태 조회
+
+        Response:
+            - liked: 좋아요 여부 (boolean)
+            - like_count: 총 좋아요 수
+        """
+        course = self.get_object()
+        user = request.user
+
+        liked = CourseLike.objects.filter(user=user, course=course).exists()
+
+        return Response({
+            'liked': liked,
+            'like_count': course.like_count
+        })
+
 
 class ReviewViewSet(viewsets.ModelViewSet):
     """리뷰 ViewSet"""
@@ -788,3 +846,38 @@ class MeView(generics.RetrieveAPIView):
             "disability_type": getattr(user, "disability_type", "NONE"),
             "preferred_accessibility": getattr(user, "preferred_accessibility", {}),
         })
+
+
+# 코스 댓글 API
+class CourseCommentListCreateView(generics.ListCreateAPIView):
+    """코스 댓글 목록 조회 및 생성"""
+    serializer_class = CourseCommentSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        course_id = self.kwargs['course_id']
+        return CourseComment.objects.filter(course_id=course_id, parent=None).order_by('-created_at')
+
+    def perform_create(self, serializer):
+        course_id = self.kwargs['course_id']
+        serializer.save(user=self.request.user, course_id=course_id)
+
+
+class CourseCommentDetailView(generics.RetrieveUpdateDestroyAPIView):
+    """코스 댓글 상세 조회, 수정, 삭제"""
+    queryset = CourseComment.objects.all()
+    serializer_class = CourseCommentSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return CourseComment.objects.filter(user=self.request.user)
+
+
+class CourseCommentRepliesView(generics.ListAPIView):
+    """댓글의 대댓글 목록 조회"""
+    serializer_class = CourseCommentSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        comment_id = self.kwargs['comment_id']
+        return CourseComment.objects.filter(parent_id=comment_id).order_by('created_at')

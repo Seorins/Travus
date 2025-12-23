@@ -165,6 +165,16 @@ export default {
     return apiClient.post('/courses/', data)
   },
 
+  // 코스 좋아요 토글
+  toggleCourseLike(courseId) {
+    return apiClient.post(`/courses/${courseId}/toggle_like/`)
+  },
+
+  // 코스 좋아요 상태 조회
+  getCourseLikeStatus(courseId) {
+    return apiClient.get(`/courses/${courseId}/like_status/`)
+  },
+
   // 리뷰 목록
   getReviews(travelSpotId) {
     return apiClient.get('/reviews/', {
@@ -175,5 +185,23 @@ export default {
   // 리뷰 작성
   createReview(data) {
     return apiClient.post('/reviews/', data)
+  },
+
+  // 코스 댓글 관련
+  getCourseComments(courseId) {
+    return apiClient.get(`/courses/${courseId}/comments/`)
+  },
+
+  createCourseComment(courseId, data) {
+    return apiClient.post(`/courses/${courseId}/comments/`, data)
+  },
+
+  deleteCourseComment(commentId) {
+    return apiClient.delete(`/comments/${commentId}/`)
+  },
+
+  // 현재 사용자 정보
+  getCurrentUser() {
+    return apiClient.get('/auth/me/')
   }
 }

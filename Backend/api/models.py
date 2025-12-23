@@ -325,3 +325,76 @@ class Review(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.travel_spot.name} ({self.rating}점)"
+
+
+class CourseLike(models.Model):
+    """코스 좋아요"""
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='course_likes',
+        verbose_name='사용자'
+    )
+    course = models.ForeignKey(
+        Course,
+        on_delete=models.CASCADE,
+        related_name='likes',
+        verbose_name='코스'
+    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='생성일')
+
+    class Meta:
+        db_table = 'course_likes'
+        verbose_name = '코스 좋아요'
+        verbose_name_plural = '코스 좋아요'
+        unique_together = [['user', 'course']]
+        indexes = [
+            models.Index(fields=['user', '-created_at']),
+            models.Index(fields=['course', '-created_at']),
+        ]
+
+    def __str__(self):
+        return f"{self.user.username} - {self.course.title} 좋아요"
+
+
+class CourseComment(models.Model):
+    """코스 댓글 (여행톡)"""
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='course_comments',
+        verbose_name='사용자'
+    )
+    course = models.ForeignKey(
+        Course,
+        on_delete=models.CASCADE,
+        related_name='comments',
+        verbose_name='코스'
+    )
+    content = models.TextField(verbose_name='내용')
+
+    # 대댓글 지원
+    parent = models.ForeignKey(
+        'self',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='replies',
+        verbose_name='부모 댓글'
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='생성일')
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='수정일')
+
+    class Meta:
+        db_table = 'course_comments'
+        verbose_name = '코스 댓글'
+        verbose_name_plural = '코스 댓글'
+        indexes = [
+            models.Index(fields=['course', '-created_at']),
+            models.Index(fields=['user', '-created_at']),
+        ]
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.user.username} - {self.course.title} 댓글"

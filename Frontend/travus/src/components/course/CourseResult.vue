@@ -1,7 +1,7 @@
 <template>
   <div class="course-result">
-    <!-- 3분할 레이아웃: 좌측(일정 리스트) + 중앙(지도) + 우측(상세 패널) -->
-    <div class="result-layout" :class="{ 'detail-open': showDetailPanel }">
+    <!-- 레퍼런스 그대로: 좌우 분할 레이아웃 (좌측 25~30%, 우측 70~75%) -->
+    <div class="result-layout">
 
       <!-- 좌측 사이드바 - 레퍼런스 그대로 구현 -->
       <aside class="sidebar">
@@ -12,65 +12,72 @@
           </button>
           <h1 class="planner-title">{{ courseData.title || 'AI코스 플래너' }}</h1>
           <div class="header-actions">
-            <button class="btn-icon" @click="saveCourse" :disabled="isSaving">
-              <i class="fa" :class="isSaved ? 'fa-check' : 'fa-save'"></i>
+            <button
+              class="btn-icon like-btn"
+              :class="{ liked: isLiked }"
+              @click="toggleLike"
+              :disabled="!savedCourseId"
+            >
+              <i class="fa fa-thumbs-up"></i>
+              <span class="like-count" v-if="likeCount > 0">{{ likeCount }}</span>
             </button>
-            <button class="btn-icon"><i class="fa fa-thumbs-up"></i></button>
-            <button class="btn-icon"><i class="fa fa-share-alt"></i></button>
+            <button class="btn-icon" @click="showShareModal = true">
+              <i class="fa fa-share-alt"></i>
+            </button>
           </div>
         </div>
 
-        <!-- 탭 메뉴 - 레퍼런스 그대로 -->
+        <!-- 탭 메뉴 -->
         <div class="tab-menu">
-          <button class="tab-item active">여행요약</button>
-          <button class="tab-item">세부일정</button>
-          <button class="tab-item">연관기사</button>
-          <button class="tab-item">여행톡</button>
+          <button
+            class="tab-item"
+            :class="{ active: activeTab === 'schedule' }"
+            @click="activeTab = 'schedule'"
+          >
+            여행 일정
+          </button>
+          <button
+            class="tab-item"
+            :class="{ active: activeTab === 'comments' }"
+            @click="activeTab = 'comments'"
+          >
+            여행톡
+          </button>
         </div>
 
-        <!-- 여행 요약 카드 - AI 데이터 기반 -->
-        <div class="trip-summary-card">
-          <div class="summary-badge">
-            <span class="badge-day">{{ courseData.duration?.name || '여행' }}</span>
-          </div>
-          <div class="summary-info">
-            <div class="info-item">
-              <span class="info-icon">📍</span>
-              <span class="info-text">총 {{ itineraryDays.reduce((sum, day) => sum + day.places.length, 0) }}개 장소</span>
+        <!-- 여행 일정 탭 콘텐츠 -->
+        <div v-if="activeTab === 'schedule'" class="tab-content">
+          <!-- 여행 요약 카드 - AI 데이터 기반 -->
+          <div class="trip-summary-card">
+            <div class="summary-badge">
+              <span class="badge-day">{{ courseData.duration?.name || '여행' }}</span>
             </div>
-            <div class="info-item">
-              <span class="info-icon">🗺️</span>
-              <span class="info-text">여행지역: {{ courseData.regions?.map(code => regionNameMap[code]).join(', ') }}</span>
+            <div class="summary-info">
+              <div class="info-item">
+                <span class="info-icon">📍</span>
+                <span class="info-text">총 {{ itineraryDays.reduce((sum, day) => sum + day.places.length, 0) }}개 장소</span>
+              </div>
+              <div class="info-item">
+                <span class="info-icon">🗺️</span>
+                <span class="info-text">여행지역: {{ courseData.regions?.map(code => regionNameMap[code]).join(', ') }}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-icon">🏷️</span>
+                <span class="info-text">{{ courseData.duration?.days || 1 }}일 일정</span>
+              </div>
             </div>
-            <div class="info-item">
-              <span class="info-icon">🏷️</span>
-              <span class="info-text">{{ courseData.duration?.days || 1 }}일 일정</span>
+            <div class="summary-tags">
+              <span class="tag" v-for="theme in courseData.themes" :key="theme">#{{ theme }}</span>
             </div>
           </div>
-          <div class="summary-tags">
-            <span class="tag" v-for="theme in courseData.themes" :key="theme">#{{ theme }}</span>
+
+          <!-- Day 헤더 -->
+          <div class="day-header">
+            <h3>Day {{ currentDay }}</h3>
           </div>
-        </div>
 
-        <!-- 평점 입력 -->
-        <div class="rating-section">
-          <span class="rating-label">별점을 남겨주세요.</span>
-          <div class="stars">
-            <i class="fa fa-star-o"></i>
-            <i class="fa fa-star-o"></i>
-            <i class="fa fa-star-o"></i>
-            <i class="fa fa-star-o"></i>
-            <i class="fa fa-star-o"></i>
-          </div>
-        </div>
-
-        <!-- Day 헤더 -->
-        <div class="day-header">
-          <h3>Day {{ currentDay }}</h3>
-        </div>
-
-        <!-- 장소 리스트 - 레퍼런스 그대로 (세로 스크롤) -->
-        <div class="places-list">
+          <!-- 장소 리스트 - 레퍼런스 그대로 (세로 스크롤) -->
+          <div class="places-list">
           <div
             v-for="(place, index) in currentDayPlaces"
             :key="index"
@@ -90,6 +97,48 @@
               <div class="place-name">{{ place.name }}</div>
               <div class="place-address">{{ place.address || '주소 정보 없음' }}</div>
               <button class="btn-detail" @click.stop="showPlaceDetail(place)">더보기 <i class="fa fa-plus"></i></button>
+            </div>
+          </div>
+        </div>
+        </div>
+
+        <!-- 여행톡 탭 콘텐츠 -->
+        <div v-if="activeTab === 'comments'" class="tab-content comments-tab">
+          <div class="comments-section">
+            <h3 class="comments-title">여행톡</h3>
+            <p class="comments-desc">이 코스에 대한 의견을 남겨주세요!</p>
+
+            <!-- 댓글 입력 -->
+            <div class="comment-input-wrapper">
+              <textarea
+                v-model="newComment"
+                class="comment-input"
+                placeholder="댓글을 입력하세요..."
+                rows="3"
+              ></textarea>
+              <button class="btn-comment-submit" @click="submitComment" :disabled="!newComment.trim()">
+                등록
+              </button>
+            </div>
+
+            <!-- 댓글 목록 -->
+            <div class="comments-list">
+              <div v-if="comments.length === 0" class="no-comments">
+                <p>아직 댓글이 없습니다. 첫 댓글을 남겨보세요!</p>
+              </div>
+
+              <div v-for="comment in comments" :key="comment.id" class="comment-item">
+                <div class="comment-header">
+                  <span class="comment-author">{{ comment.username }}</span>
+                  <span class="comment-date">{{ formatDate(comment.created_at) }}</span>
+                </div>
+                <div class="comment-content">{{ comment.content }}</div>
+                <div class="comment-actions">
+                  <button class="btn-comment-action" v-if="isMyComment(comment)" @click="deleteComment(comment.id)">
+                    <i class="fa fa-trash"></i> 삭제
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -133,59 +182,110 @@
         </div>
       </main>
 
-    </div>
+      <!-- 네이버 지도 스타일: 상세 정보 패널 (사이드바 옆에 슬라이드) -->
+      <div v-if="selectedPlace && showDetailPanel" class="detail-panel-overlay" @click="closeDetailPanel"></div>
+      <aside v-if="selectedPlace" class="detail-panel" :class="{ active: showDetailPanel }">
+        <div class="detail-panel-inner">
+          <!-- 상단: 닫기 버튼 -->
+          <div class="detail-header">
+            <button class="btn-close-panel" @click="closeDetailPanel">
+              <i class="fa fa-times"></i>
+            </button>
+          </div>
 
-    <!-- 장소 상세보기 모달 -->
-    <div v-if="showDetailModal" class="detail-modal-overlay" @click="closeDetailModal">
-      <div class="detail-modal" @click.stop>
-        <div class="modal-header">
-          <h2>{{ selectedPlace?.name }}</h2>
-          <button class="btn-close" @click="closeDetailModal">
-            <i class="fa fa-times"></i>
-          </button>
+          <!-- 이미지 갤러리 (가로 스크롤) -->
+          <div class="detail-image-gallery">
+            <div class="gallery-container">
+              <img
+                :src="getPlaceImage(selectedPlace)"
+                :alt="selectedPlace.name"
+                class="gallery-image"
+                @error="handleImageError"
+              />
+              <!-- 추가 이미지가 있다면 여기에 -->
+            </div>
+          </div>
+
+          <!-- 장소 기본 정보 -->
+          <div class="detail-content">
+            <!-- 장소명 (클릭 시 상세 페이지로 이동) -->
+            <h2 class="detail-title clickable" @click="goToSpotDetail(selectedPlace)">
+              {{ selectedPlace.name }}
+            </h2>
+
+            <!-- 카테고리 / 태그 -->
+            <div class="detail-category">
+              <span class="category-badge">{{ selectedPlace.category || '여행지' }}</span>
+            </div>
+
+            <!-- 주소 -->
+            <div class="detail-info-row" v-if="selectedPlace.address">
+              <div class="info-label">
+                <i class="fa fa-map-marker"></i>
+                <span>주소</span>
+              </div>
+              <div class="info-value">{{ selectedPlace.address }}</div>
+            </div>
+
+            <!-- 전화번호 (있다면) -->
+            <div class="detail-info-row" v-if="selectedPlace.phone">
+              <div class="info-label">
+                <i class="fa fa-phone"></i>
+                <span>전화번호</span>
+              </div>
+              <div class="info-value">{{ selectedPlace.phone }}</div>
+            </div>
+
+            <!-- 구분선 -->
+            <div class="divider"></div>
+
+            <!-- 방문 후기 섹션 (향후 구현) -->
+            <div class="detail-reviews">
+              <h3 class="reviews-title">방문 후기</h3>
+              <p class="no-reviews">아직 등록된 후기가 없습니다.</p>
+            </div>
+          </div>
         </div>
+      </aside>
 
-        <div class="modal-body">
-          <!-- 이미지 갤러리 -->
-          <div class="image-gallery">
-            <img
-              :src="getPlaceImage(selectedPlace)"
-              :alt="selectedPlace?.name"
-              class="main-image"
-              @error="handleImageError"
-            />
+      <!-- 공유 모달 -->
+      <div v-if="showShareModal" class="modal-overlay" @click="showShareModal = false">
+        <div class="modal-content share-modal" @click.stop>
+          <div class="modal-header">
+            <h3>코스 공유하기</h3>
+            <button class="btn-close-modal" @click="showShareModal = false">
+              <i class="fa fa-times"></i>
+            </button>
           </div>
-
-          <!-- 장소 정보 -->
-          <div class="place-info-section">
-            <div class="info-row">
-              <span class="info-label">카테고리</span>
-              <span class="info-value">{{ selectedPlace?.category || '여행지' }}</span>
+          <div class="modal-body">
+            <p class="share-desc">아래 링크를 복사하여 공유하세요</p>
+            <div class="url-input-wrapper">
+              <input
+                ref="urlInput"
+                type="text"
+                :value="shareUrl"
+                readonly
+                class="url-input"
+              />
+              <button class="btn-copy" @click="copyUrl">
+                <i class="fa" :class="urlCopied ? 'fa-check' : 'fa-copy'"></i>
+                {{ urlCopied ? '복사됨' : '복사' }}
+              </button>
             </div>
-            <div class="info-row">
-              <span class="info-label">주소</span>
-              <span class="info-value">{{ selectedPlace?.address || '주소 정보 없음' }}</span>
-            </div>
-            <div class="info-row" v-if="selectedPlace?.latitude && selectedPlace?.longitude">
-              <span class="info-label">좌표</span>
-              <span class="info-value">{{ selectedPlace.latitude }}, {{ selectedPlace.longitude }}</span>
-            </div>
-          </div>
-
-          <!-- 댓글 섹션 (향후 구현) -->
-          <div class="comments-section">
-            <h3 class="comments-title">방문 후기</h3>
-            <p class="no-comments">아직 등록된 후기가 없습니다.</p>
           </div>
         </div>
       </div>
+
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import api from '@/services/api'
+
+const router = useRouter()
 
 const props = defineProps({
   courseData: {
@@ -224,10 +324,33 @@ const kakaoMap = ref(null)
 const markers = ref([])
 const polylines = ref([])
 const isLoading = ref(true)
-const isSaving = ref(false)
-const isSaved = ref(false)
 const selectedPlace = ref(null) // 상세보기 선택된 장소
-const showDetailModal = ref(false) // 상세보기 모달 표시 여부
+const showDetailPanel = ref(false) // 상세보기 패널 표시 여부
+
+// 탭 및 댓글 관리
+const activeTab = ref('schedule') // 'schedule' or 'comments'
+const comments = ref([])
+const newComment = ref('')
+const currentUser = ref(null)
+
+// 자동 저장 관리
+const savedCourseId = ref(null) // 저장된 코스 ID
+const isAutoSaving = ref(false)
+
+// 좋아요 관리
+const isLiked = ref(false)
+const likeCount = ref(0)
+
+// 공유 모달 관리
+const showShareModal = ref(false)
+const urlCopied = ref(false)
+const urlInput = ref(null)
+
+// 공유 URL 계산
+const shareUrl = computed(() => {
+  if (!savedCourseId.value) return window.location.href
+  return `${window.location.origin}/course/${savedCourseId.value}`
+})
 
 // 현재 날짜의 장소들
 const currentDayPlaces = computed(() => {
@@ -459,24 +582,102 @@ const focusOnMarker = (place) => {
   kakaoMap.value.setLevel(3)
 }
 
-// 장소 상세보기 모달 열기
+// 장소 상세보기 패널 열기
 const showPlaceDetail = (place) => {
   selectedPlace.value = place
-  showDetailModal.value = true
+  showDetailPanel.value = true
 }
 
-// 장소 상세보기 모달 닫기
-const closeDetailModal = () => {
-  showDetailModal.value = false
+// 장소 상세보기 패널 닫기
+const closeDetailPanel = () => {
+  showDetailPanel.value = false
   selectedPlace.value = null
 }
 
-// 코스 저장
-const saveCourse = async () => {
-  if (isSaving.value || isSaved.value) return
+// 장소 상세 페이지로 이동
+const goToSpotDetail = (place) => {
+  if (!place.id) return
+
+  // TravelDetail 페이지로 이동 (spot ID + contentTypeId 쿼리 파라미터 전달)
+  router.push({
+    name: 'travel-detail',
+    params: { id: place.id },
+    query: { contentTypeId: place.content_type_id }
+  })
+}
+
+// 댓글 관련 함수
+const loadComments = async () => {
+  try {
+    const courseId = props.courseData.id
+    if (!courseId) return
+
+    const response = await api.getCourseComments(courseId)
+    comments.value = response.data
+  } catch (error) {
+    console.error('댓글 로드 실패:', error)
+  }
+}
+
+const submitComment = async () => {
+  if (!newComment.value.trim()) return
 
   try {
-    isSaving.value = true
+    const courseId = props.courseData.id
+    await api.createCourseComment(courseId, {
+      content: newComment.value
+    })
+
+    newComment.value = ''
+    await loadComments()
+  } catch (error) {
+    console.error('댓글 작성 실패:', error)
+    if (error.response?.status === 401) {
+      alert('로그인이 필요합니다.')
+    } else {
+      alert('댓글 작성에 실패했습니다.')
+    }
+  }
+}
+
+const deleteComment = async (commentId) => {
+  if (!confirm('댓글을 삭제하시겠습니까?')) return
+
+  try {
+    await api.deleteCourseComment(commentId)
+    await loadComments()
+  } catch (error) {
+    console.error('댓글 삭제 실패:', error)
+    alert('댓글 삭제에 실패했습니다.')
+  }
+}
+
+const isMyComment = (comment) => {
+  return currentUser.value && comment.user === currentUser.value.id
+}
+
+const formatDate = (dateString) => {
+  const date = new Date(dateString)
+  const now = new Date()
+  const diffMs = now - date
+  const diffMins = Math.floor(diffMs / 60000)
+  const diffHours = Math.floor(diffMs / 3600000)
+  const diffDays = Math.floor(diffMs / 86400000)
+
+  if (diffMins < 1) return '방금 전'
+  if (diffMins < 60) return `${diffMins}분 전`
+  if (diffHours < 24) return `${diffHours}시간 전`
+  if (diffDays < 7) return `${diffDays}일 전`
+
+  return date.toLocaleDateString('ko-KR')
+}
+
+// 자동 저장 함수
+const autoSaveCourse = async () => {
+  if (isAutoSaving.value || savedCourseId.value) return
+
+  try {
+    isAutoSaving.value = true
 
     // 저장할 데이터 준비
     const courseData = {
@@ -489,28 +690,76 @@ const saveCourse = async () => {
     const courseResponse = await api.saveCourse(courseData)
     const savedCourse = courseResponse.data
 
-    console.log('코스 저장 성공:', savedCourse)
+    savedCourseId.value = savedCourse.id
+    console.log('코스 자동 저장 성공:', savedCourse)
 
-    // TODO: CourseSpot 저장 (나중에 구현)
-    // 현재는 Course만 저장하고, 상세 일정은 나중에 추가
-
-    isSaved.value = true
-    alert('코스가 저장되었습니다!')
+    // 저장 후 좋아요 상태 로드
+    await loadLikeStatus()
 
   } catch (error) {
-    console.error('코스 저장 실패:', error)
-
-    let errorMessage = '코스 저장에 실패했습니다.'
+    console.error('코스 자동 저장 실패:', error)
 
     if (error.response?.status === 401) {
-      errorMessage = '로그인이 필요합니다.'
-    } else if (error.response?.data?.error) {
-      errorMessage = error.response.data.error
+      console.log('로그인 필요 - 자동 저장 건너뜀')
     }
-
-    alert(errorMessage)
   } finally {
-    isSaving.value = false
+    isAutoSaving.value = false
+  }
+}
+
+// 좋아요 토글
+const toggleLike = async () => {
+  if (!savedCourseId.value) {
+    alert('코스를 먼저 저장해주세요.')
+    return
+  }
+
+  try {
+    const response = await api.toggleCourseLike(savedCourseId.value)
+    isLiked.value = response.data.liked
+    likeCount.value = response.data.like_count
+  } catch (error) {
+    console.error('좋아요 토글 실패:', error)
+    if (error.response?.status === 401) {
+      alert('로그인이 필요합니다.')
+    } else {
+      alert('좋아요 처리에 실패했습니다.')
+    }
+  }
+}
+
+// 좋아요 상태 로드
+const loadLikeStatus = async () => {
+  if (!savedCourseId.value) return
+
+  try {
+    const response = await api.getCourseLikeStatus(savedCourseId.value)
+    isLiked.value = response.data.liked
+    likeCount.value = response.data.like_count
+  } catch (error) {
+    console.error('좋아요 상태 로드 실패:', error)
+  }
+}
+
+// URL 복사
+const copyUrl = async () => {
+  try {
+    await navigator.clipboard.writeText(shareUrl.value)
+    urlCopied.value = true
+    setTimeout(() => {
+      urlCopied.value = false
+    }, 2000)
+  } catch (error) {
+    console.error('URL 복사 실패:', error)
+    // 폴백: input 선택 후 복사
+    if (urlInput.value) {
+      urlInput.value.select()
+      document.execCommand('copy')
+      urlCopied.value = true
+      setTimeout(() => {
+        urlCopied.value = false
+      }, 2000)
+    }
   }
 }
 
@@ -526,14 +775,16 @@ const loadAIGeneratedData = () => {
       itineraryDays.value = props.courseData.days.map(dayData => ({
         date: `Day ${dayData.day}`,
         places: dayData.spots.map(spot => ({
-          id: spot.id,
+          id: spot.spot.id, // TravelSpot의 실제 DB ID
+          content_type_id: spot.spot.content_type_id, // 콘텐츠 타입 ID 추가
           name: spot.spot.name,
           address: spot.spot.address,
           latitude: parseFloat(spot.spot.latitude),
           longitude: parseFloat(spot.spot.longitude),
           image_url: spot.spot.image_url,
           category: getCategoryName(spot.spot.content_type_id),
-          type: spot.type
+          type: spot.type,
+          phone: spot.spot.tel || spot.spot.phone || null // 전화번호 추가
         }))
       }))
 
@@ -618,6 +869,20 @@ onMounted(async () => {
     updateMapMarkers()
     console.log('✅ 마커 업데이트 완료')
 
+    // 사용자 정보 로드
+    try {
+      const userResponse = await api.getCurrentUser()
+      currentUser.value = userResponse.data
+    } catch (error) {
+      console.log('사용자 정보 없음 (로그인 필요)')
+    }
+
+    // 댓글 로드
+    await loadComments()
+
+    // 자동 저장 (코스 생성 시 자동으로 저장)
+    await autoSaveCourse()
+
   } catch (error) {
     console.error('❌ 초기화 실패:', error)
     console.error('❌ 에러 상세:', error.message, error.stack)
@@ -693,6 +958,44 @@ watch(currentDay, () => {
   color: #666;
   cursor: pointer;
   padding: 4px 8px;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.btn-icon:hover {
+  color: #00C73C;
+}
+
+.btn-icon:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 좋아요 버튼 */
+.like-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.like-btn.liked {
+  color: #00C73C;
+}
+
+.like-btn.liked i {
+  animation: likeAnimation 0.3s ease;
+}
+
+@keyframes likeAnimation {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.3); }
+  100% { transform: scale(1); }
+}
+
+.like-count {
+  font-size: 12px;
+  font-weight: 600;
+  color: inherit;
 }
 
 /* 탭 메뉴 - 레퍼런스 그대로 */
@@ -1047,35 +1350,385 @@ watch(currentDay, () => {
   font-weight: 700;
 }
 
-/* 장소 상세보기 모달 */
-.detail-modal-overlay {
+/* 네이버 지도 스타일: 상세 정보 패널 오버레이 */
+.detail-panel-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: transparent;
+  z-index: 14;
+  cursor: default;
+}
+
+/* 네이버 지도 스타일: 상세 정보 패널 */
+.detail-panel {
+  position: absolute;
+  top: 20px; /* 상단 여백 */
+  left: 400px; /* 사이드바 + 여백 */
+  width: 420px;
+  height: calc(100% - 40px); /* 상하 여백 */
+  background: white;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+  border-radius: 16px;
+  transform: translateX(-100%);
+  transition: transform 0.3s ease-in-out;
+  z-index: 15;
+  overflow: hidden;
+}
+
+.detail-panel.active {
+  transform: translateX(0);
+}
+
+.detail-panel-inner {
+  height: 100%;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 상단 헤더 */
+.detail-header {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 20;
+}
+
+.btn-close-panel {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 50%;
+  font-size: 18px;
+  color: #333;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  transition: all 0.2s;
+}
+
+.btn-close-panel:hover {
+  background: white;
+  color: #000;
+}
+
+/* 이미지 갤러리 */
+.detail-image-gallery {
+  width: 100%;
+  background: #f5f5f5;
+  position: relative;
+}
+
+.gallery-container {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+.gallery-container::-webkit-scrollbar {
+  height: 8px;
+}
+
+.gallery-container::-webkit-scrollbar-thumb {
+  background: #ddd;
+  border-radius: 4px;
+}
+
+.gallery-image {
+  width: 100%;
+  height: 280px;
+  object-fit: cover;
+  flex-shrink: 0;
+  scroll-snap-align: start;
+}
+
+/* 상세 콘텐츠 */
+.detail-content {
+  padding: 24px;
+  flex: 1;
+}
+
+/* 장소명 */
+.detail-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #000;
+  margin: 0 0 12px 0;
+  line-height: 1.4;
+}
+
+.detail-title.clickable {
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.detail-title.clickable:hover {
+  color: #00C73C;
+}
+
+/* 카테고리 */
+.detail-category {
+  margin-bottom: 20px;
+}
+
+.category-badge {
+  display: inline-block;
+  padding: 6px 14px;
+  background: #00C73C;
+  color: white;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* 정보 행 */
+.detail-info-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.detail-info-row .info-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #666;
+}
+
+.detail-info-row .info-label i {
+  font-size: 16px;
+  color: #00C73C;
+  width: 20px;
+}
+
+.detail-info-row .info-value {
+  font-size: 15px;
+  color: #333;
+  line-height: 1.6;
+  padding-left: 28px;
+}
+
+/* 구분선 */
+.divider {
+  height: 8px;
+  background: #f5f5f5;
+  margin: 24px -24px;
+}
+
+/* 후기 섹션 */
+.detail-reviews {
+  padding-top: 24px;
+}
+
+.reviews-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #000;
+  margin: 0 0 16px 0;
+}
+
+.no-reviews {
+  font-size: 14px;
+  color: #999;
+  text-align: center;
+  padding: 40px 20px;
+  margin: 0;
+}
+
+/* 탭 콘텐츠 */
+.tab-content {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 여행톡 탭 */
+.comments-tab {
+  padding: 16px;
+}
+
+.comments-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.comments-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #000;
+  margin: 0;
+}
+
+.comments-desc {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+}
+
+/* 댓글 입력 */
+.comment-input-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  background: #f9f9f9;
+  border-radius: 8px;
+}
+
+.comment-input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 14px;
+  resize: vertical;
+  font-family: inherit;
+}
+
+.comment-input:focus {
+  outline: none;
+  border-color: #00C73C;
+}
+
+.btn-comment-submit {
+  align-self: flex-end;
+  padding: 8px 24px;
+  background: #00C73C;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-comment-submit:hover:not(:disabled) {
+  background: #00b035;
+}
+
+.btn-comment-submit:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+/* 댓글 목록 */
+.comments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.no-comments {
+  text-align: center;
+  padding: 40px 20px;
+  color: #999;
+  font-size: 14px;
+}
+
+.no-comments p {
+  margin: 0;
+}
+
+/* 댓글 아이템 */
+.comment-item {
+  padding: 16px;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+}
+
+.comment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.comment-author {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+.comment-date {
+  font-size: 12px;
+  color: #999;
+}
+
+.comment-content {
+  font-size: 14px;
+  color: #333;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  margin-bottom: 8px;
+}
+
+.comment-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-comment-action {
+  background: none;
+  border: none;
+  color: #999;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 4px 8px;
+  transition: color 0.2s;
+}
+
+.btn-comment-action:hover {
+  color: #ff4444;
+}
+
+/* 공유 모달 */
+.modal-overlay {
   position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.6);
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  padding: 20px;
+  animation: fadeIn 0.2s ease;
 }
 
-.detail-modal {
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal-content {
   background: white;
   border-radius: 16px;
-  max-width: 600px;
-  width: 100%;
-  max-height: 80vh;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-  animation: modalSlideUp 0.3s ease-out;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  animation: slideUp 0.3s ease;
 }
 
-@keyframes modalSlideUp {
+@keyframes slideUp {
   from {
     opacity: 0;
-    transform: translateY(30px);
+    transform: translateY(20px);
   }
   to {
     opacity: 1;
@@ -1085,114 +1738,87 @@ watch(currentDay, () => {
 
 .modal-header {
   display: flex;
-  align-items: center;
   justify-content: space-between;
+  align-items: center;
   padding: 20px 24px;
   border-bottom: 1px solid #e0e0e0;
 }
 
-.modal-header h2 {
+.modal-header h3 {
   font-size: 20px;
   font-weight: 700;
   color: #000;
   margin: 0;
-  flex: 1;
 }
 
-.btn-close {
+.btn-close-modal {
   background: none;
   border: none;
   font-size: 20px;
   color: #666;
   cursor: pointer;
-  padding: 4px 8px;
+  padding: 4px;
   transition: color 0.2s;
 }
 
-.btn-close:hover {
+.btn-close-modal:hover {
   color: #000;
 }
 
 .modal-body {
-  flex: 1;
-  overflow-y: auto;
   padding: 24px;
 }
 
-.modal-body::-webkit-scrollbar {
-  width: 6px;
-}
-
-.modal-body::-webkit-scrollbar-thumb {
-  background: #ddd;
-  border-radius: 3px;
-}
-
-/* 이미지 갤러리 */
-.image-gallery {
-  width: 100%;
-  margin-bottom: 24px;
-}
-
-.main-image {
-  width: 100%;
-  height: 300px;
-  object-fit: cover;
-  border-radius: 12px;
-  background: #f0f0f0;
-}
-
-/* 장소 정보 */
-.place-info-section {
-  margin-bottom: 24px;
-  padding: 16px;
-  background: #f9f9f9;
-  border-radius: 12px;
-}
-
-.info-row {
-  display: flex;
-  padding: 8px 0;
-  border-bottom: 1px solid #e0e0e0;
-}
-
-.info-row:last-child {
-  border-bottom: none;
-}
-
-.info-label {
+.share-desc {
   font-size: 14px;
-  font-weight: 600;
   color: #666;
-  min-width: 80px;
-}
-
-.info-value {
-  font-size: 14px;
-  color: #333;
-  flex: 1;
-}
-
-/* 댓글 섹션 */
-.comments-section {
-  margin-top: 24px;
-  padding-top: 24px;
-  border-top: 1px solid #e0e0e0;
-}
-
-.comments-title {
-  font-size: 16px;
-  font-weight: 700;
-  color: #000;
   margin: 0 0 16px 0;
 }
 
-.no-comments {
+.url-input-wrapper {
+  display: flex;
+  gap: 8px;
+}
+
+.url-input {
+  flex: 1;
+  padding: 12px 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
   font-size: 14px;
-  color: #999;
-  text-align: center;
-  padding: 40px 20px;
-  margin: 0;
+  color: #333;
+  background: #f9f9f9;
+}
+
+.url-input:focus {
+  outline: none;
+  border-color: #00C73C;
+  background: white;
+}
+
+.btn-copy {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 20px;
+  background: #00C73C;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.btn-copy:hover {
+  background: #00b035;
+  transform: translateY(-1px);
+}
+
+.btn-copy i {
+  font-size: 14px;
 }
 
 /* 반응형 - 레퍼런스는 데스크톱 기준이므로 모바일은 최소한만 */
@@ -1208,17 +1834,23 @@ watch(currentDay, () => {
     width: 100%;
   }
 
-  .detail-modal {
-    max-width: 95%;
-    max-height: 90vh;
+  .detail-panel {
+    left: 0;
+    width: 100%;
   }
 
-  .modal-body {
-    padding: 16px;
+  .modal-content {
+    width: 95%;
+    margin: 20px;
   }
 
-  .main-image {
-    height: 200px;
+  .url-input-wrapper {
+    flex-direction: column;
+  }
+
+  .btn-copy {
+    width: 100%;
+    justify-content: center;
   }
 }
 </style>
