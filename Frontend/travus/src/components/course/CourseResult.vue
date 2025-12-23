@@ -1,7 +1,7 @@
 <template>
   <div class="course-result">
-    <!-- 레퍼런스 그대로: 좌우 분할 레이아웃 (좌측 25~30%, 우측 70~75%) -->
-    <div class="result-layout">
+    <!-- 3분할 레이아웃: 좌측(일정 리스트) + 중앙(지도) + 우측(상세 패널) -->
+    <div class="result-layout" :class="{ 'detail-open': showDetailPanel }">
 
       <!-- 좌측 사이드바 - 레퍼런스 그대로 구현 -->
       <aside class="sidebar">
@@ -10,9 +10,11 @@
           <button class="btn-back" @click="emit('restart')">
             <i class="fa fa-arrow-left"></i>
           </button>
-          <h1 class="planner-title">AI코스 플래너</h1>
+          <h1 class="planner-title">{{ courseData.title || 'AI코스 플래너' }}</h1>
           <div class="header-actions">
-            <button class="btn-icon"><i class="fa fa-bookmark"></i></button>
+            <button class="btn-icon" @click="saveCourse" :disabled="isSaving">
+              <i class="fa" :class="isSaved ? 'fa-check' : 'fa-save'"></i>
+            </button>
             <button class="btn-icon"><i class="fa fa-thumbs-up"></i></button>
             <button class="btn-icon"><i class="fa fa-share-alt"></i></button>
           </div>
@@ -26,28 +28,27 @@
           <button class="tab-item">여행톡</button>
         </div>
 
-        <!-- 여행 요약 카드 - 레퍼런스 그대로 -->
+        <!-- 여행 요약 카드 - AI 데이터 기반 -->
         <div class="trip-summary-card">
           <div class="summary-badge">
-            <span class="badge-day">1박2일</span>
+            <span class="badge-day">{{ courseData.duration?.name || '여행' }}</span>
           </div>
           <div class="summary-info">
             <div class="info-item">
               <span class="info-icon">📍</span>
-              <span class="info-text">총 이동거리: 14km</span>
+              <span class="info-text">총 {{ itineraryDays.reduce((sum, day) => sum + day.places.length, 0) }}개 장소</span>
             </div>
             <div class="info-item">
               <span class="info-icon">🗺️</span>
-              <span class="info-text">여행지역: 대구 - 대구</span>
+              <span class="info-text">여행지역: {{ courseData.regions?.map(code => regionNameMap[code]).join(', ') }}</span>
             </div>
             <div class="info-item">
               <span class="info-icon">🏷️</span>
-              <span class="info-text">총 9개 여행지/음식점/카페/숙소 추천</span>
+              <span class="info-text">{{ courseData.duration?.days || 1 }}일 일정</span>
             </div>
           </div>
           <div class="summary-tags">
-            <span class="tag">#테마파크</span>
-            <span class="tag">#실내여행지</span>
+            <span class="tag" v-for="theme in courseData.themes" :key="theme">#{{ theme }}</span>
           </div>
         </div>
 
@@ -65,11 +66,7 @@
 
         <!-- Day 헤더 -->
         <div class="day-header">
-          <h3>Day 1</h3>
-          <button class="btn-expand">
-            <span>일정편집</span>
-            <i class="fa fa-chevron-down"></i>
-          </button>
+          <h3>Day {{ currentDay }}</h3>
         </div>
 
         <!-- 장소 리스트 - 레퍼런스 그대로 (세로 스크롤) -->
@@ -92,7 +89,7 @@
               <div class="place-category">{{ place.category || '여행지' }}</div>
               <div class="place-name">{{ place.name }}</div>
               <div class="place-address">{{ place.address || '주소 정보 없음' }}</div>
-              <button class="btn-detail">더보기 <i class="fa fa-plus"></i></button>
+              <button class="btn-detail" @click.stop="showPlaceDetail(place)">더보기 <i class="fa fa-plus"></i></button>
             </div>
           </div>
         </div>
@@ -109,8 +106,8 @@
             v-for="(_, index) in itineraryDays"
             :key="index"
             class="day-btn"
-            :class="{ active: currentDay === index }"
-            @click="switchDay(index)"
+            :class="{ active: currentDay === index + 1 }"
+            @click="switchDay(index + 1)"
           >
             <span class="day-circle" :class="`day${index + 1}`">{{ index + 1 }}</span>
             <span>{{ index + 1 }}일차</span>
@@ -137,6 +134,52 @@
       </main>
 
     </div>
+
+    <!-- 장소 상세보기 모달 -->
+    <div v-if="showDetailModal" class="detail-modal-overlay" @click="closeDetailModal">
+      <div class="detail-modal" @click.stop>
+        <div class="modal-header">
+          <h2>{{ selectedPlace?.name }}</h2>
+          <button class="btn-close" @click="closeDetailModal">
+            <i class="fa fa-times"></i>
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <!-- 이미지 갤러리 -->
+          <div class="image-gallery">
+            <img
+              :src="getPlaceImage(selectedPlace)"
+              :alt="selectedPlace?.name"
+              class="main-image"
+              @error="handleImageError"
+            />
+          </div>
+
+          <!-- 장소 정보 -->
+          <div class="place-info-section">
+            <div class="info-row">
+              <span class="info-label">카테고리</span>
+              <span class="info-value">{{ selectedPlace?.category || '여행지' }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">주소</span>
+              <span class="info-value">{{ selectedPlace?.address || '주소 정보 없음' }}</span>
+            </div>
+            <div class="info-row" v-if="selectedPlace?.latitude && selectedPlace?.longitude">
+              <span class="info-label">좌표</span>
+              <span class="info-value">{{ selectedPlace.latitude }}, {{ selectedPlace.longitude }}</span>
+            </div>
+          </div>
+
+          <!-- 댓글 섹션 (향후 구현) -->
+          <div class="comments-section">
+            <h3 class="comments-title">방문 후기</h3>
+            <p class="no-comments">아직 등록된 후기가 없습니다.</p>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -153,21 +196,67 @@ const props = defineProps({
 
 const emit = defineEmits(['restart'])
 
+// 지역 코드 → 이름 매핑
+const regionNameMap = {
+  '1': '서울',
+  '2': '인천',
+  '3': '대전',
+  '4': '대구',
+  '5': '광주',
+  '6': '부산',
+  '7': '울산',
+  '8': '세종',
+  '31': '경기',
+  '32': '강원',
+  '33': '충북',
+  '34': '충남',
+  '35': '경북',
+  '36': '경남',
+  '37': '전북',
+  '38': '전남',
+  '39': '제주'
+}
+
 // 상태 관리
 const itineraryDays = ref([])
-const currentDay = ref(0) // 현재 보고 있는 날짜 (0: Day1, 1: Day2, -1: 전체)
+const currentDay = ref(1) // 현재 보고 있는 날짜 (1: Day1, 2: Day2, -1: 전체)
 const kakaoMap = ref(null)
 const markers = ref([])
 const polylines = ref([])
 const isLoading = ref(true)
+const isSaving = ref(false)
+const isSaved = ref(false)
+const selectedPlace = ref(null) // 상세보기 선택된 장소
+const showDetailModal = ref(false) // 상세보기 모달 표시 여부
 
 // 현재 날짜의 장소들
 const currentDayPlaces = computed(() => {
+  let places = []
+
   if (currentDay.value === -1) {
     // 전체 보기
-    return itineraryDays.value.flatMap(day => day.places)
+    places = itineraryDays.value.flatMap(day => day.places)
+  } else {
+    // 특정 날짜 보기 (1-based index로 변경)
+    const dayIndex = currentDay.value - 1
+    places = itineraryDays.value[dayIndex]?.places || []
   }
-  return itineraryDays.value[currentDay.value]?.places || []
+
+  // 숙박 필터링: 각 day의 첫 번째 장소가 숙박이면 제거
+  // (숙박은 전날 마지막 코스로만 표시되어야 함)
+  if (currentDay.value !== -1) {
+    // 개별 day 보기일 때만 필터링
+    const filtered = places.filter((place, index) => {
+      // 첫 번째 항목이고 type이 'accommodation'이면 제외
+      if (index === 0 && place.type === 'accommodation') {
+        return false
+      }
+      return true
+    })
+    return filtered
+  }
+
+  return places
 })
 
 // 이미지 에러 핸들링
@@ -283,15 +372,15 @@ const updateMapMarkers = () => {
   const bounds = new window.kakao.maps.LatLngBounds()
   const linePath = []
 
-  // 보여줄 날짜 결정
+  // 보여줄 날짜 결정 (1-based index로 변경)
   const daysToShow = currentDay.value === -1
     ? itineraryDays.value
-    : [itineraryDays.value[currentDay.value]]
+    : [itineraryDays.value[currentDay.value - 1]]
 
   let globalIndex = 0
 
   daysToShow.forEach((day, dayIndex) => {
-    const actualDayIndex = currentDay.value === -1 ? dayIndex : currentDay.value
+    const actualDayIndex = currentDay.value === -1 ? dayIndex : (currentDay.value - 1)
 
     day.places.forEach((place, placeIndex) => {
       if (!place.latitude || !place.longitude) return
@@ -370,50 +459,92 @@ const focusOnMarker = (place) => {
   kakaoMap.value.setLevel(3)
 }
 
-// 데이터베이스에서 여행지 데이터 가져오기
-const fetchTravelData = async () => {
+// 장소 상세보기 모달 열기
+const showPlaceDetail = (place) => {
+  selectedPlace.value = place
+  showDetailModal.value = true
+}
+
+// 장소 상세보기 모달 닫기
+const closeDetailModal = () => {
+  showDetailModal.value = false
+  selectedPlace.value = null
+}
+
+// 코스 저장
+const saveCourse = async () => {
+  if (isSaving.value || isSaved.value) return
+
+  try {
+    isSaving.value = true
+
+    // 저장할 데이터 준비
+    const courseData = {
+      title: props.courseData.title,
+      description: props.courseData.description || '',
+      is_public: false // 기본값: 비공개
+    }
+
+    // Course 저장
+    const courseResponse = await api.saveCourse(courseData)
+    const savedCourse = courseResponse.data
+
+    console.log('코스 저장 성공:', savedCourse)
+
+    // TODO: CourseSpot 저장 (나중에 구현)
+    // 현재는 Course만 저장하고, 상세 일정은 나중에 추가
+
+    isSaved.value = true
+    alert('코스가 저장되었습니다!')
+
+  } catch (error) {
+    console.error('코스 저장 실패:', error)
+
+    let errorMessage = '코스 저장에 실패했습니다.'
+
+    if (error.response?.status === 401) {
+      errorMessage = '로그인이 필요합니다.'
+    } else if (error.response?.data?.error) {
+      errorMessage = error.response.data.error
+    }
+
+    alert(errorMessage)
+  } finally {
+    isSaving.value = false
+  }
+}
+
+// AI 생성 데이터를 itineraryDays 형식으로 변환
+const loadAIGeneratedData = () => {
   try {
     isLoading.value = true
 
-    const regions = props.courseData.regions || []
-    const days = props.courseData.duration?.days || 1
+    console.log('📦 AI 생성 데이터:', props.courseData)
 
-    // API 호출
-    const response = await api.getTravelSpots({
-      area_name: regions.join(','),
-      limit: days * 5
-    })
-
-    const travelSpots = response.data.results || response.data || []
-
-    // 여행지를 일차별로 분배
-    const placesPerDay = Math.ceil(travelSpots.length / days)
-    const tempDays = []
-
-    for (let i = 0; i < days; i++) {
-      const startIndex = i * placesPerDay
-      const endIndex = startIndex + placesPerDay
-      const dayPlaces = travelSpots.slice(startIndex, endIndex).map(spot => ({
-        id: spot.id,
-        name: spot.name,
-        address: spot.address || spot.addr1,
-        latitude: spot.latitude || spot.mapy,
-        longitude: spot.longitude || spot.mapx,
-        image_url: spot.image_url,
-        first_image: spot.first_image,
-        category: getCategoryName(spot.content_type_id)
+    // props.courseData.days 사용 (AI가 생성한 데이터)
+    if (props.courseData.days && props.courseData.days.length > 0) {
+      itineraryDays.value = props.courseData.days.map(dayData => ({
+        date: `Day ${dayData.day}`,
+        places: dayData.spots.map(spot => ({
+          id: spot.id,
+          name: spot.spot.name,
+          address: spot.spot.address,
+          latitude: parseFloat(spot.spot.latitude),
+          longitude: parseFloat(spot.spot.longitude),
+          image_url: spot.spot.image_url,
+          category: getCategoryName(spot.spot.content_type_id),
+          type: spot.type
+        }))
       }))
 
-      tempDays.push({
-        date: `Day ${i + 1}`,
-        places: dayPlaces
-      })
+      console.log('✅ AI 데이터 로드 완료:', itineraryDays.value)
+    } else {
+      console.warn('⚠️ AI 생성 데이터가 없습니다')
+      useSampleData()
     }
 
-    itineraryDays.value = tempDays
-
   } catch (error) {
-    console.error('여행 데이터 조회 실패:', error)
+    console.error('❌ AI 데이터 로드 실패:', error)
     useSampleData()
   } finally {
     isLoading.value = false
@@ -481,8 +612,8 @@ onMounted(async () => {
     initializeKakaoMap()
     console.log('✅ 카카오맵 초기화 완료')
 
-    await fetchTravelData()
-    console.log('✅ 여행 데이터 로드 완료')
+    loadAIGeneratedData()
+    console.log('✅ AI 데이터 로드 완료')
 
     updateMapMarkers()
     console.log('✅ 마커 업데이트 완료')
@@ -916,6 +1047,154 @@ watch(currentDay, () => {
   font-weight: 700;
 }
 
+/* 장소 상세보기 모달 */
+.detail-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.detail-modal {
+  background: white;
+  border-radius: 16px;
+  max-width: 600px;
+  width: 100%;
+  max-height: 80vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  animation: modalSlideUp 0.3s ease-out;
+}
+
+@keyframes modalSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.modal-header h2 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #000;
+  margin: 0;
+  flex: 1;
+}
+
+.btn-close {
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: #666;
+  cursor: pointer;
+  padding: 4px 8px;
+  transition: color 0.2s;
+}
+
+.btn-close:hover {
+  color: #000;
+}
+
+.modal-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+}
+
+.modal-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+  background: #ddd;
+  border-radius: 3px;
+}
+
+/* 이미지 갤러리 */
+.image-gallery {
+  width: 100%;
+  margin-bottom: 24px;
+}
+
+.main-image {
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+  border-radius: 12px;
+  background: #f0f0f0;
+}
+
+/* 장소 정보 */
+.place-info-section {
+  margin-bottom: 24px;
+  padding: 16px;
+  background: #f9f9f9;
+  border-radius: 12px;
+}
+
+.info-row {
+  display: flex;
+  padding: 8px 0;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.info-row:last-child {
+  border-bottom: none;
+}
+
+.info-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #666;
+  min-width: 80px;
+}
+
+.info-value {
+  font-size: 14px;
+  color: #333;
+  flex: 1;
+}
+
+/* 댓글 섹션 */
+.comments-section {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.comments-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #000;
+  margin: 0 0 16px 0;
+}
+
+.no-comments {
+  font-size: 14px;
+  color: #999;
+  text-align: center;
+  padding: 40px 20px;
+  margin: 0;
+}
+
 /* 반응형 - 레퍼런스는 데스크톱 기준이므로 모바일은 최소한만 */
 @media (max-width: 768px) {
   .sidebar {
@@ -927,6 +1206,19 @@ watch(currentDay, () => {
 
   .map-area {
     width: 100%;
+  }
+
+  .detail-modal {
+    max-width: 95%;
+    max-height: 90vh;
+  }
+
+  .modal-body {
+    padding: 16px;
+  }
+
+  .main-image {
+    height: 200px;
   }
 }
 </style>

@@ -207,7 +207,7 @@ onUnmounted(() => {
 .ar-room-section {
   min-height: 120vh;
   height: auto;
-  background: #f5f5f5;
+  background: #ffffff;
   padding: 8rem 0 10rem 0;
   position: relative;
   overflow: hidden;
@@ -242,7 +242,7 @@ onUnmounted(() => {
 .ar-room-title {
   font-size: 4rem;
   font-weight: 900;
-  color: #FF6A00;
+  color: #394b9e;
   margin-bottom: 1rem;
   letter-spacing: -2px;
   text-transform: uppercase;

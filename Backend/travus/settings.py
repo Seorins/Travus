@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+from datetime import timedelta
 import os
 from dotenv import load_dotenv
 
@@ -40,6 +41,7 @@ INSTALLED_APPS = [
     'api',
     'rest_framework',
     'corsheaders',
+    'rest_framework_simplejwt.token_blacklist',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -144,6 +146,7 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticatedOrReadOnly',
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
         'rest_framework.authentication.SessionAuthentication',
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
@@ -156,9 +159,26 @@ REST_FRAMEWORK = {
 
 # Korean Tourism API Settings (무장애 여행 API는 Service2 사용)
 TOUR_API_BASE_URL = os.getenv('TOUR_API_BASE_URL', 'http://apis.data.go.kr/B551011/KorWithService2')
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=14),
+    'ROTATE_REFRESH_TOKENS': False,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': SECRET_KEY,
+    'AUTH_HEADER_TYPES': ('Bearer',),
+}
+
+# Korean Tourism API Settings
+# TOUR_API_BASE_URL = os.getenv('TOUR_API_BASE_URL', 'http://apis.data.go.kr/B551python011/KorWithService1')
 TOUR_API_KEY = os.getenv('TOUR_API_KEY', '')
 TOUR_API_MOBILE_OS = os.getenv('TOUR_API_MOBILE_OS', 'ETC')
 TOUR_API_MOBILE_APP = os.getenv('TOUR_API_MOBILE_APP', 'TravUs')
+
+# GMS API Settings (SSAFY OpenAI API Gateway)
+GMS_API_KEY = os.getenv('GMS_API_KEY', 'S14P02EA02-e78f608f-87c7-4534-a076-6916104b3bdc')
+GMS_API_URL = 'https://gms.ssafy.io/gmsapi/api.openai.com/v1/chat/completions'
+GMS_MODEL = 'gpt-4o-mini'
 
 # Redis Settings (for caching)
 REDIS_HOST = os.getenv('REDIS_HOST', 'localhost')
