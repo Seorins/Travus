@@ -10,6 +10,21 @@ const apiClient = axios.create({
   }
 })
 
+// 요청 인터셉터 (JWT 토큰 자동 추가)
+apiClient.interceptors.request.use(
+  (config) => {
+    // localStorage에서 토큰 가져오기
+    const token = localStorage.getItem('access_token')
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`
+    }
+    return config
+  },
+  (error) => {
+    return Promise.reject(error)
+  }
+)
+
 // 응답 인터셉터 (에러 처리)
 apiClient.interceptors.response.use(
   (response) => response,
@@ -165,9 +180,31 @@ export default {
     return apiClient.post('/courses/', data)
   },
 
+  // 나의 여행코스 조회
+  getMyCourses() {
+    return apiClient.get('/courses/my_courses/')
+  },
+
+  // 월간 Best 30 코스
+  getMonthlyBestCourses() {
+    return apiClient.get('/courses/monthly_best/')
+  },
+
+  // 지역별 사용자 코스
+  getCoursesByRegion(areaCode) {
+    return apiClient.get('/courses/by_region/', {
+      params: { area_code: areaCode }
+    })
+  },
+
+  // 코스 상세 조회
+  getCourseDetail(courseId) {
+    return apiClient.get(`/courses/${courseId}/`)
+  },
+
   // 코스 좋아요 토글
   toggleCourseLike(courseId) {
-    return apiClient.post(`/courses/${courseId}/toggle_like/`)
+    return apiClient.post(`/courses/${courseId}/like/`)
   },
 
   // 코스 좋아요 상태 조회

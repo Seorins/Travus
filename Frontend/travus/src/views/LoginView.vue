@@ -83,6 +83,7 @@ import { useRouter } from 'vue-router'
 import { useTTS } from '@/composables/useTTS'
 import { useAuthStore } from '@/stores/auth'
 import NavigationBar from '@/components/common/NavigationBar.vue'
+import axios from 'axios'
 
 const { isTTSEnabled, speak, toggleTTS: ttsToggle } = useTTS()
 const authStore = useAuthStore()
@@ -115,17 +116,38 @@ const handleFocus = (payload) => {
   }
 }
 
-const handleSubmit = () => {
+const handleSubmit = async () => {
   errorMessage.value = ''
-  const result = authStore.login(form.username.trim(), form.password, form.keep)
 
-  if (!result.ok) {
-    errorMessage.value = result.message
-    speak(result.message)
-    return
+  try {
+    // 백엔드 로그인 API 호출
+    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api'
+    const response = await axios.post(`${API_BASE_URL}/auth/login/`, {
+      username: form.username.trim(),
+      password: form.password
+    })
+
+    // JWT 토큰 저장
+    const { access, refresh, user } = response.data
+    localStorage.setItem('access_token', access)
+    localStorage.setItem('refresh_token', refresh)
+
+    // auth store 업데이트 (로컬 상태 동기화)
+    authStore.currentUser = user
+    authStore.isLoggedIn = true
+
+    speak('로그인 성공')
+    router.push('/')
+  } catch (error) {
+    console.error('로그인 실패:', error)
+
+    const message = error.response?.data?.error ||
+                   error.response?.data?.detail ||
+                   '로그인에 실패했습니다. 아이디와 비밀번호를 확인해주세요.'
+
+    errorMessage.value = message
+    speak(message)
   }
-
-  router.push('/')
 }
 </script>
 

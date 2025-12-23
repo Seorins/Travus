@@ -609,10 +609,10 @@ const goToSpotDetail = (place) => {
 // 댓글 관련 함수
 const loadComments = async () => {
   try {
-    const courseId = props.courseData.id
-    if (!courseId) return
+    // savedCourseId 사용 (자동 저장된 코스 ID)
+    if (!savedCourseId.value) return
 
-    const response = await api.getCourseComments(courseId)
+    const response = await api.getCourseComments(savedCourseId.value)
     comments.value = response.data
   } catch (error) {
     console.error('댓글 로드 실패:', error)
@@ -622,9 +622,14 @@ const loadComments = async () => {
 const submitComment = async () => {
   if (!newComment.value.trim()) return
 
+  // 코스가 저장되지 않았으면 저장 먼저 수행
+  if (!savedCourseId.value) {
+    alert('코스를 먼저 저장하고 있습니다. 잠시만 기다려주세요.')
+    return
+  }
+
   try {
-    const courseId = props.courseData.id
-    await api.createCourseComment(courseId, {
+    await api.createCourseComment(savedCourseId.value, {
       content: newComment.value
     })
 
@@ -679,12 +684,29 @@ const autoSaveCourse = async () => {
   try {
     isAutoSaving.value = true
 
-    // 저장할 데이터 준비
+    // 저장할 데이터 준비 - spots 데이터 포함
+    const spots = []
+
+    // rawItinerary에서 spots 데이터 추출
+    if (props.courseData.rawItinerary) {
+      props.courseData.rawItinerary.forEach((item, index) => {
+        spots.push({
+          travel_spot_id: item.id,
+          order: item.order || index + 1,
+          memo: '',
+          stay_duration: null
+        })
+      })
+    }
+
     const courseData = {
       title: props.courseData.title,
       description: props.courseData.description || '',
-      is_public: false // 기본값: 비공개
+      is_public: false, // 기본값: 비공개
+      spots: spots
     }
+
+    console.log('저장할 코스 데이터:', courseData)
 
     // Course 저장
     const courseResponse = await api.saveCourse(courseData)
@@ -698,6 +720,7 @@ const autoSaveCourse = async () => {
 
   } catch (error) {
     console.error('코스 자동 저장 실패:', error)
+    console.error('에러 상세:', error.response?.data)
 
     if (error.response?.status === 401) {
       console.log('로그인 필요 - 자동 저장 건너뜀')
@@ -716,7 +739,7 @@ const toggleLike = async () => {
 
   try {
     const response = await api.toggleCourseLike(savedCourseId.value)
-    isLiked.value = response.data.liked
+    isLiked.value = response.data.is_liked
     likeCount.value = response.data.like_count
   } catch (error) {
     console.error('좋아요 토글 실패:', error)
