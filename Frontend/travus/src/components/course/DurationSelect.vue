@@ -1,10 +1,21 @@
 <template>
   <div class="duration-select">
+    <!-- 배경 이미지 -->
+    <div class="background-wrapper"></div>
+
+    <!-- 구름 애니메이션 -->
+    <div class="clouds-container">
+      <img src="@/assets/img_cloud1.png" alt="cloud" class="cloud cloud1" />
+      <img src="@/assets/img_cloud2.png" alt="cloud" class="cloud cloud2" />
+      <img src="@/assets/img_cloud4.png" alt="cloud" class="cloud cloud4" />
+      <img src="@/assets/img_cloud5.png" alt="cloud" class="cloud cloud5" />
+    </div>
+
     <div class="content-card">
       <div class="card-content">
         <div class="text-section">
-          <h2 class="title">여행 기간을 선택해주세요</h2>
-          <p class="subtitle">당일치기부터 2박 3일까지 선택할 수 있어요.</p>
+          <p class="subtitle">여행을 떠날 기간은?</p>
+          <h2 class="title">여행 기간을 <br/> <span class="nxttitle">선택해주세요</span></h2>
 
           <div class="duration-options">
             <button
@@ -14,14 +25,18 @@
               :class="{ selected: selectedDuration === option.value }"
               @click="selectDuration(option.value)"
             >
-              <div class="icon">{{ option.icon }}</div>
+              <img :src="option.icon" :alt="option.name" class="icon-img" />
               <div class="duration-name">{{ option.name }}</div>
               <div class="duration-desc">{{ option.description }}</div>
             </button>
           </div>
 
+          <p class="hint">
+            당일치기부터 2박 3일까지 선택할 수 있어요.
+          </p>
+
           <div class="button-group">
-            <button class="btn-back" @click="$emit('back')">
+            <button class="btn-back" @click="emit('back')">
               이전
             </button>
             <button
@@ -33,51 +48,13 @@
             </button>
           </div>
         </div>
-
-        <div class="illustration-section">
-          <div class="calendar-illustration">
-            <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-              <!-- 달력 -->
-              <rect x="20" y="30" width="160" height="150" rx="10" fill="white" stroke="#667eea" stroke-width="3"/>
-
-              <!-- 달력 헤더 -->
-              <rect x="20" y="30" width="160" height="40" rx="10" fill="#667eea"/>
-              <rect x="20" y="50" width="160" height="20" fill="#667eea"/>
-
-              <!-- 요일 -->
-              <line x1="20" y1="80" x2="180" y2="80" stroke="#e2e8f0" stroke-width="2"/>
-
-              <!-- 날짜 그리드 -->
-              <g fill="#cbd5e0" font-size="12" font-weight="600">
-                <circle cx="45" cy="100" r="4"/>
-                <circle cx="70" cy="100" r="4"/>
-                <circle cx="95" cy="100" r="4"/>
-                <circle cx="120" cy="100" r="4"/>
-                <circle cx="145" cy="100" r="4"/>
-
-                <circle cx="45" cy="125" r="4"/>
-                <circle cx="70" cy="125" r="4"/>
-                <circle cx="95" cy="125" r="4"/>
-                <circle cx="120" cy="125" r="4"/>
-                <circle cx="145" cy="125" r="4"/>
-              </g>
-
-              <!-- 선택된 날짜들 -->
-              <circle cx="95" cy="150" r="12" fill="#667eea" opacity="0.3"/>
-              <circle cx="120" cy="150" r="12" fill="#667eea" opacity="0.3"/>
-              <circle cx="145" cy="150" r="12" fill="#667eea" opacity="0.3"/>
-
-              <!-- 시계 아이콘 -->
-              <g transform="translate(155, 25)">
-                <circle cx="0" cy="0" r="15" fill="white" opacity="0.3"/>
-                <circle cx="0" cy="0" r="12" fill="white" stroke="#5568d3" stroke-width="2"/>
-                <line x1="0" y1="0" x2="0" y2="-6" stroke="#5568d3" stroke-width="2"/>
-                <line x1="0" y1="0" x2="4" y2="0" stroke="#5568d3" stroke-width="2"/>
-              </g>
-            </svg>
-          </div>
-        </div>
       </div>
+    </div>
+
+    <!-- 캐릭터 -->
+    <div class="character-wrapper">
+      <img src='@/assets/select2.png' alt="TravUs AI 캐릭터" class="character-img" />
+      <div class="character-shadow"></div>
     </div>
   </div>
 </template>
@@ -92,21 +69,21 @@ const durationOptions = [
     value: 'day',
     name: '당일치기',
     description: '하루 동안 즐기는 여행',
-    icon: '☀️',
+    icon: new URL('@/assets/calender1.png', import.meta.url).href,
     days: 1
   },
   {
     value: '1night',
     name: '1박 2일',
     description: '여유로운 주말 여행',
-    icon: '🌙',
+    icon: new URL('@/assets/calender2.png', import.meta.url).href,
     days: 2
   },
   {
     value: '2nights',
     name: '2박 3일',
     description: '알찬 휴가 여행',
-    icon: '⭐',
+    icon: new URL('@/assets/calender3.png', import.meta.url).href,
     days: 3
   }
 ]
@@ -132,29 +109,118 @@ const handleNext = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #E8F4F8 0%, #D4E7F5 100%);
   padding: 100px 20px 40px;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(to bottom, #8BBFEB 0%, #A5CAF0 50%, #BDD5F5 100%);
+}
+
+/* 배경 이미지 - course_background 사용 */
+.background-wrapper {
+  position: absolute;
+  inset: 0;
+  background-image: url('@/assets/course_background.png');
+  background-repeat: no-repeat;
+  background-position: bottom right;
+  background-size: auto 100%;
+  z-index: 0;
+}
+
+.background-wrapper::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 30%;
+  background: linear-gradient(to bottom, #8BBFEB 0%, #A5CAF0 50%, transparent 100%);
+  z-index: 1;
+}
+
+/* 구름 애니메이션 */
+.clouds-container {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.cloud {
+  position: absolute;
+  opacity: 0;
+  animation: cloudFloat 3s ease-out forwards;
+}
+
+.cloud1 {
+  top: 10%;
+  left: 10%;
+  width: 120px;
+  animation-delay: 0.2s;
+}
+
+.cloud2 {
+  top: 20%;
+  right: 15%;
+  width: 150px;
+  animation-delay: 0.5s;
+}
+
+.cloud4 {
+  top: 50%;
+  left: 5%;
+  width: 100px;
+  animation-delay: 0.8s;
+}
+
+.cloud5 {
+  top: 60%;
+  right: 10%;
+  width: 130px;
+  animation-delay: 1.1s;
+}
+
+@keyframes cloudFloat {
+  0% {
+    opacity: 0;
+    transform: translateY(-50px);
+  }
+  100% {
+    opacity: 0.8;
+    transform: translateY(0);
+  }
 }
 
 .content-card {
   width: 100%;
-  max-width: 1200px;
+  max-width: 800px;
+  min-height: 700px;
   background: white;
-  border-radius: 24px;
+  border-radius: 5px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
   padding: 3rem;
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
 }
 
 .card-content {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 3rem;
-  align-items: center;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
 }
 
 .text-section {
   display: flex;
   flex-direction: column;
+  flex: 1;
+}
+
+.subtitle {
+  font-size: 1.125rem;
+  color: #718096;
+  margin-bottom: 0.5rem;
 }
 
 .title {
@@ -164,17 +230,18 @@ const handleNext = () => {
   margin: 0 0 0.5rem 0;
 }
 
-.subtitle {
-  font-size: 1.125rem;
-  color: #718096;
-  margin: 0 0 2rem 0;
+.nxttitle {
+  font-size: 2rem;
+  font-weight: 300;
+  color: #1a202c;
 }
 
 .duration-options {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 1rem;
-  margin-bottom: 2rem;
+  margin-bottom: 3rem;
+  margin-top: 2rem;
 }
 
 .duration-card {
@@ -184,7 +251,7 @@ const handleNext = () => {
   justify-content: center;
   padding: 2rem 1rem;
   border: 2px solid #e2e8f0;
-  background: white;
+  background: #e2e8f0;
   border-radius: 16px;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -199,19 +266,21 @@ const handleNext = () => {
 }
 
 .duration-card.selected {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #667eea;
+  color: white;
   border-color: #667eea;
   box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
 }
 
-.duration-card.selected .icon,
 .duration-card.selected .duration-name,
 .duration-card.selected .duration-desc {
   color: white;
 }
 
-.icon {
-  font-size: 3rem;
+.icon-img {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
   margin-bottom: 1rem;
 }
 
@@ -228,9 +297,18 @@ const handleNext = () => {
   line-height: 1.4;
 }
 
+.hint {
+  font-size: 0.875rem;
+  color: #a0aec0;
+  margin: 0 0 2rem 0;
+  line-height: 1.6;
+}
+
 .button-group {
   display: flex;
   gap: 1rem;
+  margin-top: auto;
+  padding-top: 2rem;
 }
 
 .btn-back,
@@ -273,29 +351,61 @@ const handleNext = () => {
   box-shadow: none;
 }
 
-.illustration-section {
+/* 캐릭터 */
+.character-wrapper {
+  position: absolute;
+  right: 6%;
+  bottom: 8%;
+  z-index: 3;
+  pointer-events: none;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
 }
 
-.calendar-illustration {
-  width: 100%;
-  max-width: 200px;
-}
-
-.calendar-illustration svg {
-  width: 100%;
+.character-img {
+  width: 250px;
   height: auto;
+  position: relative;
+  z-index: 2;
+  animation: floatCharacter 3s ease-in-out infinite;
+  margin-bottom: -50px;
+}
+
+.character-shadow {
+  width: 180px;
+  height: 30px;
+  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.1) 40%, transparent 70%);
+  border-radius: 50%;
+  z-index: 1;
+  filter: blur(8px);
+}
+
+@keyframes floatCharacter {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
 }
 
 @media (max-width: 1024px) {
-  .card-content {
-    grid-template-columns: 1fr;
+  .character-wrapper {
+    right: 3%;
+    bottom: 5%;
   }
 
-  .illustration-section {
-    display: none;
+  .character-img {
+    width: 200px;
+  }
+
+  .character-shadow {
+    width: 150px;
+  }
+
+  .cloud1, .cloud2, .cloud4, .cloud5 {
+    width: 80px;
   }
 }
 
@@ -305,6 +415,10 @@ const handleNext = () => {
   }
 
   .title {
+    font-size: 1.5rem;
+  }
+
+  .nxttitle {
     font-size: 1.5rem;
   }
 
@@ -318,6 +432,14 @@ const handleNext = () => {
 
   .duration-card {
     padding: 1.5rem 1rem;
+  }
+
+  .character-wrapper {
+    display: none;
+  }
+
+  .cloud {
+    width: 60px !important;
   }
 }
 </style>

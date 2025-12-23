@@ -12,7 +12,7 @@
       <!-- 에러 상태 -->
       <div v-else-if="error" class="error-container">
         <p>{{ error }}</p>
-        <button @click="$router.push('/travel')" class="back-btn">목록으로 돌아가기</button>
+        <button @click="router.push('/travel')" class="back-btn">목록으로 돌아가기</button>
       </div>
 
       <!-- 상세 정보 -->
@@ -81,37 +81,79 @@
 
           <!-- 기본 정보 그리드 -->
           <div class="info-grid-section">
+            <!-- 전화번호 -->
             <div class="info-grid-item" v-if="destination.tel">
-              <span class="info-key">문의/안내</span>
+              <span class="info-key">{{ destination.telname || '문의/안내' }}</span>
               <span class="info-value">{{ destination.tel }}</span>
             </div>
+
+            <!-- 주소 -->
             <div class="info-grid-item" v-if="destination.addr1">
               <span class="info-key">주소</span>
-              <span class="info-value">{{ destination.addr1 }}</span>
+              <span class="info-value">
+                {{ destination.addr1 }}
+                <span v-if="destination.addr2"> {{ destination.addr2 }}</span>
+              </span>
             </div>
+
+            <!-- 우편번호 -->
+            <div class="info-grid-item" v-if="destination.zipcode">
+              <span class="info-key">우편번호</span>
+              <span class="info-value">{{ destination.zipcode }}</span>
+            </div>
+
+            <!-- 지역 -->
+            <div class="info-grid-item">
+              <span class="info-key">지역</span>
+              <span class="info-value">{{ getRegionName(destination.areacode) }}</span>
+            </div>
+
+            <!-- 이용시간 (detailIntro에서 제공) -->
             <div class="info-grid-item" v-if="detailIntro && detailIntro.usetime">
               <span class="info-key">이용시간</span>
-              <span class="info-value">{{ detailIntro.usetime }}</span>
+              <span class="info-value" v-html="detailIntro.usetime"></span>
             </div>
+
+            <!-- 쉬는날 (detailIntro에서 제공) -->
             <div class="info-grid-item" v-if="detailIntro && detailIntro.restdate">
               <span class="info-key">쉬는날</span>
-              <span class="info-value">{{ detailIntro.restdate }}</span>
+              <span class="info-value" v-html="detailIntro.restdate"></span>
             </div>
+
+            <!-- 주차시설 (detailIntro에서 제공) -->
             <div class="info-grid-item" v-if="detailIntro && detailIntro.parking">
               <span class="info-key">주차시설</span>
-              <span class="info-value">{{ detailIntro.parking }}</span>
+              <span class="info-value" v-html="detailIntro.parking"></span>
             </div>
-            <div class="info-grid-item" v-if="detailIntro && detailIntro.infocenter">
-              <span class="info-key">문의 및 안내</span>
-              <span class="info-value">{{ detailIntro.infocenter }}</span>
+
+            <!-- 입장료/이용요금 (detailIntro에서 제공) -->
+            <div class="info-grid-item" v-if="detailIntro && (detailIntro.usefee || detailIntro.usetimefestival)">
+              <span class="info-key">이용요금</span>
+              <span class="info-value" v-html="detailIntro.usefee || detailIntro.usetimefestival"></span>
             </div>
+
+            <!-- 홈페이지 -->
             <div class="info-grid-item" v-if="destination.homepage">
               <span class="info-key">홈페이지</span>
               <div class="info-value" v-html="destination.homepage"></div>
             </div>
-            <div class="info-grid-item">
-              <span class="info-key">지역</span>
-              <span class="info-value">{{ getRegionName(destination.areacode) }}</span>
+
+            <!-- 등록일 -->
+            <div class="info-grid-item" v-if="destination.createdtime">
+              <span class="info-key">등록일</span>
+              <span class="info-value">{{ formatDate(destination.createdtime) }}</span>
+            </div>
+
+            <!-- 수정일 -->
+            <div class="info-grid-item" v-if="destination.modifiedtime">
+              <span class="info-key">최종 수정일</span>
+              <span class="info-value">{{ formatDate(destination.modifiedtime) }}</span>
+            </div>
+
+            <!-- 콘텐츠 타입 -->
+            <div class="info-grid-item" v-if="destination.contenttypeid">
+              <span class="info-key">분류</span>
+              <span class="info-value">{{ getContentTypeName(destination.contenttypeid) }}</span>
             </div>
           </div>
 
@@ -343,6 +385,33 @@ const getRegionName = (areacode) => {
   return regionMap[areacode] || '기타'
 }
 
+// 콘텐츠 타입 이름 매핑
+const contentTypeMap = {
+  '12': '관광지',
+  '14': '문화시설',
+  '15': '축제공연행사',
+  '25': '여행코스',
+  '28': '레포츠',
+  '32': '숙박',
+  '38': '쇼핑',
+  '39': '음식점'
+}
+
+const getContentTypeName = (contentTypeId) => {
+  return contentTypeMap[contentTypeId] || '기타'
+}
+
+// 날짜 포맷 함수 (YYYYMMDDHHMMSS -> YYYY-MM-DD)
+const formatDate = (dateString) => {
+  if (!dateString || dateString.length < 8) return dateString
+
+  const year = dateString.substring(0, 4)
+  const month = dateString.substring(4, 6)
+  const day = dateString.substring(6, 8)
+
+  return `${year}-${month}-${day}`
+}
+
 // 같은 지역 추천 여행지 가져오기
 const fetchRecommendations = async (areaCode, currentContentId) => {
   try {
@@ -475,6 +544,48 @@ const fetchDestinationDetail = async () => {
 
     console.log('✅ 여행지 정보 로드 완료:', destination.value.title)
 
+    // ==========================================
+    // API에서 추가 상세 정보 가져오기 (detailCommon)
+    // ==========================================
+    // TODO: API 호출 임시 비활성화 - 나중에 다시 활성화할 것
+    /*
+    try {
+      console.log('📍 API에서 상세 정보 조회 (detailCommon)...')
+      const detailCommonResponse = await api.getTravelSpotDetailCommon(
+        contentId,
+        travelSpot.content_type_id
+      )
+
+      if (detailCommonResponse.data && detailCommonResponse.data.response) {
+        const body = detailCommonResponse.data.response.body
+        if (body && body.items && body.items.item) {
+          const commonData = Array.isArray(body.items.item)
+            ? body.items.item[0]
+            : body.items.item
+
+          // API 응답의 추가 정보를 destination에 병합
+          destination.value = {
+            ...destination.value,
+            createdtime: commonData.createdtime,
+            modifiedtime: commonData.modifiedtime,
+            telname: commonData.telname,
+            addr2: commonData.addr2,
+            zipcode: commonData.zipcode,
+            // 기존 데이터가 없으면 API 데이터로 채우기
+            overview: destination.value.overview || commonData.overview,
+            tel: destination.value.tel || commonData.tel,
+            homepage: destination.value.homepage || commonData.homepage
+          }
+
+          console.log('✅ API 상세 정보 병합 완료')
+        }
+      }
+    } catch (apiError) {
+      console.warn('⚠️ API 상세 정보 조회 실패 (DB 데이터만 사용):', apiError.message)
+      // API 실패해도 DB 데이터로 계속 진행
+    }
+    */
+
     // 무장애 정보 매핑 (DB에서 가져온 데이터 사용)
     if (travelSpot.accessibility) {
       const acc = travelSpot.accessibility
@@ -487,12 +598,33 @@ const fetchDestinationDetail = async () => {
     }
 
     // ==========================================
-    // 세부사항은 DB 데이터 사용 (API 429 에러 방지)
+    // API에서 소개 정보 가져오기 (detailIntro)
     // ==========================================
-    console.log('ℹ️ API 429 에러로 인해 DB 데이터만 사용합니다')
+    // TODO: API 호출 임시 비활성화 - 나중에 다시 활성화할 것
+    /*
+    try {
+      console.log('📍 API에서 소개 정보 조회 (detailIntro)...')
+      const detailIntroResponse = await api.getTravelSpotDetailIntro(
+        contentId,
+        travelSpot.content_type_id
+      )
 
-    // overview, tel, homepage는 이미 destination에 설정됨
-    // detailIntro는 null로 유지 (템플릿에서 v-if로 처리)
+      if (detailIntroResponse.data && detailIntroResponse.data.response) {
+        const body = detailIntroResponse.data.response.body
+        if (body && body.items && body.items.item) {
+          const introData = Array.isArray(body.items.item)
+            ? body.items.item[0]
+            : body.items.item
+
+          detailIntro.value = introData
+          console.log('✅ API 소개 정보 로드 완료')
+        }
+      }
+    } catch (apiError) {
+      console.warn('⚠️ API 소개 정보 조회 실패:', apiError.message)
+      // API 실패해도 계속 진행
+    }
+    */
 
     // 이미지 정보 설정 (DB의 image_url 우선 사용 - API 호출 최소화)
     if (travelSpot.image_url) {
@@ -612,6 +744,29 @@ watch(() => route.params.id, (newId, oldId) => {
   justify-content: center;
   min-height: 60vh;
   padding: 2rem;
+}
+
+.error-container p {
+  color: #ef4444;
+  font-size: 1.125rem;
+  margin-bottom: 1.5rem;
+}
+
+.back-btn {
+  padding: 0.75rem 1.5rem;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.back-btn:hover {
+  background: #5568d3;
+  transform: translateY(-1px);
 }
 
 .loading-spinner {
