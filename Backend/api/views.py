@@ -4,11 +4,11 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.views import APIView
-from .models import TravelSpot, TravelSpotCategory, Bookmark, Course, Review
+from .models import TravelSpot, TravelSpotCategory, Bookmark, Course, Review, CourseComment, CourseLike
 from .serializers import (
     TravelSpotListSerializer, TravelSpotDetailSerializer,
     TravelSpotCategorySerializer, BookmarkSerializer,
-    CourseSerializer, ReviewSerializer
+    CourseSerializer, ReviewSerializer, CourseCommentSerializer
 )
 from .services.tour_api import tour_api_service
 from django.contrib.auth import get_user_model
@@ -549,6 +549,225 @@ class CourseViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
+    @action(detail=False, methods=['post'], permission_classes=[permissions.AllowAny])
+    def generate_ai_course(self, request):
+        """
+        AI를 이용한 여행 코스 생성
+
+        Request Body:
+            - region (str): 지역명 (예: "서울")
+            - area_code (str): 지역 코드 (예: "1")
+            - duration (str): 여행 기간 ("당일치기", "1박 2일", "2박 3일")
+            - themes (list): 여행 테마 리스트 (선택사항)
+
+        Response:
+            - title: 코스 제목
+            - description: 코스 설명
+            - itinerary: 일정 배열 [{ day, order, type, id, spot_detail }]
+        """
+        from .services.ai_course_generator import ai_course_generator
+
+        # 요청 데이터 검증
+        region = request.data.get('region')
+        area_code = request.data.get('area_code')
+        duration = request.data.get('duration')
+        themes = request.data.get('themes', [])
+
+        print(f"[DEBUG] AI 코스 생성 요청: region={region}, area_code={area_code}, duration={duration}, themes={themes}")
+
+        if not region or not area_code or not duration:
+            print(f"[ERROR] 필수 파라미터 누락: region={region}, area_code={area_code}, duration={duration}")
+            return Response(
+                {'error': '지역, 지역코드, 여행 기간은 필수입니다'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if duration not in ["당일치기", "1박 2일", "2박 3일"]:
+            return Response(
+                {'error': '여행 기간은 "당일치기", "1박 2일", "2박 3일" 중 하나여야 합니다'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            # DB에서 해당 지역의 여행지 조회
+            travel_spots = TravelSpot.objects.filter(
+                area_code=area_code,
+                is_active=True
+            ).exclude(
+                image_url__isnull=True
+            ).exclude(
+                image_url=''
+            ).exclude(
+                latitude__isnull=True
+            ).exclude(
+                longitude__isnull=True
+            ).values(
+                'id', 'name', 'content_type_id', 'description',
+                'latitude', 'longitude', 'address', 'image_url', 'area_code'
+            )
+
+            print(f"[DEBUG] DB 조회 결과: {len(travel_spots)}개 장소")
+            if len(travel_spots) > 0:
+                print(f"[DEBUG] 첫 번째 장소: name={travel_spots[0].get('name')}, area_code={travel_spots[0].get('area_code')}, address={travel_spots[0].get('address')}")
+                # 지역 코드 분포 확인
+                area_codes = {}
+                for spot in travel_spots:
+                    code = spot.get('area_code')
+                    area_codes[code] = area_codes.get(code, 0) + 1
+                print(f"[DEBUG] 지역 코드 분포: {area_codes}")
+
+            # 여행지, 음식점, 숙박 분리
+            attractions = [spot for spot in travel_spots if spot['content_type_id'] not in ['39', '32']]
+            restaurants = [spot for spot in travel_spots if spot['content_type_id'] == '39']
+            accommodations = [spot for spot in travel_spots if spot['content_type_id'] == '32']
+
+            # 충분한 데이터가 있는지 확인
+            required_counts = {
+                "당일치기": {"travel": 4, "restaurant": 2, "accommodation": 0},
+                "1박 2일": {"travel": 8, "restaurant": 4, "accommodation": 1},
+                "2박 3일": {"travel": 12, "restaurant": 6, "accommodation": 2}
+            }
+
+            required = required_counts[duration]
+            if len(attractions) < required["travel"]:
+                return Response(
+                    {'error': f'해당 지역의 여행지가 부족합니다 (필요: {required["travel"]}개, 현재: {len(attractions)}개)'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            if len(restaurants) < required["restaurant"]:
+                return Response(
+                    {'error': f'해당 지역의 음식점이 부족합니다 (필요: {required["restaurant"]}개, 현재: {len(restaurants)}개)'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            if len(accommodations) < required["accommodation"]:
+                return Response(
+                    {'error': f'해당 지역의 숙박시설이 부족합니다 (필요: {required["accommodation"]}개, 현재: {len(accommodations)}개)'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # AI 코스 생성
+            all_spots = list(travel_spots)
+            ai_result = ai_course_generator.generate_course(
+                region=region,
+                duration=duration,
+                themes=themes,
+                travel_spots=all_spots
+            )
+
+            # 생성된 ID 목록으로 상세 정보 조회
+            spot_ids = [item['id'] for item in ai_result['itinerary']]
+            spot_details = TravelSpot.objects.filter(id__in=spot_ids).values(
+                'id', 'name', 'content_type_id', 'description', 'address',
+                'latitude', 'longitude', 'image_url', 'tel', 'homepage'
+            )
+
+            # ID를 키로 하는 딕셔너리 생성
+            spot_dict = {spot['id']: spot for spot in spot_details}
+
+            # AI 응답에 상세 정보 추가 및 검증
+            valid_itinerary = []
+            for item in ai_result['itinerary']:
+                spot_detail = spot_dict.get(item['id'])
+                if spot_detail:
+                    item['spot_detail'] = spot_detail
+                    valid_itinerary.append(item)
+                else:
+                    # ID가 없는 경우 로그 남기고 스킵
+                    print(f"[WARNING] ID {item['id']}에 해당하는 장소를 찾을 수 없습니다")
+
+            # 유효한 일정으로 교체
+            ai_result['itinerary'] = valid_itinerary
+
+            # 최소 장소 수 확인 (기간별 최소 요구사항)
+            min_required = {
+                "당일치기": 6,
+                "1박 2일": 10,  # 최소한의 일정 (숙박 포함하면 충분)
+                "2박 3일": 15   # 최소한의 일정 (숙박 포함하면 충분)
+            }
+
+            min_count = min_required.get(duration, 6)
+            if len(valid_itinerary) < min_count:
+                invalid_count = len(ai_result['itinerary']) - len(valid_itinerary) if 'itinerary' in ai_result else 0
+                return Response(
+                    {
+                        'error': f'AI가 생성한 일정 중 일부 장소를 찾을 수 없습니다. (유효: {len(valid_itinerary)}개, 필요: {min_count}개 이상)\n다시 시도해주세요.'
+                    },
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+
+            return Response(ai_result, status=status.HTTP_200_OK)
+
+        except ValueError as e:
+            return Response(
+                {'error': f'입력 값 오류: {str(e)}'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            return Response(
+                {'error': f'AI 코스 생성 실패: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
+    def toggle_like(self, request, pk=None):
+        """
+        코스 좋아요 토글
+
+        이미 좋아요한 경우: 좋아요 취소
+        좋아요하지 않은 경우: 좋아요 추가
+
+        Response:
+            - liked: 현재 좋아요 상태 (boolean)
+            - like_count: 현재 총 좋아요 수
+        """
+        course = self.get_object()
+        user = request.user
+
+        like_obj, created = CourseLike.objects.get_or_create(
+            user=user,
+            course=course
+        )
+
+        if created:
+            # 좋아요 추가
+            course.like_count = models.F('like_count') + 1
+            course.save(update_fields=['like_count'])
+            course.refresh_from_db()
+            liked = True
+        else:
+            # 좋아요 취소
+            like_obj.delete()
+            course.like_count = models.F('like_count') - 1
+            course.save(update_fields=['like_count'])
+            course.refresh_from_db()
+            liked = False
+
+        return Response({
+            'liked': liked,
+            'like_count': course.like_count
+        })
+
+    @action(detail=True, methods=['get'], permission_classes=[permissions.IsAuthenticated])
+    def like_status(self, request, pk=None):
+        """
+        현재 사용자의 코스 좋아요 상태 조회
+
+        Response:
+            - liked: 좋아요 여부 (boolean)
+            - like_count: 총 좋아요 수
+        """
+        course = self.get_object()
+        user = request.user
+
+        liked = CourseLike.objects.filter(user=user, course=course).exists()
+
+        return Response({
+            'liked': liked,
+            'like_count': course.like_count
+        })
+
 
 class ReviewViewSet(viewsets.ModelViewSet):
     """리뷰 ViewSet"""
@@ -566,6 +785,35 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+class CheckUsernameView(APIView):
+    """아이디 중복 체크"""
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request):
+        username = request.query_params.get('username', '').strip()
+
+        if not username:
+            return Response({
+                'available': False,
+                'message': '아이디를 입력해주세요.'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # 아이디 길이 및 형식 검증
+        if len(username) < 4 or len(username) > 20:
+            return Response({
+                'available': False,
+                'message': '아이디는 4-20자여야 합니다.'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # 아이디 사용 가능 여부 확인
+        exists = User.objects.filter(username=username).exists()
+
+        return Response({
+            'available': not exists,
+            'message': '사용 가능한 아이디입니다.' if not exists else '이미 사용중인 아이디입니다.'
+        })
+
 
 class SignupView(generics.CreateAPIView):
     queryset = User.objects.all()
@@ -627,3 +875,38 @@ class MeView(generics.RetrieveAPIView):
             "disability_type": getattr(user, "disability_type", "NONE"),
             "preferred_accessibility": getattr(user, "preferred_accessibility", {}),
         })
+
+
+# 코스 댓글 API
+class CourseCommentListCreateView(generics.ListCreateAPIView):
+    """코스 댓글 목록 조회 및 생성"""
+    serializer_class = CourseCommentSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        course_id = self.kwargs['course_id']
+        return CourseComment.objects.filter(course_id=course_id, parent=None).order_by('-created_at')
+
+    def perform_create(self, serializer):
+        course_id = self.kwargs['course_id']
+        serializer.save(user=self.request.user, course_id=course_id)
+
+
+class CourseCommentDetailView(generics.RetrieveUpdateDestroyAPIView):
+    """코스 댓글 상세 조회, 수정, 삭제"""
+    queryset = CourseComment.objects.all()
+    serializer_class = CourseCommentSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return CourseComment.objects.filter(user=self.request.user)
+
+
+class CourseCommentRepliesView(generics.ListAPIView):
+    """댓글의 대댓글 목록 조회"""
+    serializer_class = CourseCommentSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        comment_id = self.kwargs['comment_id']
+        return CourseComment.objects.filter(parent_id=comment_id).order_by('created_at')

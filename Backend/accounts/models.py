@@ -14,7 +14,20 @@ class User(AbstractUser):
         ('OTHER', '기타'),
     ]
 
+    GENDER_CHOICES = [
+        ('M', '남자'),
+        ('F', '여자'),
+    ]
+
     phone = models.CharField(max_length=20, blank=True, null=True, verbose_name='전화번호')
+    birth = models.DateField(blank=True, null=True, verbose_name='생년월일')
+    gender = models.CharField(
+        max_length=1,
+        choices=GENDER_CHOICES,
+        blank=True,
+        null=True,
+        verbose_name='성별'
+    )
     disability_type = models.CharField(
         max_length=20,
         choices=DISABILITY_CHOICES,

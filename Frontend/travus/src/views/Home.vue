@@ -25,10 +25,10 @@
         <WeeklyRecommendSection @focus="handleFocus" />
       </section>
 
-      <!-- 여행 대상 섹션 -->
+      <!-- 여행 대상 섹션
       <section class="section scroll-snap-section" data-section="target">
         <TravelTargetSection @focus="handleFocus" />
-      </section>
+      </section> -->
 
       <!-- 여행지 섹션 -->
       <section class="section scroll-snap-section" data-section="destination">

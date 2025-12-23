@@ -10,6 +10,21 @@ const apiClient = axios.create({
   }
 })
 
+// 요청 인터셉터 (JWT 토큰 자동 추가)
+apiClient.interceptors.request.use(
+  (config) => {
+    // localStorage에서 토큰 가져오기
+    const token = localStorage.getItem('access_token')
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`
+    }
+    return config
+  },
+  (error) => {
+    return Promise.reject(error)
+  }
+)
+
 // 응답 인터셉터 (에러 처리)
 apiClient.interceptors.response.use(
   (response) => response,
@@ -153,6 +168,28 @@ export default {
     return apiClient.get(`/courses/${id}/`)
   },
 
+  // AI 코스 생성
+  generateAICourse(data) {
+    return apiClient.post('/courses/generate_ai_course/', data, {
+      timeout: 60000 // AI 응답을 위해 타임아웃 60초로 증가
+    })
+  },
+
+  // 코스 저장
+  saveCourse(data) {
+    return apiClient.post('/courses/', data)
+  },
+
+  // 코스 좋아요 토글
+  toggleCourseLike(courseId) {
+    return apiClient.post(`/courses/${courseId}/toggle_like/`)
+  },
+
+  // 코스 좋아요 상태 조회
+  getCourseLikeStatus(courseId) {
+    return apiClient.get(`/courses/${courseId}/like_status/`)
+  },
+
   // 리뷰 목록
   getReviews(travelSpotId) {
     return apiClient.get('/reviews/', {
@@ -163,5 +200,23 @@ export default {
   // 리뷰 작성
   createReview(data) {
     return apiClient.post('/reviews/', data)
+  },
+
+  // 코스 댓글 관련
+  getCourseComments(courseId) {
+    return apiClient.get(`/courses/${courseId}/comments/`)
+  },
+
+  createCourseComment(courseId, data) {
+    return apiClient.post(`/courses/${courseId}/comments/`, data)
+  },
+
+  deleteCourseComment(commentId) {
+    return apiClient.delete(`/comments/${commentId}/`)
+  },
+
+  // 현재 사용자 정보
+  getCurrentUser() {
+    return apiClient.get('/auth/me/')
   }
 }
