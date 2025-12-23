@@ -29,7 +29,7 @@ class TravelSpotViewSet(viewsets.ReadOnlyModelViewSet):
     retrieve: 여행지 상세 조회
     """
     queryset = TravelSpot.objects.filter(is_active=True)
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.AllowAny]
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
@@ -918,10 +918,94 @@ class ReviewViewSet(viewsets.ModelViewSet):
         if travel_spot_id:
             queryset = queryset.filter(travel_spot_id=travel_spot_id)
 
-        return queryset.select_related('user', 'travel_spot')
+        return queryset.select_related('user', 'travel_spot').order_by('-created_at')
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+    @action(detail=False, methods=['get'], permission_classes=[permissions.AllowAny])
+    def summary(self, request):
+        """AI 댓글 요약 기능"""
+        travel_spot_id = request.query_params.get('travel_spot')
+
+        if not travel_spot_id:
+            return Response(
+                {'error': 'travel_spot 파라미터가 필요합니다.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # 해당 여행지의 모든 댓글 가져오기
+        reviews = Review.objects.filter(travel_spot_id=travel_spot_id).select_related('user')
+
+        if reviews.count() == 0:
+            return Response({
+                'summary': '아직 작성된 댓글이 없습니다.',
+                'review_count': 0
+            })
+
+        # 댓글 내용 수집
+        review_texts = [f"평점 {review.rating}점: {review.content}" for review in reviews]
+        combined_text = "\n".join(review_texts)
+
+        try:
+            import requests
+            import json
+
+            gms_api_key = getattr(settings, 'GMS_API_KEY', 'S14P02EA02-e78f608f-87c7-4534-a076-6916104b3bdc')
+            gms_api_url = 'https://gms.ssafy.io/gmsapi/api.openai.com/v1/chat/completions'
+
+            response = requests.post(
+                gms_api_url,
+                headers={
+                    "Content-Type": "application/json",
+                    "Authorization": f"Bearer {gms_api_key}"
+                },
+                json={
+                    "model": "gpt-4o-mini",
+                    "messages": [
+                        {
+                            "role": "system",
+                            "content": "당신은 여행지 리뷰 분석 전문가입니다. 사용자들의 댓글을 분석하여 핵심 내용을 4줄로 간결하게 요약해주세요."
+                        },
+                        {
+                            "role": "user",
+                            "content": f"""다음은 여행지에 대한 사용자 댓글들입니다. 이 댓글들을 분석하여 4줄로 요약해주세요.
+
+댓글 내용:
+{combined_text}
+
+요약 형식:
+1. 전반적인 평가 (긍정적/부정적)
+2. 주요 장점
+3. 주요 단점 또는 개선점
+4. 방문 추천 여부
+
+4줄로 간결하게 작성해주세요."""
+                        }
+                    ],
+                    "temperature": 0.7
+                },
+                timeout=30
+            )
+
+            if response.status_code == 200:
+                ai_result = response.json()
+                summary_text = ai_result['choices'][0]['message']['content']
+
+                return Response({
+                    'summary': summary_text,
+                    'review_count': reviews.count()
+                })
+            else:
+                raise Exception(f"GMS API 호출 실패: {response.status_code}")
+
+        except Exception as e:
+            print(f"AI 요약 생성 실패: {str(e)}")
+            return Response({
+                'summary': '댓글 요약을 생성하는 중 오류가 발생했습니다.',
+                'review_count': reviews.count(),
+                'error': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class CheckUsernameView(APIView):
     """아이디 중복 체크"""

@@ -7,6 +7,7 @@
     <CourseStart
       v-if="currentStep === 'start'"
       @next="goToRegionSelect"
+      @select-course="showCourseDetail"
     />
 
     <!-- ② 지역 선택 -->
@@ -93,6 +94,47 @@ const regionNameMap = {
 
 const goToRegionSelect = () => {
   currentStep.value = 'region'
+}
+
+// 코스 상세 보기
+const showCourseDetail = async (courseId) => {
+  try {
+    const response = await api.getCourseDetail(courseId)
+    const courseData = response.data
+
+    // CourseResult에 맞는 형식으로 변환
+    const dayGroups = {}
+    courseData.course_spots.forEach(spot => {
+      const day = spot.day || 1
+      if (!dayGroups[day]) {
+        dayGroups[day] = []
+      }
+      dayGroups[day].push({
+        order: spot.order,
+        type: spot.spot_type,
+        id: spot.travel_spot.id,
+        spot: spot.travel_spot
+      })
+    })
+
+    const days = Object.keys(dayGroups).map(dayNum => ({
+      day: parseInt(dayNum),
+      spots: dayGroups[dayNum].sort((a, b) => a.order - b.order)
+    }))
+
+    generatedCourse.value = {
+      id: courseData.id,
+      title: courseData.title,
+      description: courseData.description,
+      days: days,
+      isExisting: true // 기존 코스임을 표시
+    }
+
+    currentStep.value = 'result'
+  } catch (error) {
+    console.error('코스 불러오기 실패:', error)
+    alert('코스를 불러오는데 실패했습니다.')
+  }
 }
 
 const goToDurationSelect = (regions) => {

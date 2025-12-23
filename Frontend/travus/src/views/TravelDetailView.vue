@@ -204,43 +204,57 @@
             </div>
           </div>
 
-          <!-- AI 요약 섹션 -->
-          <div class="ai-summary-section">
-            <div class="ai-summary-header">
-              <div class="ai-icon">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-                </svg>
-              </div>
-              <h3 class="ai-summary-title">AI가 빠르게 요약해주는 사용자 후기!</h3>
-              <button class="info-icon-btn">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                  <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/>
-                  <path d="M12 16v-4M12 8h.01"/>
-                </svg>
-              </button>
-            </div>
-            <div class="ai-summary-content">
-              <h4 class="ai-summary-subtitle">구름포 일몰이 가득기리</h4>
-              <p>구름포 일몰이 가득기리는 아기자기한 일본식 원림에서 건축의 간결함 토목의 거장 명작, 도대관, 명암조, 명상, 호수의 색감 좋으며 조수로 유명한 가장새로운 색감 좋고, 금전이 빛도 수십낭 추천합니다. 포토존이 많이 사진 찍기 좋고, 근처의 맛도 수없습니다. 가이드와 어우러진 다미오는 하면서 맛지만, 개다서 바라면서 바른 이유식하는 것은 종찬해요 조심하세요.</p>
-            </div>
-          </div>
-
           <!-- 댓글 섹션 -->
           <div class="comments-section">
             <div class="comments-header">
-              <h2 class="section-title">댓글 (0)</h2>
+              <h2 class="section-title">댓글 ({{ reviews.length }})</h2>
+            </div>
+
+            <!-- AI 댓글 요약 -->
+            <div class="ai-summary-section">
+              <img src="@/assets/ai_robot.png" alt="AI" class="ai-icon-img" />
+              <div class="ai-summary-text-wrapper">
+                <div class="ai-summary-header">
+                  <h3>AI가 빠르게 요약해주는 사용자 후기</h3>
+                </div>
+                <div v-if="reviews.length === 0" class="ai-summary-content">
+                  <p class="no-reviews-message">댓글이 아직 없습니다.</p>
+                </div>
+                <div v-else-if="aiSummaryLoading" class="ai-summary-loading">
+                  <div class="loading-spinner-small"></div>
+                  <p>AI가 댓글을 분석하고 있습니다...</p>
+                </div>
+                <div v-else-if="aiSummary" class="ai-summary-content">
+                  <p>{{ aiSummary }}</p>
+                </div>
+              </div>
             </div>
 
             <!-- 댓글 작성 -->
             <div class="comment-write-section">
+              <div class="comment-rating-section">
+                <span class="rating-label">평점:</span>
+                <div class="star-rating">
+                  <button
+                    v-for="star in 5"
+                    :key="star"
+                    class="star-btn"
+                    :class="{ active: star <= newReview.rating }"
+                    @click="newReview.rating = star"
+                  >
+                    ★
+                  </button>
+                </div>
+              </div>
               <textarea
+                v-model="newReview.content"
                 class="comment-textarea"
-                placeholder="로그인 후 댓글을 등록할 수 있습니다."
+                :placeholder="isLoggedIn ? '댓글을 작성해주세요.' : '로그인 후 댓글을 등록할 수 있습니다.'"
                 rows="4"
+                :disabled="!isLoggedIn"
               ></textarea>
               <div class="comment-actions">
-                <button class="comment-action-btn">
+                <button class="comment-action-btn" @click="showGuidelinesModal = true">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                     <circle cx="12" cy="12" r="10" stroke-width="2"/>
                     <path d="M12 16v-4M12 8h.01" stroke-width="2" stroke-linecap="round"/>
@@ -248,29 +262,44 @@
                   유의사항
                 </button>
                 <div class="comment-submit-group">
-                  <button class="comment-btn-secondary">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                      <path d="M12 4v16m8-8H4" stroke-width="2" stroke-linecap="round"/>
-                    </svg>
-                    사진
+                  <button class="comment-btn-primary" @click="submitReview" :disabled="!isLoggedIn || !newReview.content.trim()">
+                    등록
                   </button>
-                  <button class="comment-btn-primary">등록</button>
                 </div>
               </div>
-            </div>
-
-            <!-- 댓글 정렬 (댓글이 있을 때만 표시) -->
-            <div v-if="false" class="comment-sort">
-              <button class="sort-btn active">최신순</button>
-              <span class="sort-divider">|</span>
-              <button class="sort-btn">추천순</button>
             </div>
 
             <!-- 댓글 리스트 -->
             <div class="comment-list">
               <!-- 댓글이 없을 때 -->
-              <div class="no-comments">
+              <div v-if="reviews.length === 0" class="no-comments">
                 <p>첫 댓글을 남겨보세요!</p>
+              </div>
+
+              <!-- 댓글 아이템 -->
+              <div v-for="review in reviews" :key="review.id" class="comment-item">
+                <div class="comment-user-info">
+                  <div class="user-avatar">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </div>
+                  <div class="user-details">
+                    <span class="user-name">{{ review.user_name || review.username }}</span>
+                    <div class="review-rating">
+                      <span v-for="star in 5" :key="star" class="star" :class="{ filled: star <= review.rating }">★</span>
+                    </div>
+                  </div>
+                  <span class="comment-date">{{ formatReviewDate(review.created_at) }}</span>
+                </div>
+                <div class="comment-content">
+                  <p>{{ review.content }}</p>
+                </div>
+                <div class="comment-footer">
+                  <button v-if="canDeleteReview(review)" class="comment-delete-btn" @click="deleteReview(review.id)">
+                    삭제
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -304,6 +333,55 @@
             </button>
           </div>
           <p v-if="copySuccess" class="copy-success-message">✓ 링크가 클립보드에 복사되었습니다</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 유의사항 모달 -->
+    <div v-if="showGuidelinesModal" class="modal-overlay" @click="showGuidelinesModal = false">
+      <div class="modal-content guidelines-modal" @click.stop>
+        <div class="modal-header">
+          <h3>댓글 작성 유의사항</h3>
+          <button class="modal-close-btn" @click="showGuidelinesModal = false">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M18 6L6 18M6 6l12 12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="guidelines-content">
+            <div class="guideline-item">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M12 9v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <p>타인을 비방하거나 모욕하는 내용은 삭제될 수 있습니다.</p>
+            </div>
+            <div class="guideline-item">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M12 9v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <p>욕설, 비속어, 혐오 표현 등 부적절한 언어는 자동으로 삭제될 수 있습니다.</p>
+            </div>
+            <div class="guideline-item">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M12 9v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <p>광고성 글이나 도배성 글은 자동으로 삭제될 수 있습니다.</p>
+            </div>
+            <div class="guideline-item">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M12 9v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <p>관련 없는 내용이나 스팸성 글은 관리자에 의해 삭제될 수 있습니다.</p>
+            </div>
+            <div class="guideline-item">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M12 9v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <p>건전한 여행 커뮤니티 문화를 위해 여러분의 협조 부탁드립니다.</p>
+            </div>
+          </div>
+          <button class="guidelines-confirm-btn" @click="showGuidelinesModal = false">확인</button>
         </div>
       </div>
     </div>
@@ -360,6 +438,17 @@ const showShareModal = ref(false)
 const copySuccess = ref(false)
 const urlInput = ref(null)
 const currentUrl = ref('')
+
+// 댓글 관련
+const reviews = ref([])
+const newReview = ref({
+  rating: 5,
+  content: ''
+})
+const showGuidelinesModal = ref(false)
+const aiSummary = ref('')
+const aiSummaryLoading = ref(false)
+const isLoggedIn = ref(false)
 
 const regionMap = {
   '1': '서울',
@@ -671,11 +760,14 @@ const fetchDestinationDetail = async () => {
     error.value = err.message || '여행지 정보를 불러오는데 실패했습니다.'
   } finally {
     isLoading.value = false
+    // 댓글 로드 (에러가 있어도 댓글은 시도)
+    await loadReviews()
   }
 }
 
-onMounted(() => {
-  fetchDestinationDetail()
+onMounted(async () => {
+  await checkLoginStatus()
+  await fetchDestinationDetail()
 })
 
 // 추천 여행지 클릭 핸들러
@@ -718,6 +810,133 @@ const copyToClipboard = async () => {
         copySuccess.value = false
       }, 3000)
     }
+  }
+}
+
+// 댓글 불러오기
+const loadReviews = async () => {
+  if (!destination.value?.id) return
+
+  try {
+    const response = await api.getReviews(destination.value.id)
+    reviews.value = response.data
+
+    // 댓글이 있으면 AI 요약 로드
+    if (reviews.value.length > 0) {
+      loadAISummary()
+    }
+  } catch (error) {
+    console.error('댓글 불러오기 실패:', error)
+  }
+}
+
+// AI 요약 불러오기
+const loadAISummary = async () => {
+  if (!destination.value?.id) return
+
+  aiSummaryLoading.value = true
+  try {
+    const response = await api.getReviewSummary(destination.value.id)
+    // 실제 댓글이 있을 때만 요약 표시
+    if (response.data.review_count > 0) {
+      aiSummary.value = response.data.summary
+    }
+  } catch (error) {
+    console.error('AI 요약 불러오기 실패:', error)
+    // 에러 발생 시 aiSummary를 비워서 섹션이 표시되지 않도록 함
+  } finally {
+    aiSummaryLoading.value = false
+  }
+}
+
+// 댓글 작성
+const submitReview = async () => {
+  if (!isLoggedIn.value) {
+    alert('로그인이 필요합니다.')
+    router.push('/login')
+    return
+  }
+
+  if (!newReview.value.content.trim()) {
+    alert('댓글 내용을 입력해주세요.')
+    return
+  }
+
+  try {
+    await api.createReview({
+      travel_spot: destination.value.id,
+      rating: newReview.value.rating,
+      content: newReview.value.content
+    })
+
+    // 댓글 초기화
+    newReview.value = {
+      rating: 5,
+      content: ''
+    }
+
+    // 댓글 목록 새로고침
+    await loadReviews()
+    alert('댓글이 작성되었습니다.')
+  } catch (error) {
+    console.error('댓글 작성 실패:', error)
+    alert('댓글 작성에 실패했습니다.')
+  }
+}
+
+// 댓글 삭제
+const deleteReview = async (reviewId) => {
+  if (!confirm('정말 삭제하시겠습니까?')) return
+
+  try {
+    await api.deleteReview(reviewId)
+    await loadReviews()
+    alert('댓글이 삭제되었습니다.')
+  } catch (error) {
+    console.error('댓글 삭제 실패:', error)
+    alert('댓글 삭제에 실패했습니다.')
+  }
+}
+
+// 댓글 삭제 권한 확인
+const canDeleteReview = (review) => {
+  // 로그인 안 했으면 false
+  if (!isLoggedIn.value) return false
+
+  // 본인 댓글이면 true (username 또는 user_name으로 확인)
+  const currentUsername = localStorage.getItem('username')
+  return review.user_name === currentUsername || review.username === currentUsername
+}
+
+// 댓글 날짜 포맷
+const formatReviewDate = (dateString) => {
+  const date = new Date(dateString)
+  const now = new Date()
+  const diffMs = now - date
+  const diffMinutes = diffMs / 60000
+
+  if (diffMinutes < 1) return '방금 전'
+  if (diffMinutes < 60) return `${Math.floor(diffMinutes)}분 전`
+
+  const diffHours = diffMinutes / 60
+  if (diffHours < 24) return `${Math.floor(diffHours)}시간 전`
+
+  const diffDays = diffHours / 24
+  if (diffDays < 7) return `${Math.floor(diffDays)}일 전`
+
+  return date.toLocaleDateString('ko-KR')
+}
+
+// 로그인 상태 체크
+const checkLoginStatus = async () => {
+  try {
+    const token = localStorage.getItem('access_token')
+    if (token) {
+      await api.getCurrentUser()
+      isLoggedIn.value = true
+    }
+  } catch (error) {
+    isLoggedIn.value = false
   }
 }
 
@@ -1663,5 +1882,224 @@ watch(() => route.params.id, (newId, oldId) => {
   .comment-submit-group {
     justify-content: flex-end;
   }
+}
+
+/* AI 요약 섹션 */
+.ai-summary-section {
+  background: linear-gradient(135deg, #dbeafe 0%, #e0f2fe 50%, #ede9fe 100%);
+  border: 2px solid #bfdbfe;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+}
+
+.ai-icon-img {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.ai-summary-text-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.ai-summary-header {
+  display: flex;
+  align-items: center;
+}
+
+.ai-summary-header h3 {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.ai-summary-loading {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 0;
+}
+
+.ai-summary-loading p {
+  color: #6b7280;
+  margin: 0;
+}
+
+.loading-spinner-small {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #e5e7eb;
+  border-top-color: #667eea;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.ai-summary-content p {
+  margin: 0;
+  line-height: 1.8;
+  font-size: 0.95rem;
+  white-space: pre-wrap;
+  color: #374151;
+}
+
+/* 별점 섹션 */
+.comment-rating-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.rating-label {
+  font-weight: 600;
+  color: #374151;
+  font-size: 0.95rem;
+}
+
+.star-rating {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.star-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #d1d5db;
+  cursor: pointer;
+  transition: all 0.2s;
+  padding: 0;
+}
+
+.star-btn.active {
+  color: #fbbf24;
+}
+
+.star-btn:hover {
+  transform: scale(1.1);
+}
+
+/* 댓글 아이템 별점 */
+.review-rating {
+  display: flex;
+  gap: 0.125rem;
+  margin-top: 0.25rem;
+}
+
+.review-rating .star {
+  color: #d1d5db;
+  font-size: 0.875rem;
+}
+
+.review-rating .star.filled {
+  color: #fbbf24;
+}
+
+/* 댓글 삭제 버튼 */
+.comment-delete-btn {
+  padding: 0.25rem 0.75rem;
+  background: none;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  color: #ef4444;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.comment-delete-btn:hover {
+  background: #fef2f2;
+  border-color: #ef4444;
+}
+
+/* 유의사항 모달 */
+.guidelines-modal {
+  max-width: 500px;
+}
+
+.guidelines-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.guideline-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: #f9fafb;
+  border-radius: 8px;
+}
+
+.guideline-item svg {
+  flex-shrink: 0;
+  color: #667eea;
+  margin-top: 0.125rem;
+}
+
+.guideline-item p {
+  margin: 0;
+  color: #374151;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.guidelines-confirm-btn {
+  width: 100%;
+  padding: 0.75rem;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.guidelines-confirm-btn:hover {
+  background: #5568d3;
+}
+
+/* 사용자 아바타 */
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #f3f4f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.user-avatar svg {
+  color: #9ca3af;
+}
+
+/* disabled 상태 */
+.comment-btn-primary:disabled {
+  background: #d1d5db;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.comment-btn-primary:disabled:hover {
+  background: #d1d5db;
+}
+
+.comment-textarea:disabled {
+  background: #f3f4f6;
+  cursor: not-allowed;
 }
 </style>

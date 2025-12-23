@@ -224,6 +224,18 @@ export default {
     return apiClient.post('/reviews/', data)
   },
 
+  // 리뷰 삭제
+  deleteReview(reviewId) {
+    return apiClient.delete(`/reviews/${reviewId}/`)
+  },
+
+  // AI 리뷰 요약
+  getReviewSummary(travelSpotId) {
+    return apiClient.get('/reviews/summary/', {
+      params: { travel_spot: travelSpotId }
+    })
+  },
+
   // 코스 댓글 관련
   getCourseComments(courseId) {
     return apiClient.get(`/courses/${courseId}/comments/`)

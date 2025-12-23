@@ -12,7 +12,7 @@
             1분이면 끝! 나만을 위한 여행 코스 추천
           </p>
           <div class="button-group">
-            <button class="btn-primary" @click="$emit('next')">
+            <button class="btn-primary" @click="handleCreateCourse">
               코스만들기
               <span class="arrow">→</span>
             </button>
@@ -135,7 +135,7 @@ import { useRouter } from 'vue-router'
 import api from '@/services/api'
 import { useAuthStore } from '@/stores/auth'
 
-defineEmits(['next'])
+const emit = defineEmits(['next', 'select-course'])
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -170,6 +170,16 @@ const regions = [
   { code: '38', name: '전남' },
   { code: '39', name: '제주' }
 ]
+
+// 코스 만들기 버튼 클릭
+const handleCreateCourse = () => {
+  if (!authStore.isLoggedIn) {
+    alert('코스 만들기는 로그인이 필요합니다.')
+    router.push('/login')
+    return
+  }
+  emit('next')
+}
 
 // 카테고리 변경 시 코스 로드
 const selectCategory = async (categoryId) => {
@@ -208,12 +218,15 @@ const loadCourses = async () => {
     courses.value = response.data.results || response.data
   } catch (error) {
     console.error('코스 불러오기 실패:', error)
-    if (error.response?.status === 401) {
+    if (error.response?.status === 401 && selectedCategory.value === 'my-course') {
+      // 나의 여행코스만 401 에러 시 로그인 페이지로 이동
       alert('로그인이 필요합니다.')
       router.push('/login')
-    } else {
+    } else if (error.response?.status !== 401) {
+      // 401이 아닌 다른 에러만 알림
       alert('코스를 불러오는데 실패했습니다.')
     }
+    // 다른 탭에서 401이 나면 그냥 빈 배열로 처리
   } finally {
     loading.value = false
   }
@@ -236,7 +249,7 @@ const handleImageError = (e) => {
 
 // 코스 상세로 이동
 const goToCourseDetail = (courseId) => {
-  router.push(`/course-detail/${courseId}`)
+  emit('select-course', courseId)
 }
 
 // 날짜 포맷
