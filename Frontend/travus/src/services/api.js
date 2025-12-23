@@ -180,9 +180,31 @@ export default {
     return apiClient.post('/courses/', data)
   },
 
+  // 나의 여행코스 조회
+  getMyCourses() {
+    return apiClient.get('/courses/my_courses/')
+  },
+
+  // 월간 Best 30 코스
+  getMonthlyBestCourses() {
+    return apiClient.get('/courses/monthly_best/')
+  },
+
+  // 지역별 사용자 코스
+  getCoursesByRegion(areaCode) {
+    return apiClient.get('/courses/by_region/', {
+      params: { area_code: areaCode }
+    })
+  },
+
+  // 코스 상세 조회
+  getCourseDetail(courseId) {
+    return apiClient.get(`/courses/${courseId}/`)
+  },
+
   // 코스 좋아요 토글
   toggleCourseLike(courseId) {
-    return apiClient.post(`/courses/${courseId}/toggle_like/`)
+    return apiClient.post(`/courses/${courseId}/like/`)
   },
 
   // 코스 좋아요 상태 조회

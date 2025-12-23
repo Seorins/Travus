@@ -4,23 +4,26 @@ const STORAGE_KEY = 'travus-auth'
 
 const loadState = () => {
   if (typeof window === 'undefined') {
-    return { users: [], currentUser: null, isLoggedIn: false }
+    return { users: [], currentUser: null, isLoggedIn: false, token: null }
   }
 
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY)
+    const token = window.localStorage.getItem('access_token')
+
     if (!raw) {
-      return { users: [], currentUser: null, isLoggedIn: false }
+      return { users: [], currentUser: null, isLoggedIn: !!token, token }
     }
 
     const parsed = JSON.parse(raw)
     return {
       users: Array.isArray(parsed.users) ? parsed.users : [],
       currentUser: parsed.currentUser || null,
-      isLoggedIn: Boolean(parsed.isLoggedIn)
+      isLoggedIn: Boolean(parsed.isLoggedIn) || !!token,
+      token: token || parsed.token || null
     }
   } catch {
-    return { users: [], currentUser: null, isLoggedIn: false }
+    return { users: [], currentUser: null, isLoggedIn: false, token: null }
   }
 }
 
@@ -30,7 +33,8 @@ const saveState = (state, storage = window.localStorage) => {
   const payload = {
     users: state.users,
     currentUser: state.currentUser,
-    isLoggedIn: state.isLoggedIn
+    isLoggedIn: state.isLoggedIn,
+    token: state.token
   }
 
   storage.setItem(STORAGE_KEY, JSON.stringify(payload))
@@ -41,6 +45,18 @@ export const useAuthStore = defineStore('auth', {
     ...loadState()
   }),
   actions: {
+    // JWT 토큰 기반 사용자 정보 설정
+    setUser(user) {
+      this.currentUser = user
+      this.isLoggedIn = true
+      saveState(this)
+    },
+    // JWT 토큰 설정
+    setToken(token) {
+      this.token = token
+      this.isLoggedIn = true
+      saveState(this)
+    },
     signUp({ username, password, name, phone, email = '', birth = '', gender = '' }) {
       const exists = this.users.some((user) => user.username === username)
       if (exists) {
@@ -91,8 +107,11 @@ export const useAuthStore = defineStore('auth', {
     logout() {
       this.currentUser = null
       this.isLoggedIn = false
+      this.token = null
       if (typeof window !== 'undefined') {
         window.localStorage.removeItem(STORAGE_KEY)
+        window.localStorage.removeItem('access_token')
+        window.localStorage.removeItem('refresh_token')
         window.sessionStorage.removeItem(STORAGE_KEY)
       }
     },

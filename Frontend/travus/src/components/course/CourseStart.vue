@@ -33,49 +33,96 @@
           :key="category.id"
           class="tab-btn"
           :class="{ active: selectedCategory === category.id }"
-          @click="selectedCategory = category.id"
+          @click="selectCategory(category.id)"
         >
-          <span class="tab-icon">{{ category.icon }}</span>
           {{ category.name }}
         </button>
       </div>
     </div>
 
-    <!-- Best 30 섹션 -->
-    <div class="best30-section">
-      <div class="container">
+    <!-- 지역 선택 (지역별 탭에서만 표시) -->
+    <div v-if="selectedCategory === 'regional'" class="region-selector-wrapper">
+      <div class="region-selector">
+        <button
+          v-for="region in regions"
+          :key="region.code"
+          class="region-btn"
+          :class="{ active: selectedRegion === region.code }"
+          @click="selectRegion(region.code)"
+        >
+          {{ region.name }}
+        </button>
+      </div>
+    </div>
 
+    <!-- 코스 목록 섹션 -->
+    <div class="courses-section">
+      <div class="container">
         <!-- 섹션 제목 -->
         <div class="section-header">
-          <h2 class="section-title">월간 Best 30</h2>
-          <button class="info-btn">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <circle cx="12" cy="12" r="10" stroke-width="2"/>
-              <path d="M12 16v-4M12 8h.01" stroke-width="2" stroke-linecap="round"/>
-            </svg>
-          </button>
+          <h2 class="section-title">
+            {{ selectedCategory === 'my-course' ? '나의 여행코스' : selectedCategory === 'best30' ? '월간 Best 30' : '지역별 사용자코스' }}
+          </h2>
         </div>
 
-        <!-- 카드 그리드 -->
-        <div class="cards-grid">
+        <!-- 로딩 -->
+        <div v-if="loading" class="loading">
+          <i class="fa fa-spinner fa-spin"></i>
+          <p>코스를 불러오는 중...</p>
+        </div>
+
+        <!-- 코스 카드 그리드 -->
+        <div v-else-if="courses.length > 0" class="cards-grid">
           <div
-            v-for="item in bestItems"
-            :key="item.id"
-            class="destination-card"
+            v-for="course in courses"
+            :key="course.id"
+            class="course-card"
+            @click="goToCourseDetail(course.id)"
           >
             <div class="card-image">
-              <img :src="item.image" :alt="item.name" />
-              <button class="accessibility-badge" v-if="item.accessible">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
-                </svg>
-              </button>
+              <img :src="getCourseThumbnail(course)" :alt="course.title" @error="handleImageError" />
+              <div class="course-overlay">
+                <span class="spot-count">{{ course.course_spots ? course.course_spots.length : 0 }}개 장소</span>
+              </div>
             </div>
             <div class="card-content">
-              <h3 class="card-title">{{ item.name }}</h3>
-              <p class="card-location">{{ item.location }}</p>
+              <h3 class="card-title">{{ course.title }}</h3>
+              <p class="card-description">{{ course.description }}</p>
+
+              <!-- 작성자 정보 -->
+              <div class="course-meta">
+                <span class="author">
+                  <i class="fa fa-user"></i>
+                  {{ course.user_name || course.username }}
+                </span>
+                <span class="date">{{ formatDate(course.created_at) }}</span>
+              </div>
+
+              <!-- 통계 -->
+              <div class="course-stats">
+                <span class="stat-item">
+                  <i class="fa fa-thumbs-up"></i>
+                  {{ course.like_count }}
+                </span>
+                <span class="stat-item">
+                  <i class="fa fa-eye"></i>
+                  {{ course.view_count }}
+                </span>
+                <span class="stat-item">
+                  <i class="fa fa-comment"></i>
+                  {{ course.comments_count || 0 }}
+                </span>
+              </div>
             </div>
           </div>
+        </div>
+
+        <!-- 빈 상태 -->
+        <div v-else class="empty-state">
+          <i class="fa fa-map-o"></i>
+          <p v-if="selectedCategory === 'my-course'">아직 생성한 코스가 없습니다.</p>
+          <p v-else-if="selectedCategory === 'best30'">아직 등록된 코스가 없습니다.</p>
+          <p v-else>이 지역에 등록된 코스가 없습니다.</p>
         </div>
       </div>
     </div>
@@ -83,11 +130,20 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import api from '@/services/api'
+import { useAuthStore } from '@/stores/auth'
 
 defineEmits(['next'])
 
-const selectedCategory = ref('my-course')
+const router = useRouter()
+const authStore = useAuthStore()
+
+const selectedCategory = ref('best30')
+const selectedRegion = ref('1')
+const courses = ref([])
+const loading = ref(false)
 
 const categories = [
   { id: 'my-course', name: '나의 여행코스' },
@@ -95,36 +151,113 @@ const categories = [
   { id: 'regional', name: '지역별 사용자코스' }
 ]
 
-const bestItems = [
-  {
-    id: 1,
-    name: '소수서원',
-    location: '경상북도 영주시',
-    image: 'https://via.placeholder.com/400x300',
-    accessible: true
-  },
-  {
-    id: 2,
-    name: '대진등대',
-    location: '강원도 속초시',
-    image: 'https://via.placeholder.com/400x300',
-    accessible: false
-  },
-  {
-    id: 3,
-    name: '대구미술관',
-    location: '대구광역시',
-    image: 'https://via.placeholder.com/400x300',
-    accessible: true
-  },
-  {
-    id: 4,
-    name: '청량산',
-    location: '경상북도 봉화군',
-    image: 'https://via.placeholder.com/400x300',
-    accessible: true
-  }
+const regions = [
+  { code: '1', name: '서울' },
+  { code: '2', name: '인천' },
+  { code: '3', name: '대전' },
+  { code: '4', name: '대구' },
+  { code: '5', name: '광주' },
+  { code: '6', name: '부산' },
+  { code: '7', name: '울산' },
+  { code: '8', name: '세종' },
+  { code: '31', name: '경기' },
+  { code: '32', name: '강원' },
+  { code: '33', name: '충북' },
+  { code: '34', name: '충남' },
+  { code: '35', name: '경북' },
+  { code: '36', name: '경남' },
+  { code: '37', name: '전북' },
+  { code: '38', name: '전남' },
+  { code: '39', name: '제주' }
 ]
+
+// 카테고리 변경 시 코스 로드
+const selectCategory = async (categoryId) => {
+  if (categoryId === 'my-course' && !authStore.isLoggedIn) {
+    alert('로그인이 필요합니다.')
+    router.push('/login')
+    return
+  }
+
+  selectedCategory.value = categoryId
+  await loadCourses()
+}
+
+// 지역 선택
+const selectRegion = async (regionCode) => {
+  selectedRegion.value = regionCode
+  await loadCourses()
+}
+
+// 코스 로드
+const loadCourses = async () => {
+  loading.value = true
+  courses.value = []
+
+  try {
+    let response
+
+    if (selectedCategory.value === 'my-course') {
+      response = await api.getMyCourses()
+    } else if (selectedCategory.value === 'best30') {
+      response = await api.getMonthlyBestCourses()
+    } else if (selectedCategory.value === 'regional') {
+      response = await api.getCoursesByRegion(selectedRegion.value)
+    }
+
+    courses.value = response.data.results || response.data
+  } catch (error) {
+    console.error('코스 불러오기 실패:', error)
+    if (error.response?.status === 401) {
+      alert('로그인이 필요합니다.')
+      router.push('/login')
+    } else {
+      alert('코스를 불러오는데 실패했습니다.')
+    }
+  } finally {
+    loading.value = false
+  }
+}
+
+// 코스 썸네일 가져오기
+const getCourseThumbnail = (course) => {
+  if (course.course_spots && course.course_spots.length > 0) {
+    const firstSpot = course.course_spots[0].travel_spot
+    if (firstSpot && firstSpot.image_url) return firstSpot.image_url
+    if (firstSpot && firstSpot.thumbnail_url) return firstSpot.thumbnail_url
+  }
+  return 'https://via.placeholder.com/400x300?text=No+Image'
+}
+
+// 이미지 에러 처리
+const handleImageError = (e) => {
+  e.target.src = 'https://via.placeholder.com/400x300?text=No+Image'
+}
+
+// 코스 상세로 이동
+const goToCourseDetail = (courseId) => {
+  router.push(`/course-detail/${courseId}`)
+}
+
+// 날짜 포맷
+const formatDate = (dateString) => {
+  const date = new Date(dateString)
+  const now = new Date()
+  const diffMs = now - date
+  const diffDays = diffMs / 86400000
+
+  if (diffDays < 1) return '오늘'
+  if (diffDays < 2) return '어제'
+  if (diffDays < 7) return diffDays.toFixed(0) + '일 전'
+  if (diffDays < 30) return (diffDays / 7).toFixed(0) + '주 전'
+
+  return date.toLocaleDateString('ko-KR')
+}
+
+// 초기 로드
+onMounted(async () => {
+  await loadCourses()
+})
 </script>
 
 <style scoped>
@@ -550,5 +683,180 @@ const bestItems = [
   .cards-grid {
     grid-template-columns: 1fr;
   }
+}
+
+/* 지역 선택 */
+.region-selector-wrapper {
+  background: #f8f9fa;
+  padding: 1.5rem 2rem 0;
+}
+
+.region-selector {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  max-width: 1400px;
+  margin: 0 auto;
+  justify-content: center;
+}
+
+.region-btn {
+  padding: 0.5rem 1rem;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  color: #4a5568;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.region-btn:hover {
+  border-color: #2c3e7a;
+  color: #2c3e7a;
+}
+
+.region-btn.active {
+  background: #2c3e7a;
+  border-color: #2c3e7a;
+  color: white;
+}
+
+/* 코스 섹션 */
+.courses-section {
+  background: #f8f9fa;
+  padding: 3rem 0 4rem;
+}
+
+/* 로딩 */
+.loading {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: #718096;
+}
+
+.loading i {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  color: #2c3e7a;
+}
+
+.loading p {
+  font-size: 1rem;
+  margin: 0;
+}
+
+/* 코스 카드 */
+.course-card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.course-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+}
+
+.course-card .card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.course-card:hover .card-image img {
+  transform: scale(1.1);
+}
+
+.course-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 0.75rem;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
+}
+
+.spot-count {
+  color: white;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.card-description {
+  font-size: 0.875rem;
+  color: #718096;
+  margin: 0 0 0.75rem 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-height: 1.5;
+}
+
+.course-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 0.8rem;
+}
+
+.author {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: #718096;
+}
+
+.author i {
+  color: #2c3e7a;
+}
+
+.date {
+  font-size: 0.75rem;
+  color: #a0aec0;
+}
+
+.course-stats {
+  display: flex;
+  gap: 1rem;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.8rem;
+  color: #718096;
+}
+
+.stat-item i {
+  color: #2c3e7a;
+}
+
+/* 빈 상태 */
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+}
+
+.empty-state i {
+  font-size: 4rem;
+  color: #cbd5e0;
+  margin-bottom: 1rem;
+}
+
+.empty-state p {
+  font-size: 1rem;
+  color: #a0aec0;
+  margin: 0;
 }
 </style>
