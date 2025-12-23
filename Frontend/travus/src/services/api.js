@@ -1,6 +1,10 @@
 import axios from 'axios'
 
+// ngrok 등 외부 도메인을 사용할 때는 VITE_API_BASE_URL / VITE_AI_BASE_URL을 절대경로(https://...)로 설정하세요.
+// 미설정 시 로컬 백엔드로 기본 동작합니다.
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api'
+const API_ROOT_URL = API_BASE_URL.replace(/\/api\/?$/, '')
+const AI_BASE_URL = import.meta.env.VITE_AI_BASE_URL || `${API_ROOT_URL}/ai`
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -24,12 +28,27 @@ apiClient.interceptors.request.use(
     return Promise.reject(error)
   }
 )
+const aiClient = axios.create({
+  baseURL: AI_BASE_URL,
+  timeout: 10000,
+  headers: {
+    'Content-Type': 'application/json'
+  }
+})
 
 // 응답 인터셉터 (에러 처리)
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     console.error('API Error:', error)
+    return Promise.reject(error)
+  }
+)
+
+aiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    console.error('AI API Error:', error)
     return Promise.reject(error)
   }
 )
@@ -218,5 +237,22 @@ export default {
   // 현재 사용자 정보
   getCurrentUser() {
     return apiClient.get('/auth/me/')
+  // ==========================
+  // AI 카메라
+  // ==========================
+  analyzeImage(formData) {
+    return aiClient.post('/image/', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    })
+  },
+
+  chatAI(data) {
+    return aiClient.post('/chat/', data)
+  },
+
+  transcribeAudio(formData) {
+    return aiClient.post('/speech/', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    })
   }
 }

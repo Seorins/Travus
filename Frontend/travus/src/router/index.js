@@ -10,6 +10,7 @@ import MyPageView from '@/views/MyPageView.vue'
 import PersonalInfoView from '@/views/PersonalInfoView.vue'
 import CommentsView from '@/views/CommentsView.vue'
 import ErrorView from '@/views/ErrorView.vue'
+import CameraView from '@/views/CameraView.vue'
 import { useAuthStore } from '@/stores/auth'
 
 const router = createRouter({
@@ -39,6 +40,11 @@ const router = createRouter({
       path: '/course',
       name: 'course',
       component: CourseView
+    },
+    {
+      path: '/camera',
+      name: 'camera',
+      component: CameraView
     },
     {
       path: '/login',
