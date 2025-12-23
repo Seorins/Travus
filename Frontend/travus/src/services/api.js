@@ -153,6 +153,18 @@ export default {
     return apiClient.get(`/courses/${id}/`)
   },
 
+  // AI 코스 생성
+  generateAICourse(data) {
+    return apiClient.post('/courses/generate_ai_course/', data, {
+      timeout: 60000 // AI 응답을 위해 타임아웃 60초로 증가
+    })
+  },
+
+  // 코스 저장
+  saveCourse(data) {
+    return apiClient.post('/courses/', data)
+  },
+
   // 리뷰 목록
   getReviews(travelSpotId) {
     return apiClient.get('/reviews/', {
