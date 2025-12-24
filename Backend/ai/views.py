@@ -12,10 +12,24 @@ GMS_BASE_URL = os.getenv('GMS_BASE_URL', 'https://gms.ssafy.io/gmsapi/api.openai
 GMS_KEY = os.getenv('GMS_KEY')
 OPENAI_KEY = os.getenv('OPENAI_API_KEY') or settings.OPENAI_API_KEY
 
-# 텍스트/이미지용 기본 클라이언트 (일반 OpenAI 키)
-chat_client = OpenAI(api_key=OPENAI_KEY)
-# 음성 변환은 GMS 키가 있으면 GMS 경로로, 없으면 기본 클라이언트 재사용
-audio_client = OpenAI(api_key=GMS_KEY, base_url=GMS_BASE_URL) if GMS_KEY else chat_client
+# Prefer SSAFY gateway if available; otherwise call OpenAI directly
+chat_client = OpenAI(api_key=GMS_KEY, base_url=GMS_BASE_URL) if GMS_KEY else OpenAI(api_key=OPENAI_KEY)
+audio_client = OpenAI(api_key=GMS_KEY, base_url=GMS_BASE_URL) if GMS_KEY else OpenAI(api_key=OPENAI_KEY)
+
+
+def handle_ai_error(exc, fallback_message):
+    """
+    Map common AI errors (e.g., quota) to clearer client responses.
+    """
+    status = getattr(exc, "status_code", None)
+    detail_text = str(exc)
+    if not status and hasattr(exc, "response") and hasattr(exc.response, "status_code"):
+        status = exc.response.status_code
+
+    if status == 429 or "insufficient_quota" in detail_text.lower() or "quota" in detail_text.lower():
+        return Response({"error": "AI quota exceeded. Please try again later.", "detail": detail_text}, status=429)
+
+    return Response({"error": fallback_message, "detail": detail_text}, status=503)
 
 
 @api_view(['POST'])
@@ -46,7 +60,7 @@ def analyze_image(request):
         )
         return Response({"result": response.output_text})
     except Exception as e:
-        return Response({"error": "Image analysis failed.", "detail": str(e)}, status=500)
+        return handle_ai_error(e, "Image analysis failed.")
 
 
 @api_view(['POST'])
@@ -65,7 +79,7 @@ def chat_ai(request):
             messages=[
                 {
                     "role": "system",
-                    "content": "너는 여행 안내원이다. 한국어로 간결하게 답변해라."
+                    "content": "너는 여행 안내원이야. 한국어로 간결하게 답변해라."
                 },
                 {
                     "role": "user",
@@ -78,7 +92,7 @@ def chat_ai(request):
         answer = completion.choices[0].message.content if completion.choices else ""
         return Response({"answer": answer})
     except Exception as e:
-        return Response({"error": "AI response failed.", "detail": str(e)}, status=500)
+        return handle_ai_error(e, "AI response failed.")
 
 
 @api_view(['POST'])
@@ -115,7 +129,7 @@ def transcribe_audio(request):
             )
         return Response({"text": transcript.text})
     except Exception as e:
-        return Response({"error": "Audio transcription failed.", "detail": str(e)}, status=500)
+        return handle_ai_error(e, "Audio transcription failed.")
     finally:
         if tmp_path and os.path.exists(tmp_path):
             try:
