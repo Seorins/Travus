@@ -58,7 +58,6 @@
           </div>
 
           <div class="controls">
-            <button class="ghost-btn" @click="startCamera" @focus="handleFocus">다시 연결</button>
             <button class="primary-btn" :disabled="captureDisabled" @click="capturePhoto" @focus="handleFocus">
               {{ analysisLoading ? '분석 중...' : '캡처 및 분석' }}
             </button>
@@ -158,6 +157,55 @@ const mediaRecorder = ref(null)
 const audioChunks = ref([])
 const voiceError = ref('')
 
+const MAX_IMAGE_DIMENSION = 900
+const JPEG_QUALITY = 0.7
+
+const getScaledSize = (width, height) => {
+  const maxDim = Math.max(width || MAX_IMAGE_DIMENSION, height || MAX_IMAGE_DIMENSION)
+  if (maxDim <= MAX_IMAGE_DIMENSION) return { width: width || MAX_IMAGE_DIMENSION, height: height || MAX_IMAGE_DIMENSION }
+  const scale = MAX_IMAGE_DIMENSION / maxDim
+  return { width: Math.round((width || MAX_IMAGE_DIMENSION) * scale), height: Math.round((height || MAX_IMAGE_DIMENSION) * scale) }
+}
+
+const compressCanvasToBlob = (canvas) =>
+  new Promise((resolve, reject) => {
+    canvas.toBlob(
+      (blob) => {
+        if (!blob) return reject(new Error('Failed to create image blob'))
+        resolve(blob)
+      },
+      'image/jpeg',
+      JPEG_QUALITY
+    )
+  })
+
+const resizeImageFile = (file) =>
+  new Promise((resolve, reject) => {
+    const img = new Image()
+    const url = URL.createObjectURL(file)
+    img.onload = async () => {
+      try {
+        const { width, height } = getScaledSize(img.width, img.height)
+        const canvas = document.createElement('canvas')
+        canvas.width = width
+        canvas.height = height
+        const ctx = canvas.getContext('2d')
+        ctx.drawImage(img, 0, 0, width, height)
+        const blob = await compressCanvasToBlob(canvas)
+        resolve(new File([blob], file.name.replace(/\.[^.]+$/, '') + '.jpg', { type: 'image/jpeg' }))
+      } catch (err) {
+        reject(err)
+      } finally {
+        URL.revokeObjectURL(url)
+      }
+    }
+    img.onerror = () => {
+      URL.revokeObjectURL(url)
+      reject(new Error('Failed to load image'))
+    }
+    img.src = url
+  })
+
 const handleFocus = (text) => {
   const spoken = typeof text === 'string' ? text : (text?.target?.innerText || text?.target?.value)
   if (spoken && isTTSEnabled.value) {
@@ -206,38 +254,35 @@ const stopCamera = () => {
 
 const captureDisabled = computed(() => !isStreaming.value || analysisLoading.value)
 
-const capturePhoto = () => {
+const capturePhoto = async () => {
   if (!videoRef.value) return
 
   const video = videoRef.value
   const canvas = canvasRef.value
-  const width = video.videoWidth || 720
-  const height = video.videoHeight || 480
-
+  const { width, height } = getScaledSize(video.videoWidth || 720, video.videoHeight || 480)
   canvas.width = width
   canvas.height = height
   const ctx = canvas.getContext('2d')
   ctx.drawImage(video, 0, 0, width, height)
 
-  canvas.toBlob(async (blob) => {
-    if (!blob) return
-    if (capturedImage.value) {
-      URL.revokeObjectURL(capturedImage.value)
-    }
-    capturedImage.value = URL.createObjectURL(blob)
-    const file = new File([blob], 'capture.png', { type: 'image/png' })
-    await sendForAnalysis(file)
-  }, 'image/png')
-}
-
-const handleFileUpload = async (event) => {
-  const file = event.target.files?.[0]
-  if (!file) return
+  const blob = await compressCanvasToBlob(canvas)
   if (capturedImage.value) {
     URL.revokeObjectURL(capturedImage.value)
   }
-  capturedImage.value = URL.createObjectURL(file)
+  capturedImage.value = URL.createObjectURL(blob)
+  const file = new File([blob], 'capture.jpg', { type: 'image/jpeg' })
   await sendForAnalysis(file)
+}
+
+const handleFileUpload = async (event) => {
+  const originalFile = event.target.files?.[0]
+  if (!originalFile) return
+  if (capturedImage.value) {
+    URL.revokeObjectURL(capturedImage.value)
+  }
+  const processedFile = await resizeImageFile(originalFile)
+  capturedImage.value = URL.createObjectURL(processedFile)
+  await sendForAnalysis(processedFile)
 }
 
 const sendForAnalysis = async (file) => {
@@ -326,8 +371,7 @@ const toggleRecording = async () => {
 
     recorder.start()
     isRecording.value = true
-    statusMessage.value = '녹음 중입니다. 질문을 말씀해 주세요.'
-    if (isTTSEnabled.value) speak('녹음이 시작되었습니다. 질문을 말씀해 주세요.')
+    statusMessage.value = ''
   } catch (error) {
     console.error(error)
     voiceError.value = '마이크 권한을 확인해주세요.'
