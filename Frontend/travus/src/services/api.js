@@ -191,9 +191,12 @@ export default {
   },
 
   // 지역별 사용자 코스
-  getCoursesByRegion(areaCode) {
+  getCoursesByRegion(areaCode, ordering = 'likes') {
     return apiClient.get('/courses/by_region/', {
-      params: { area_code: areaCode }
+      params: {
+        area_code: areaCode,
+        ordering: ordering
+      }
     })
   },
 
@@ -222,6 +225,18 @@ export default {
   // 리뷰 작성
   createReview(data) {
     return apiClient.post('/reviews/', data)
+  },
+
+  // 리뷰 삭제
+  deleteReview(reviewId) {
+    return apiClient.delete(`/reviews/${reviewId}/`)
+  },
+
+  // AI 리뷰 요약
+  getReviewSummary(travelSpotId) {
+    return apiClient.get('/reviews/summary/', {
+      params: { travel_spot: travelSpotId }
+    })
   },
 
   // 코스 댓글 관련
