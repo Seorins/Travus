@@ -31,7 +31,7 @@
             </div>
             <div class="card-body">
               <p>실시간 분석</p>
-              <h3>GPT가 여행지를 설명합니다</h3>
+              <h3>AI가 여행지를 설명합니다</h3>
             </div>
           </div>
           <div class="floating-card secondary">
@@ -428,7 +428,7 @@ onBeforeUnmount(() => {
 <style scoped>
 .camera-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #c8e9ff, #f6edff);
+  background: linear-gradient(135deg, #94b6cc, #f6edff);
   color: #0f172a;
 }
 

@@ -35,8 +35,9 @@ class TravelSpotListSerializer(serializers.ModelSerializer):
     class Meta:
         model = TravelSpot
         fields = [
-            'id', 'content_id', 'name', 'category_name',
-            'address', 'area_code', 'image_url', 'thumbnail_url',
+            'id', 'content_id', 'content_type_id', 'name', 'category_name',
+            'address', 'area_code', 'latitude', 'longitude',
+            'image_url', 'thumbnail_url', 'tel',
             'rating', 'review_count', 'view_count', 'bookmark_count',
             'is_bookmarked'
         ]
@@ -44,12 +45,18 @@ class TravelSpotListSerializer(serializers.ModelSerializer):
     def get_is_bookmarked(self, obj):
         """현재 사용자가 이 여행지를 북마크했는지 여부"""
         request = self.context.get('request')
-        if request and request.user.is_authenticated:
-            return Bookmark.objects.filter(
-                user=request.user,
-                travel_spot=obj
-            ).exists()
-        return False
+        if not request or not request.user.is_authenticated:
+            return False
+
+        # prefetched bookmarks가 있으면 사용 (N+1 쿼리 방지)
+        if hasattr(obj, '_user_bookmarked'):
+            return obj._user_bookmarked
+
+        # 없으면 직접 조회
+        return Bookmark.objects.filter(
+            user=request.user,
+            travel_spot=obj
+        ).exists()
 
 
 class TravelSpotDetailSerializer(serializers.ModelSerializer):
@@ -195,7 +202,7 @@ class CourseCommentSerializer(serializers.ModelSerializer):
             'id', 'user', 'username', 'course', 'content',
             'parent', 'replies_count', 'created_at', 'updated_at'
         ]
-        read_only_fields = ['user', 'created_at', 'updated_at']
+        read_only_fields = ['user', 'course', 'created_at', 'updated_at']
 
     def get_replies_count(self, obj):
         return obj.replies.count()

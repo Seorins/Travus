@@ -62,7 +62,7 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import NavigationBar from '@/components/common/NavigationBar.vue'
 import { useAuthStore } from '@/stores/auth'
@@ -74,6 +74,15 @@ const user = computed(() => authStore.currentUser)
 const displayName = computed(() => user.value?.name || user.value?.username || '여행자')
 const { isTTSEnabled, speak, toggleTTS } = useTTS()
 const activeChip = ref('전체')
+
+// 로그인 확인
+onMounted(() => {
+  // 로그인하지 않았으면 로그인 페이지로 이동
+  if (!authStore.isLoggedIn) {
+    alert('로그인이 필요한 서비스입니다.')
+    router.push('/login')
+  }
+})
 const chipItems = [
   { key: '전체', label: '전체(0)' },
   { key: '수도권', label: '수도권(0)' },

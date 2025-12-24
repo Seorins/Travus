@@ -272,5 +272,9 @@ export default {
     return aiClient.post('/speech/', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     })
+  },
+
+  generateSpotDescription(data) {
+    return aiClient.post('/spot-description/', data)
   }
 }

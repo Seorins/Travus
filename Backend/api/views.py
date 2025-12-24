@@ -39,6 +39,12 @@ class TravelSpotViewSet(viewsets.ReadOnlyModelViewSet):
             return TravelSpotDetailSerializer
         return TravelSpotListSerializer
 
+    def get_serializer_context(self):
+        """Serializer에 request context 전달"""
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
+
     def get_queryset(self):
         queryset = super().get_queryset()
 
@@ -91,7 +97,30 @@ class TravelSpotViewSet(viewsets.ReadOnlyModelViewSet):
 
         # return queryset.select_related('category').prefetch_related('accessibility')
         return queryset.prefetch_related('accessibility')
-    
+
+    def list(self, request, *args, **kwargs):
+        """목록 조회 시 북마크 정보 첨부"""
+        queryset = self.filter_queryset(self.get_queryset())
+
+        # 로그인한 사용자의 북마크 정보 미리 가져오기
+        if request.user.is_authenticated:
+            user_bookmarks = set(
+                Bookmark.objects.filter(user=request.user)
+                .values_list('travel_spot_id', flat=True)
+            )
+
+            # 각 객체에 북마크 여부 첨부
+            for spot in queryset:
+                spot._user_bookmarked = spot.id in user_bookmarks
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
     def retrieve(self, request, pk=None):
         """상세 조회 시 조회수 증가"""
         _ = pk  # URL parameter (사용하지 않지만 signature에 필요)
@@ -787,6 +816,12 @@ class CourseViewSet(viewsets.ModelViewSet):
             for item in ai_result['itinerary']:
                 spot_detail = spot_dict.get(item['id'])
                 if spot_detail:
+                    # Decimal 타입을 float로 변환
+                    if spot_detail.get('latitude'):
+                        spot_detail['latitude'] = float(spot_detail['latitude'])
+                    if spot_detail.get('longitude'):
+                        spot_detail['longitude'] = float(spot_detail['longitude'])
+
                     item['spot_detail'] = spot_detail
                     valid_itinerary.append(item)
                 else:
@@ -1177,7 +1212,7 @@ class MeView(generics.RetrieveAPIView):
 class CourseCommentListCreateView(generics.ListCreateAPIView):
     """코스 댓글 목록 조회 및 생성"""
     serializer_class = CourseCommentSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     def get_queryset(self):
         course_id = self.kwargs['course_id']
@@ -1192,16 +1227,31 @@ class CourseCommentDetailView(generics.RetrieveUpdateDestroyAPIView):
     """코스 댓글 상세 조회, 수정, 삭제"""
     queryset = CourseComment.objects.all()
     serializer_class = CourseCommentSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     def get_queryset(self):
-        return CourseComment.objects.filter(user=self.request.user)
+        # 조회는 모두 허용, 수정/삭제는 perform_update/perform_destroy에서 검증
+        return CourseComment.objects.all()
+
+    def perform_update(self, serializer):
+        # 자신의 댓글만 수정 가능
+        if serializer.instance.user != self.request.user:
+            from rest_framework.exceptions import PermissionDenied
+            raise PermissionDenied("자신의 댓글만 수정할 수 있습니다.")
+        serializer.save()
+
+    def perform_destroy(self, instance):
+        # 자신의 댓글만 삭제 가능
+        if instance.user != self.request.user:
+            from rest_framework.exceptions import PermissionDenied
+            raise PermissionDenied("자신의 댓글만 삭제할 수 있습니다.")
+        instance.delete()
 
 
 class CourseCommentRepliesView(generics.ListAPIView):
     """댓글의 대댓글 목록 조회"""
     serializer_class = CourseCommentSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     def get_queryset(self):
         comment_id = self.kwargs['comment_id']

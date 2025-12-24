@@ -16,11 +16,15 @@ const loadState = () => {
     }
 
     const parsed = JSON.parse(raw)
+
+    // 토큰이 없으면 로그인 상태를 false로 설정
+    const isLoggedIn = !!token && Boolean(parsed.isLoggedIn)
+
     return {
       users: Array.isArray(parsed.users) ? parsed.users : [],
-      currentUser: parsed.currentUser || null,
-      isLoggedIn: Boolean(parsed.isLoggedIn) || !!token,
-      token: token || parsed.token || null
+      currentUser: isLoggedIn ? (parsed.currentUser || null) : null,
+      isLoggedIn: isLoggedIn,
+      token: token || null
     }
   } catch {
     return { users: [], currentUser: null, isLoggedIn: false, token: null }
