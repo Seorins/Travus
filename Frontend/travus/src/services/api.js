@@ -237,6 +237,7 @@ export default {
   // 현재 사용자 정보
   getCurrentUser() {
     return apiClient.get('/auth/me/')
+  },
   // ==========================
   // AI 카메라
   // ==========================
