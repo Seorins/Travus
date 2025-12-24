@@ -146,7 +146,6 @@ export default {
     return apiClient.delete(`/bookmarks/${id}/`)
   },
 
-<<<<<<< HEAD
   // 북마크 토글
   toggleBookmark(travelSpotId) {
     return apiClient.post('/bookmarks/toggle/', {
@@ -162,8 +161,6 @@ export default {
   },
 
   // 코스 목록
-=======
->>>>>>> a1ac129fdfa5b7f25397c5c7c5fde71af50b40d5
   getCourses(params = {}) {
     return apiClient.get('/courses/', { params })
   },
