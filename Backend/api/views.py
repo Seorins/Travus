@@ -4,11 +4,12 @@ from rest_framework.decorators import action, api_view
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.views import APIView
-from .models import TravelSpot, TravelSpotCategory, Bookmark, Course, Review, CourseComment, CourseLike
+from .models import TravelSpot, TravelSpotCategory, Bookmark, Course, CourseSpot, Review, CourseComment, CourseLike
 from .serializers import (
     TravelSpotListSerializer, TravelSpotDetailSerializer,
     TravelSpotCategorySerializer, BookmarkSerializer,
-    CourseSerializer, ReviewSerializer, CourseCommentSerializer
+    CourseSerializer, CourseCreateSerializer, ReviewSerializer,
+    CourseCommentSerializer, CourseLikeSerializer
 )
 from .services.tour_api import tour_api_service
 from django.contrib.auth import get_user_model
@@ -30,7 +31,7 @@ class TravelSpotViewSet(viewsets.ReadOnlyModelViewSet):
     retrieve: 여행지 상세 조회
     """
     queryset = TravelSpot.objects.filter(is_active=True)
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.AllowAny]
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
@@ -533,8 +534,18 @@ class BookmarkViewSet(viewsets.ModelViewSet):
 
 class CourseViewSet(viewsets.ModelViewSet):
     """여행 코스 ViewSet"""
-    serializer_class = CourseSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
+
+    def get_serializer_class(self):
+        if self.action in ['create', 'update', 'partial_update']:
+            return CourseCreateSerializer
+        return CourseSerializer
+
+    def get_serializer_context(self):
+        """Serializer에 request 전달"""
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
 
     def get_queryset(self):
         queryset = Course.objects.all()
@@ -547,10 +558,50 @@ class CourseViewSet(viewsets.ModelViewSet):
             # 공개 코스만
             queryset = queryset.filter(is_public=True)
 
-        return queryset.select_related('user').prefetch_related('course_spots')
+        return queryset.select_related('user').prefetch_related('course_spots__travel_spot')
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+    def retrieve(self, request, *args, **kwargs):
+        """코스 조회 시 조회수 증가"""
+        instance = self.get_object()
+        instance.view_count += 1
+        instance.save(update_fields=['view_count'])
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
+    def like(self, request, pk=None):
+        """코스 좋아요 토글"""
+        course = self.get_object()
+        user = request.user
+
+        # 좋아요 여부 확인
+        like_instance = CourseLike.objects.filter(user=user, course=course).first()
+
+        if like_instance:
+            # 이미 좋아요 -> 취소
+            like_instance.delete()
+            course.like_count = models.F('like_count') - 1
+            course.save(update_fields=['like_count'])
+            course.refresh_from_db()
+            return Response({
+                'message': '좋아요를 취소했습니다.',
+                'is_liked': False,
+                'like_count': course.like_count
+            })
+        else:
+            # 좋아요 추가
+            CourseLike.objects.create(user=user, course=course)
+            course.like_count = models.F('like_count') + 1
+            course.save(update_fields=['like_count'])
+            course.refresh_from_db()
+            return Response({
+                'message': '좋아요를 눌렀습니다.',
+                'is_liked': True,
+                'like_count': course.like_count
+            })
 
     @action(detail=False, methods=['post'], permission_classes=[permissions.AllowAny])
     def generate_ai_course(self, request):
@@ -771,6 +822,100 @@ class CourseViewSet(viewsets.ModelViewSet):
             'like_count': course.like_count
         })
 
+    @action(detail=False, methods=['get'], permission_classes=[permissions.IsAuthenticated])
+    def my_courses(self, request):
+        """
+        나의 여행코스 조회
+        - 현재 로그인한 사용자가 작성한 모든 코스 반환
+        """
+        user = request.user
+        queryset = Course.objects.filter(user=user).select_related('user').prefetch_related('course_spots__travel_spot')
+        queryset = queryset.order_by('-created_at')
+
+        # 페이지네이션
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['get'], permission_classes=[permissions.AllowAny])
+    def monthly_best(self, request):
+        """
+        월간 Best 30 코스 조회
+        - 좋아요 수 기준 상위 30개 공개 코스 반환
+        - 최근 30일 이내 생성된 코스 중에서 선택
+        """
+        from datetime import datetime, timedelta
+
+        # 최근 30일
+        thirty_days_ago = datetime.now() - timedelta(days=30)
+
+        queryset = Course.objects.filter(
+            is_public=True,
+            created_at__gte=thirty_days_ago
+        ).select_related('user').prefetch_related('course_spots__travel_spot')
+
+        queryset = queryset.order_by('-like_count', '-view_count')[:30]
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['get'], permission_classes=[permissions.AllowAny])
+    def by_region(self, request):
+        """
+        지역별 사용자 코스 조회
+        - area_code 파라미터로 특정 지역의 공개 코스 반환
+
+        Query Parameters:
+            - area_code (str): 지역 코드 (필수)
+            - ordering (str): 정렬 방식 (선택, 기본값: 'likes')
+                - 'likes': 추천순 (좋아요 많은 순)
+                - 'latest': 최신순 (최근 생성순)
+        """
+        area_code = request.query_params.get('area_code')
+        ordering = request.query_params.get('ordering', 'likes')  # 기본값: 추천순
+
+        if not area_code:
+            return Response(
+                {'error': 'area_code 파라미터가 필요합니다.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # 해당 지역의 여행지를 포함하는 코스 찾기
+        from django.db.models import Q, Exists, OuterRef
+
+        # CourseSpot을 통해 해당 지역의 TravelSpot을 포함하는 코스 찾기
+        course_spots_with_area = CourseSpot.objects.filter(
+            course=OuterRef('pk'),
+            travel_spot__area_code=area_code
+        )
+
+        queryset = Course.objects.filter(
+            is_public=True
+        ).annotate(
+            has_area_spot=Exists(course_spots_with_area)
+        ).filter(
+            has_area_spot=True
+        ).select_related('user').prefetch_related('course_spots__travel_spot')
+
+        # 정렬 방식 적용
+        if ordering == 'latest':
+            queryset = queryset.order_by('-created_at', '-like_count')
+        else:  # 기본값: likes (추천순)
+            queryset = queryset.order_by('-like_count', '-created_at')
+
+        # 페이지네이션
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
 
 class ReviewViewSet(viewsets.ModelViewSet):
     """리뷰 ViewSet"""
@@ -784,10 +929,94 @@ class ReviewViewSet(viewsets.ModelViewSet):
         if travel_spot_id:
             queryset = queryset.filter(travel_spot_id=travel_spot_id)
 
-        return queryset.select_related('user', 'travel_spot')
+        return queryset.select_related('user', 'travel_spot').order_by('-created_at')
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+    @action(detail=False, methods=['get'], permission_classes=[permissions.AllowAny])
+    def summary(self, request):
+        """AI 댓글 요약 기능"""
+        travel_spot_id = request.query_params.get('travel_spot')
+
+        if not travel_spot_id:
+            return Response(
+                {'error': 'travel_spot 파라미터가 필요합니다.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # 해당 여행지의 모든 댓글 가져오기
+        reviews = Review.objects.filter(travel_spot_id=travel_spot_id).select_related('user')
+
+        if reviews.count() == 0:
+            return Response({
+                'summary': '아직 작성된 댓글이 없습니다.',
+                'review_count': 0
+            })
+
+        # 댓글 내용 수집
+        review_texts = [f"평점 {review.rating}점: {review.content}" for review in reviews]
+        combined_text = "\n".join(review_texts)
+
+        try:
+            import requests
+            import json
+
+            gms_api_key = getattr(settings, 'GMS_API_KEY', 'S14P02EA02-e78f608f-87c7-4534-a076-6916104b3bdc')
+            gms_api_url = 'https://gms.ssafy.io/gmsapi/api.openai.com/v1/chat/completions'
+
+            response = requests.post(
+                gms_api_url,
+                headers={
+                    "Content-Type": "application/json",
+                    "Authorization": f"Bearer {gms_api_key}"
+                },
+                json={
+                    "model": "gpt-4o-mini",
+                    "messages": [
+                        {
+                            "role": "system",
+                            "content": "당신은 여행지 리뷰 분석 전문가입니다. 사용자들의 댓글을 분석하여 핵심 내용을 4줄로 간결하게 요약해주세요."
+                        },
+                        {
+                            "role": "user",
+                            "content": f"""다음은 여행지에 대한 사용자 댓글들입니다. 이 댓글들을 분석하여 4줄로 요약해주세요.
+
+댓글 내용:
+{combined_text}
+
+요약 형식:
+1. 전반적인 평가 (긍정적/부정적)
+2. 주요 장점
+3. 주요 단점 또는 개선점
+4. 방문 추천 여부
+
+4줄로 간결하게 작성해주세요."""
+                        }
+                    ],
+                    "temperature": 0.7
+                },
+                timeout=30
+            )
+
+            if response.status_code == 200:
+                ai_result = response.json()
+                summary_text = ai_result['choices'][0]['message']['content']
+
+                return Response({
+                    'summary': summary_text,
+                    'review_count': reviews.count()
+                })
+            else:
+                raise Exception(f"GMS API 호출 실패: {response.status_code}")
+
+        except Exception as e:
+            print(f"AI 요약 생성 실패: {str(e)}")
+            return Response({
+                'summary': '댓글 요약을 생성하는 중 오류가 발생했습니다.',
+                'review_count': reviews.count(),
+                'error': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class CheckUsernameView(APIView):
     """아이디 중복 체크"""

@@ -484,7 +484,13 @@ const getMarkerColor = (dayIndex) => {
 
 // 지도에 마커 및 경로 추가
 const updateMapMarkers = () => {
-  if (!kakaoMap.value || !itineraryDays.value.length) return
+  console.log('🗺️ updateMapMarkers 호출')
+  console.log('📍 itineraryDays:', itineraryDays.value)
+
+  if (!kakaoMap.value || !itineraryDays.value.length) {
+    console.warn('⚠️ 지도 또는 itineraryDays가 없음')
+    return
+  }
 
   // 기존 마커 및 폴리라인 제거
   markers.value.forEach(marker => marker.setMap(null))
@@ -500,13 +506,22 @@ const updateMapMarkers = () => {
     ? itineraryDays.value
     : [itineraryDays.value[currentDay.value - 1]]
 
+  console.log('📅 표시할 날짜:', daysToShow)
+
   let globalIndex = 0
 
   daysToShow.forEach((day, dayIndex) => {
     const actualDayIndex = currentDay.value === -1 ? dayIndex : (currentDay.value - 1)
 
+    console.log(`📍 Day ${dayIndex + 1} places:`, day.places)
+
     day.places.forEach((place, placeIndex) => {
-      if (!place.latitude || !place.longitude) return
+      console.log(`  - Place ${placeIndex + 1}:`, place.name, place.latitude, place.longitude)
+
+      if (!place.latitude || !place.longitude) {
+        console.warn(`  ⚠️ ${place.name}: 좌표 없음`)
+        return
+      }
 
       const position = new window.kakao.maps.LatLng(
         parseFloat(place.latitude),
@@ -609,10 +624,10 @@ const goToSpotDetail = (place) => {
 // 댓글 관련 함수
 const loadComments = async () => {
   try {
-    const courseId = props.courseData.id
-    if (!courseId) return
+    // savedCourseId 사용 (자동 저장된 코스 ID)
+    if (!savedCourseId.value) return
 
-    const response = await api.getCourseComments(courseId)
+    const response = await api.getCourseComments(savedCourseId.value)
     comments.value = response.data
   } catch (error) {
     console.error('댓글 로드 실패:', error)
@@ -622,9 +637,14 @@ const loadComments = async () => {
 const submitComment = async () => {
   if (!newComment.value.trim()) return
 
+  // 코스가 저장되지 않았으면 저장 먼저 수행
+  if (!savedCourseId.value) {
+    alert('코스를 먼저 저장하고 있습니다. 잠시만 기다려주세요.')
+    return
+  }
+
   try {
-    const courseId = props.courseData.id
-    await api.createCourseComment(courseId, {
+    await api.createCourseComment(savedCourseId.value, {
       content: newComment.value
     })
 
@@ -674,17 +694,44 @@ const formatDate = (dateString) => {
 
 // 자동 저장 함수
 const autoSaveCourse = async () => {
+  // 이미 저장된 코스 조회인 경우 (courseData.id가 있으면 조회 모드)
+  if (props.courseData.id) {
+    console.log('이미 저장된 코스 조회 모드 - 자동 저장 건너뜀')
+    savedCourseId.value = props.courseData.id
+    // 기존 코스의 좋아요 상태만 로드
+    await loadLikeStatus()
+    return
+  }
+
+  // 이미 저장 중이거나 저장된 경우
   if (isAutoSaving.value || savedCourseId.value) return
 
   try {
     isAutoSaving.value = true
 
-    // 저장할 데이터 준비
+    // 저장할 데이터 준비 - spots 데이터 포함
+    const spots = []
+
+    // rawItinerary에서 spots 데이터 추출
+    if (props.courseData.rawItinerary) {
+      props.courseData.rawItinerary.forEach((item, index) => {
+        spots.push({
+          travel_spot_id: item.id,
+          order: item.order || index + 1,
+          memo: '',
+          stay_duration: null
+        })
+      })
+    }
+
     const courseData = {
       title: props.courseData.title,
       description: props.courseData.description || '',
-      is_public: false // 기본값: 비공개
+      is_public: false, // 기본값: 비공개
+      spots: spots
     }
+
+    console.log('저장할 코스 데이터:', courseData)
 
     // Course 저장
     const courseResponse = await api.saveCourse(courseData)
@@ -698,6 +745,7 @@ const autoSaveCourse = async () => {
 
   } catch (error) {
     console.error('코스 자동 저장 실패:', error)
+    console.error('에러 상세:', error.response?.data)
 
     if (error.response?.status === 401) {
       console.log('로그인 필요 - 자동 저장 건너뜀')
@@ -716,7 +764,7 @@ const toggleLike = async () => {
 
   try {
     const response = await api.toggleCourseLike(savedCourseId.value)
-    isLiked.value = response.data.liked
+    isLiked.value = response.data.is_liked
     likeCount.value = response.data.like_count
   } catch (error) {
     console.error('좋아요 토글 실패:', error)
@@ -768,29 +816,34 @@ const loadAIGeneratedData = () => {
   try {
     isLoading.value = true
 
-    console.log('📦 AI 생성 데이터:', props.courseData)
+    console.log('📦 courseData:', props.courseData)
 
-    // props.courseData.days 사용 (AI가 생성한 데이터)
+    // props.courseData.days 사용 (AI가 생성한 데이터 또는 조회한 데이터)
     if (props.courseData.days && props.courseData.days.length > 0) {
       itineraryDays.value = props.courseData.days.map(dayData => ({
         date: `Day ${dayData.day}`,
-        places: dayData.spots.map(spot => ({
-          id: spot.spot.id, // TravelSpot의 실제 DB ID
-          content_type_id: spot.spot.content_type_id, // 콘텐츠 타입 ID 추가
-          name: spot.spot.name,
-          address: spot.spot.address,
-          latitude: parseFloat(spot.spot.latitude),
-          longitude: parseFloat(spot.spot.longitude),
-          image_url: spot.spot.image_url,
-          category: getCategoryName(spot.spot.content_type_id),
-          type: spot.type,
-          phone: spot.spot.tel || spot.spot.phone || null // 전화번호 추가
-        }))
+        places: dayData.spots.map(spot => {
+          // spot.spot 또는 spot 자체가 여행지 데이터
+          const spotData = spot.spot || spot
+
+          return {
+            id: spotData.id, // TravelSpot의 실제 DB ID
+            content_type_id: spotData.content_type_id, // 콘텐츠 타입 ID 추가
+            name: spotData.name,
+            address: spotData.address,
+            latitude: parseFloat(spotData.latitude),
+            longitude: parseFloat(spotData.longitude),
+            image_url: spotData.image_url,
+            category: getCategoryName(spotData.content_type_id),
+            type: spot.type,
+            phone: spotData.tel || spotData.phone || null // 전화번호 추가
+          }
+        })
       }))
 
-      console.log('✅ AI 데이터 로드 완료:', itineraryDays.value)
+      console.log('✅ 데이터 로드 완료:', itineraryDays.value)
     } else {
-      console.warn('⚠️ AI 생성 데이터가 없습니다')
+      console.warn('⚠️ 생성 데이터가 없습니다')
       useSampleData()
     }
 

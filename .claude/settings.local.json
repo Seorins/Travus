@@ -4,7 +4,13 @@
       "Bash(cat:*)",
       "Bash(python manage.py runserver:*)",
       "Bash(python manage.py makemigrations:*)",
-      "Bash(python manage.py:*)"
+      "Bash(python manage.py:*)",
+      "Bash(venvScriptsactivate)",
+      "Bash(source:*)",
+      "Bash(ls:*)",
+      "Bash(wc:*)",
+      "Bash(npm run dev:*)",
+      "Bash(python add_course_views.py:*)"
     ]
   }
 }

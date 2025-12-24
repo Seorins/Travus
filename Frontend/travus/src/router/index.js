@@ -4,6 +4,7 @@ import About from '@/views/About.vue'
 import TravelView from '@/views/TravelView.vue'
 import TravelDetailView from '@/views/TravelDetailView.vue'
 import CourseView from '@/views/CourseView.vue'
+import CourseListView from '@/views/CourseListView.vue'
 import LoginView from '@/views/LoginView.vue'
 import SignupView from '@/views/SignupView.vue'
 import MyPageView from '@/views/MyPageView.vue'
@@ -42,6 +43,16 @@ const router = createRouter({
       component: CourseView
     },
     {
+      path: '/course-list',
+      name: 'course-list',
+      component: CourseListView
+    },
+    {
+      path: '/course-detail/:id',
+      name: 'course-detail',
+      component: CourseView  // 임시로 CourseView 사용, 나중에 CourseDetailView 만들 예정
+    },
+    { 
       path: '/camera',
       name: 'camera',
       component: CameraView

@@ -25,7 +25,9 @@
               :class="{ selected: selectedThemes.includes(theme.id) }"
               @click="toggleTheme(theme.id)"
             >
-              <div class="theme-icon">{{ theme.icon }}</div>
+              <div class="theme-icon">
+                <img :src="theme.icon" :alt="theme.name" />
+              </div>
               <div class="theme-name">{{ theme.name }}</div>
             </button>
           </div>
@@ -60,19 +62,28 @@
 
 <script setup>
 import { ref } from 'vue'
+import theme1 from '@/assets/theme1.png'
+import theme2 from '@/assets/theme2.png'
+import theme3 from '@/assets/theme3.png'
+import theme4 from '@/assets/theme4.png'
+import theme5 from '@/assets/theme5.png'
+import theme6 from '@/assets/theme6.png'
+import theme7 from '@/assets/theme7.png'
+import theme8 from '@/assets/theme8.png'
+import theme9 from '@/assets/theme9.png'
 
 const emit = defineEmits(['next', 'back'])
 
 const themes = [
-  { id: 'mountain', name: '산', icon: '🏔️' },
-  { id: 'sea', name: '바다', icon: '🌊' },
-  { id: 'indoor', name: '실내여행지', icon: '🏛️' },
-  { id: 'activity', name: '액티비티', icon: '🎯' },
-  { id: 'culture', name: '문화/역사', icon: '🏛️' },
-  { id: 'theme_park', name: '테마파크', icon: '🎢' },
-  { id: 'cafe', name: '카페', icon: '☕' },
-  { id: 'market', name: '전통시장', icon: '🏪' },
-  { id: 'festival', name: '축제', icon: '🎉' }
+  { id: 'mountain', name: '산', icon: theme1 },
+  { id: 'sea', name: '바다', icon: theme2 },
+  { id: 'indoor', name: '실내여행지', icon: theme3 },
+  { id: 'activity', name: '액티비티', icon: theme4 },
+  { id: 'culture', name: '문화/역사', icon: theme5 },
+  { id: 'theme_park', name: '테마파크', icon: theme6 },
+  { id: 'cafe', name: '카페', icon: theme7 },
+  { id: 'market', name: '전통시장', icon: theme8 },
+  { id: 'festival', name: '축제', icon: theme9 }
 ]
 
 const selectedThemes = ref([])
@@ -230,7 +241,7 @@ const handleNext = () => {
 .themes-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
+  gap: 0.5rem;
   margin-bottom: 3rem;
   margin-top: 2rem;
 }
@@ -241,37 +252,46 @@ const handleNext = () => {
   align-items: center;
   justify-content: center;
   width: 100%;
-  height: 100px;
-  padding: 0.75rem;
-  border: 2px solid #e2e8f0;
-  background: #e2e8f0;
-  border-radius: 16px;
+  padding: 0.5rem;
+  border: none;
+  background: transparent;
   cursor: pointer;
   transition: all 0.3s ease;
   text-align: center;
+  gap: 0.5rem;
 }
 
-.theme-card:hover {
-  border-color: #667eea;
-  background: #f7fafc;
+.theme-card:hover .theme-icon {
   transform: translateY(-4px);
-  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.15);
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.25);
 }
 
-.theme-card.selected {
+.theme-card.selected .theme-icon {
   background: #667eea;
-  color: white;
-  border-color: #667eea;
-  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
 }
 
 .theme-card.selected .theme-name {
-  color: white;
+  color: #667eea;
+  font-weight: 700;
 }
 
 .theme-icon {
-  font-size: 1.5rem;
-  margin-bottom: 0.5rem;
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  background: #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  padding: 0.75rem;
+}
+
+.theme-icon img {
+  width: 120%;
+  height: 120%;
+  object-fit: contain;
 }
 
 .theme-name {
@@ -414,12 +434,13 @@ const handleNext = () => {
   }
 
   .theme-card {
-    height: 90px;
     padding: 0.5rem;
   }
 
   .theme-icon {
-    font-size: 1.25rem;
+    width: 70px;
+    height: 70px;
+    padding: 1rem;
   }
 
   .theme-name {
