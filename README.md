@@ -105,3 +105,61 @@ git branch -d <브랜치명>
 * 사용 완료된 개인 브랜치는 정리되어 깔끔한 상태 유지.
 
 ---
+
+## ✅ 7. 작업 중 master 변경사항 가져오기 
+
+* 내 작업은 아직 커밋하지 않은 상태
+* 다른 팀원이 master에 merge 완료한 경우
+* 내 작업을 유지한 채 최신 master를 반영해야 할 때
+
+---
+
+### 안전한 작업 절차 (커밋 전 기준)
+
+1️⃣ 현재 작업 내용 임시 저장
+```bash
+git status
+git stash
+```
+
+* 작업 중이던 코드가 임시로 안전하게 보관됨
+
+---
+
+2️⃣ master 브랜치로 이동
+```bash
+git checkout master
+```
+
+---
+
+3️⃣ 최신 master 가져오기
+```bash
+git pull origin master
+```
+
+* 다른 팀원의 merge 내용 반영
+
+---
+
+4️⃣ 내 작업 브랜치로 복귀
+```bash
+git checkout <본인_브랜치명>
+```
+
+---
+
+5️⃣ master 변경사항 병합
+```bash
+git merge master
+```
+
+* 충돌 없으면 즉시 완료
+* 충돌 발생 시 → 직접 수정 후 commit
+
+---
+
+6️⃣ 임시 저장한 작업 복구
+```bash
+git stash pop
+```
