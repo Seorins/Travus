@@ -129,6 +129,11 @@ export default {
     })
   },
 
+  // AI 여행지 설명 생성
+  generateTravelSpotDescription(travelSpotId) {
+    return apiClient.post(`/travel-spots/${travelSpotId}/generate_description/`)
+  },
+
   // User features
   getCategories() {
     return apiClient.get('/categories/')

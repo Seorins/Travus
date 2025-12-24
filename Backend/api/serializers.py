@@ -137,13 +137,14 @@ class CourseSerializer(serializers.ModelSerializer):
 
 
 class ReviewSerializer(serializers.ModelSerializer):
+    user_id = serializers.IntegerField(source='user.id', read_only=True)
     username = serializers.CharField(source='user.username', read_only=True)
     user_name = serializers.CharField(source='user.username', read_only=True)
 
     class Meta:
         model = Review
         fields = [
-            'id', 'user', 'username', 'user_name', 'travel_spot',
+            'id', 'user', 'user_id', 'username', 'user_name', 'travel_spot',
             'rating', 'content', 'accessibility_rating',
             'images', 'like_count', 'created_at', 'updated_at'
         ]

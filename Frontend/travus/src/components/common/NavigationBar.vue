@@ -359,7 +359,7 @@ const handleFocus = (event) => {
 
 .dropdown-item.router-link-active {
   background: #f3f4f6;
-  color: #667eea;
+  color: #374151;
 }
 
 .navbar-controls {

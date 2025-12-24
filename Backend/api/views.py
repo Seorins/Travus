@@ -13,6 +13,7 @@ from .serializers import (
     CourseCommentSerializer, CourseLikeSerializer
 )
 from .services.tour_api import tour_api_service
+from .services.ai_description_generator import AIDescriptionGenerator
 from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError
@@ -539,6 +540,67 @@ class TravelSpotViewSet(viewsets.ReadOnlyModelViewSet):
             {'error': 'API 요청 실패'},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
+
+    @action(detail=True, methods=['post'], permission_classes=[permissions.AllowAny])
+    def generate_description(self, request, pk=None):
+        """
+        AI를 활용하여 여행지 상세 설명 생성
+        POST /api/travel-spots/{id}/generate_description/
+        """
+        try:
+            travel_spot = self.get_object()
+
+            # 이미 설명이 있으면 건너뛰기 (선택사항)
+            if travel_spot.description and len(travel_spot.description.strip()) > 20:
+                return Response({
+                    'success': False,
+                    'message': '이미 설명이 존재합니다',
+                    'description': travel_spot.description
+                })
+
+            # AI 설명 생성기 초기화
+            ai_generator = AIDescriptionGenerator()
+
+            # 카테고리 정보 준비
+            content_type_map = {
+                '12': '관광지',
+                '14': '문화시설',
+                '15': '축제공연행사',
+                '25': '여행코스',
+                '28': '레포츠',
+                '32': '숙박',
+                '38': '쇼핑',
+                '39': '음식점'
+            }
+            category = content_type_map.get(travel_spot.content_type_id, '여행지')
+
+            # AI로 설명 생성
+            description = ai_generator.generate_description(
+                spot_name=travel_spot.name,
+                address=travel_spot.address,
+                category=category
+            )
+
+            # DB에 저장
+            travel_spot.description = description
+            travel_spot.save(update_fields=['description'])
+
+            return Response({
+                'success': True,
+                'message': 'AI 설명이 생성되었습니다',
+                'description': description
+            })
+
+        except TravelSpot.DoesNotExist:
+            return Response(
+                {'error': '여행지를 찾을 수 없습니다'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return Response(
+                {'error': f'AI 설명 생성 실패: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 
 class TravelSpotCategoryViewSet(viewsets.ReadOnlyModelViewSet):
