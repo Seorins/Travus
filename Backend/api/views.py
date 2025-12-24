@@ -1,6 +1,6 @@
 from django.db import models
 from rest_framework import viewsets, status, generics, permissions
-from rest_framework.decorators import action
+from rest_framework.decorators import action, api_view
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.views import APIView
@@ -16,6 +16,8 @@ from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError
 from .serializers import SignupSerializer, LoginSerializer
+
+
 
 User = get_user_model()
 
@@ -47,7 +49,7 @@ class TravelSpotViewSet(viewsets.ReadOnlyModelViewSet):
         area_code = self.request.query_params.get('area_code')
         sigungu_code = self.request.query_params.get('sigungu_code')
         content_type_id = self.request.query_params.get('content_type_id')
-        category = self.request.query_params.get('category')
+        # category = self.request.query_params.get('category')
         search = self.request.query_params.get('search')
 
         if area_code:
@@ -56,8 +58,8 @@ class TravelSpotViewSet(viewsets.ReadOnlyModelViewSet):
             queryset = queryset.filter(sigungu_code=sigungu_code)
         if content_type_id:
             queryset = queryset.filter(content_type_id=content_type_id)
-        if category:
-            queryset = queryset.filter(category__name=category)
+        # if category:
+        #     queryset = queryset.filter(category__name=category)
         if search:
             queryset = queryset.filter(
                 models.Q(name__icontains=search) |
@@ -86,8 +88,9 @@ class TravelSpotViewSet(viewsets.ReadOnlyModelViewSet):
         else:
             queryset = queryset.order_by(ordering)
 
-        return queryset.select_related('category').prefetch_related('accessibility')
-
+        # return queryset.select_related('category').prefetch_related('accessibility')
+        return queryset.prefetch_related('accessibility')
+    
     def retrieve(self, request, pk=None):
         """상세 조회 시 조회수 증가"""
         _ = pk  # URL parameter (사용하지 않지만 signature에 필요)
@@ -112,7 +115,7 @@ class TravelSpotViewSet(viewsets.ReadOnlyModelViewSet):
             )
 
         try:
-            travel_spot = TravelSpot.objects.select_related('category').prefetch_related('accessibility').get(
+            travel_spot = TravelSpot.objects.prefetch_related('accessibility').get(
                 content_id=content_id,
                 is_active=True
             )
@@ -1139,3 +1142,12 @@ class CourseCommentRepliesView(generics.ListAPIView):
     def get_queryset(self):
         comment_id = self.kwargs['comment_id']
         return CourseComment.objects.filter(parent_id=comment_id).order_by('created_at')
+@api_view(['POST'])
+def analyze_image(request):
+    return Response({"message": "analyze_image OK"})
+
+@api_view(['POST'])
+def chat_ai(request):
+    return Response({"message": "chat_ai OK"})
+
+

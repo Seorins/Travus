@@ -20,94 +20,44 @@ class TravelSpotCategory(models.Model):
 
 
 class TravelSpot(models.Model):
-    """여행지 정보"""
-    # 공공데이터 API 필드
-    content_id = models.CharField(max_length=50, unique=True, verbose_name='콘텐츠 ID')
-    content_type_id = models.CharField(max_length=20, verbose_name='콘텐츠 타입 ID')
+    id = models.BigAutoField(primary_key=True)
 
-    # 기본 정보
-    name = models.CharField(max_length=200, verbose_name='여행지명')
-    category = models.ForeignKey(
-        TravelSpotCategory,
-        on_delete=models.SET_NULL,
-        null=True,
-        related_name='travel_spots',
-        verbose_name='카테고리'
-    )
+    content_id = models.CharField(max_length=50, unique=True)
+    content_type_id = models.CharField(max_length=20)
 
-    # 위치 정보
-    address = models.CharField(max_length=300, verbose_name='주소')
-    area_code = models.CharField(max_length=10, blank=True, null=True, verbose_name='지역코드')
-    sigungu_code = models.CharField(max_length=10, blank=True, null=True, verbose_name='시군구코드')
-    latitude = models.DecimalField(
-        max_digits=10,
-        decimal_places=7,
-        null=True,
-        blank=True,
-        verbose_name='위도'
-    )
-    longitude = models.DecimalField(
-        max_digits=10,
-        decimal_places=7,
-        null=True,
-        blank=True,
-        verbose_name='경도'
-    )
+    name = models.CharField(max_length=200)
+    address = models.CharField(max_length=300)
 
-    # 상세 정보
-    description = models.TextField(blank=True, null=True, verbose_name='설명')
-    overview = models.TextField(blank=True, null=True, verbose_name='개요')
-    tel = models.TextField(blank=True, null=True, verbose_name='전화번호')
-    tel_name = models.CharField(max_length=100, blank=True, null=True, verbose_name='전화번호명')
-    homepage = models.TextField(blank=True, null=True, verbose_name='홈페이지')
-    zipcode = models.CharField(max_length=10, blank=True, null=True, verbose_name='우편번호')
-    addr1 = models.CharField(max_length=300, blank=True, null=True, verbose_name='주소')
-    addr2 = models.CharField(max_length=300, blank=True, null=True, verbose_name='상세주소')
+    area_code = models.CharField(max_length=10, null=True)
+    sigungu_code = models.CharField(max_length=10, null=True)
 
-    # 이미지
-    image_url = models.URLField(blank=True, null=True, verbose_name='대표 이미지 URL')
-    thumbnail_url = models.URLField(blank=True, null=True, verbose_name='썸네일 이미지 URL')
+    latitude = models.DecimalField(max_digits=10, decimal_places=7, null=True)
+    longitude = models.DecimalField(max_digits=10, decimal_places=7, null=True)
 
-    # API 추가 정보
-    created_time = models.CharField(max_length=20, blank=True, null=True, verbose_name='API 등록일')
-    modified_time = models.CharField(max_length=20, blank=True, null=True, verbose_name='API 수정일')
-    cpyrht_div_cd = models.CharField(max_length=20, blank=True, null=True, verbose_name='저작권 유형')
-    cat1 = models.CharField(max_length=10, blank=True, null=True, verbose_name='대분류')
-    cat2 = models.CharField(max_length=10, blank=True, null=True, verbose_name='중분류')
-    cat3 = models.CharField(max_length=10, blank=True, null=True, verbose_name='소분류')
-    mlevel = models.CharField(max_length=10, blank=True, null=True, verbose_name='Map Level')
+    description = models.TextField(null=True)
+    overview = models.TextField(null=True)
 
-    # 평점 및 통계
-    rating = models.DecimalField(
-        max_digits=3,
-        decimal_places=2,
-        default=0.00,
-        validators=[MinValueValidator(0.00), MaxValueValidator(5.00)],
-        verbose_name='평점'
-    )
-    review_count = models.IntegerField(default=0, verbose_name='리뷰 수')
-    view_count = models.IntegerField(default=0, verbose_name='조회수')
-    bookmark_count = models.IntegerField(default=0, verbose_name='북마크 수')
+    tel = models.TextField(null=True)
+    homepage = models.CharField(max_length=200, null=True)
+    image_url = models.CharField(max_length=200, null=True)
+    thumbnail_url = models.CharField(max_length=200, null=True)
 
-    # 메타 정보
-    is_active = models.BooleanField(default=True, verbose_name='활성화 여부')
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name='생성일')
-    updated_at = models.DateTimeField(auto_now=True, verbose_name='수정일')
-    last_synced_at = models.DateTimeField(null=True, blank=True, verbose_name='마지막 동기화')
+    rating = models.DecimalField(max_digits=3, decimal_places=2)
+    review_count = models.IntegerField()
+    view_count = models.IntegerField()
+    bookmark_count = models.IntegerField()
+
+    is_active = models.BooleanField()
+
+    created_at = models.DateTimeField(null=True)
+    updated_at = models.DateTimeField(null=True)
+    last_synced_at = models.DateTimeField(null=True)
+
+    category_id = models.BigIntegerField(null=True)
 
     class Meta:
         db_table = 'travel_spots'
-        verbose_name = '여행지'
-        verbose_name_plural = '여행지'
-        indexes = [
-            models.Index(fields=['content_id']),
-            models.Index(fields=['area_code', 'sigungu_code']),
-            models.Index(fields=['-created_at']),
-        ]
-
-    def __str__(self):
-        return self.name
-
+        managed = False   # ⭐⭐⭐ 이게 핵심
 
 class AccessibilityInfo(models.Model):
     """무장애 관광 정보"""
