@@ -67,10 +67,24 @@ class BookmarkSerializer(serializers.ModelSerializer):
 
 class CourseSpotSerializer(serializers.ModelSerializer):
     travel_spot = TravelSpotListSerializer(read_only=True)
+    day = serializers.SerializerMethodField()
+    spot_type = serializers.SerializerMethodField()
 
     class Meta:
         model = CourseSpot
-        fields = ['id', 'travel_spot', 'order', 'memo', 'stay_duration']
+        fields = ['id', 'travel_spot', 'order', 'day', 'spot_type', 'memo', 'stay_duration']
+
+    def get_day(self, obj):
+        """order를 기반으로 day 계산 (하루에 3~5개 장소 가정)"""
+        # 코스의 총 spot 수를 가져와서 day 계산
+        # 간단하게 order를 5로 나눠서 계산 (하루 최대 5개 장소)
+        return ((obj.order - 1) // 5) + 1
+
+    def get_spot_type(self, obj):
+        """여행지 타입 반환 (content_type_id 기반)"""
+        if obj.travel_spot.content_type_id == 32:
+            return 'accommodation'  # 숙박
+        return 'attraction'  # 기본값: 여행지
 
 
 class CourseSerializer(serializers.ModelSerializer):

@@ -191,9 +191,12 @@ export default {
   },
 
   // 지역별 사용자 코스
-  getCoursesByRegion(areaCode) {
+  getCoursesByRegion(areaCode, ordering = 'likes') {
     return apiClient.get('/courses/by_region/', {
-      params: { area_code: areaCode }
+      params: {
+        area_code: areaCode,
+        ordering: ordering
+      }
     })
   },
 

@@ -38,16 +38,38 @@
       </div>
 
       <!-- 지역 선택 (지역별 탭에서만 표시) -->
-      <div v-if="activeTab === 'region'" class="region-filter">
-        <button
-          v-for="region in regions"
-          :key="region.code"
-          class="region-btn"
-          :class="{ active: selectedRegion === region.code }"
-          @click="selectRegion(region.code)"
-        >
-          {{ region.name }}
-        </button>
+      <div v-if="activeTab === 'region'" class="filters-section">
+        <div class="region-filter">
+          <button
+            v-for="region in regions"
+            :key="region.code"
+            class="region-btn"
+            :class="{ active: selectedRegion === region.code }"
+            @click="selectRegion(region.code)"
+          >
+            {{ region.name }}
+          </button>
+        </div>
+
+        <!-- 정렬 필터 -->
+        <div class="sort-filter">
+          <button
+            class="sort-btn"
+            :class="{ active: sortOrder === 'likes' }"
+            @click="changeSortOrder('likes')"
+          >
+            <i class="fa fa-thumbs-up"></i>
+            추천순
+          </button>
+          <button
+            class="sort-btn"
+            :class="{ active: sortOrder === 'latest' }"
+            @click="changeSortOrder('latest')"
+          >
+            <i class="fa fa-clock-o"></i>
+            최신순
+          </button>
+        </div>
       </div>
 
       <!-- 로딩 -->
@@ -134,6 +156,7 @@ const activeTab = ref('best') // 기본: 월간 Best 30
 const courses = ref([])
 const loading = ref(false)
 const selectedRegion = ref('1') // 기본: 서울
+const sortOrder = ref('likes') // 기본: 추천순
 
 const regions = [
   { code: '1', name: '서울' },
@@ -173,6 +196,12 @@ const selectRegion = async (regionCode) => {
   await loadCourses()
 }
 
+// 정렬 방식 변경
+const changeSortOrder = async (order) => {
+  sortOrder.value = order
+  await loadCourses()
+}
+
 // 코스 불러오기
 const loadCourses = async () => {
   loading.value = true
@@ -186,7 +215,7 @@ const loadCourses = async () => {
     } else if (activeTab.value === 'best') {
       response = await api.getMonthlyBestCourses()
     } else if (activeTab.value === 'region') {
-      response = await api.getCoursesByRegion(selectedRegion.value)
+      response = await api.getCoursesByRegion(selectedRegion.value, sortOrder.value)
     }
 
     courses.value = response.data.results || response.data
@@ -318,12 +347,19 @@ onMounted(async () => {
   color: white;
 }
 
+/* 필터 섹션 */
+.filters-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
 /* 지역 필터 */
 .region-filter {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
-  margin-bottom: 24px;
   justify-content: center;
 }
 
@@ -344,6 +380,43 @@ onMounted(async () => {
 }
 
 .region-btn.active {
+  background: #00C73C;
+  border-color: #00C73C;
+  color: white;
+}
+
+/* 정렬 필터 */
+.sort-filter {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.sort-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 20px;
+  background: white;
+  border: 2px solid #e0e0e0;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.sort-btn i {
+  font-size: 14px;
+}
+
+.sort-btn:hover {
+  border-color: #00C73C;
+  color: #00C73C;
+}
+
+.sort-btn.active {
   background: #00C73C;
   border-color: #00C73C;
   color: white;

@@ -868,8 +868,12 @@ class CourseViewSet(viewsets.ModelViewSet):
 
         Query Parameters:
             - area_code (str): 지역 코드 (필수)
+            - ordering (str): 정렬 방식 (선택, 기본값: 'likes')
+                - 'likes': 추천순 (좋아요 많은 순)
+                - 'latest': 최신순 (최근 생성순)
         """
         area_code = request.query_params.get('area_code')
+        ordering = request.query_params.get('ordering', 'likes')  # 기본값: 추천순
 
         if not area_code:
             return Response(
@@ -894,7 +898,11 @@ class CourseViewSet(viewsets.ModelViewSet):
             has_area_spot=True
         ).select_related('user').prefetch_related('course_spots__travel_spot')
 
-        queryset = queryset.order_by('-like_count', '-created_at')
+        # 정렬 방식 적용
+        if ordering == 'latest':
+            queryset = queryset.order_by('-created_at', '-like_count')
+        else:  # 기본값: likes (추천순)
+            queryset = queryset.order_by('-like_count', '-created_at')
 
         # 페이지네이션
         page = self.paginate_queryset(queryset)
