@@ -1,16 +1,8 @@
 <template>
-  <div class="travel-card" @click="handleClick">
+  <div class="travel-card">
     <!-- 이미지 -->
-    <div class="card-image">
+    <div class="card-image" @click="handleClick">
       <img :src="destination.image" :alt="destination.name" />
-      <div class="card-overlay">
-        <div class="rating">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-          </svg>
-          <span>{{ destination.rating }}</span>
-        </div>
-      </div>
     </div>
 
     <!-- 내용 -->
@@ -97,36 +89,6 @@ const handleClick = () => {
 
 .travel-card:hover .card-image img {
   transform: scale(1.1);
-}
-
-.card-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(to bottom, rgba(0,0,0,0.3), transparent);
-  display: flex;
-  justify-content: flex-end;
-  align-items: flex-start;
-  padding: 1rem;
-}
-
-.rating {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-  background: rgba(255, 255, 255, 0.95);
-  padding: 0.4rem 0.75rem;
-  border-radius: 20px;
-  font-weight: 600;
-  font-size: 0.875rem;
-  color: #333;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.rating svg {
-  color: #fbbf24;
 }
 
 .card-content {

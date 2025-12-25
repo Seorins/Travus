@@ -11,6 +11,8 @@ import MyPageView from '@/views/MyPageView.vue'
 import PersonalInfoView from '@/views/PersonalInfoView.vue'
 import CommentsView from '@/views/CommentsView.vue'
 import ErrorView from '@/views/ErrorView.vue'
+import CameraView from '@/views/CameraView.vue'
+import BoardView from '@/views/BoardView.vue'
 import { useAuthStore } from '@/stores/auth'
 
 const router = createRouter({
@@ -50,6 +52,16 @@ const router = createRouter({
       path: '/course-detail/:id',
       name: 'course-detail',
       component: CourseView  // 임시로 CourseView 사용, 나중에 CourseDetailView 만들 예정
+    },
+    {
+      path: '/camera',
+      name: 'camera',
+      component: CameraView
+    },
+    {
+      path: '/board',
+      name: 'board',
+      component: BoardView
     },
     {
       path: '/login',

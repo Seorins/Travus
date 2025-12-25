@@ -15,6 +15,9 @@ from datetime import timedelta
 import os
 from dotenv import load_dotenv
 
+
+load_dotenv() 
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -37,8 +40,10 @@ ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 # Application definition
 
 INSTALLED_APPS = [
+    'ai',
     'accounts',
     'api',
+    'board',
     'rest_framework',
     'corsheaders',
     'rest_framework_simplejwt.token_blacklist',
@@ -137,8 +142,13 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # CORS Settings
-CORS_ALLOWED_ORIGINS = os.getenv('CORS_ALLOWED_ORIGINS', 'http://localhost:5173').split(',')
+# ngrok 사용 시 프론트/백엔드 모두 https로 접근하므로 모두 허용하고, CSRF 신뢰 도메인을 추가합니다.
+CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
+CSRF_TRUSTED_ORIGINS = [
+    "https://*.ngrok-free.dev",
+    "https://*.ngrok.io",
+]
 
 # REST Framework Settings
 REST_FRAMEWORK = {
@@ -171,6 +181,7 @@ SIMPLE_JWT = {
 
 # Korean Tourism API Settings
 # TOUR_API_BASE_URL = os.getenv('TOUR_API_BASE_URL', 'http://apis.data.go.kr/B551python011/KorWithService1')
+TOUR_API_BASE_URL = os.getenv('TOUR_API_BASE_URL', 'http://apis.data.go.kr/B551011/KorWithService1')
 TOUR_API_KEY = os.getenv('TOUR_API_KEY', '')
 TOUR_API_MOBILE_OS = os.getenv('TOUR_API_MOBILE_OS', 'ETC')
 TOUR_API_MOBILE_APP = os.getenv('TOUR_API_MOBILE_APP', 'TravUs')
@@ -199,3 +210,5 @@ DATABASES = {
         },
     }
 }
+
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY") 

@@ -14,8 +14,8 @@ class TravelSpotCategoryAdmin(admin.ModelAdmin):
 
 @admin.register(TravelSpot)
 class TravelSpotAdmin(admin.ModelAdmin):
-    list_display = ('name', 'category', 'address', 'rating', 'view_count', 'bookmark_count', 'is_active', 'created_at')
-    list_filter = ('category', 'is_active', 'area_code')
+    list_display = ('name', 'category_id', 'address', 'rating', 'view_count', 'bookmark_count', 'is_active', 'created_at')
+    list_filter = ('category_id', 'is_active', 'area_code')
     search_fields = ('name', 'address', 'description', 'content_id')
     ordering = ('-created_at',)
     readonly_fields = ('content_id', 'view_count', 'bookmark_count', 'review_count', 'created_at', 'updated_at')
