@@ -108,7 +108,6 @@ const toggleAutoPlay = () => {
 }
 
 const handleCTA = () => {
-  console.log('CTA clicked:', slides.value[currentSlide.value].ctaText)
   // 실제 동작 추가 가능
 }
 
