@@ -25,15 +25,20 @@
         <WeeklyRecommendSection @focus="handleFocus" />
       </section>
 
+      <!-- 인기 코스 섹션 -->
+      <section data-section="popular-courses">
+        <PopularCoursesSection @focus="handleFocus" />
+      </section>
+
       <!-- 여행 대상 섹션
       <section class="section scroll-snap-section" data-section="target">
         <TravelTargetSection @focus="handleFocus" />
       </section> -->
 
-      <!-- 여행지 섹션 -->
+      <!-- 여행지 섹션
       <section class="section scroll-snap-section" data-section="destination">
         <DestinationSection @focus="handleFocus" />
-      </section>
+      </section> -->
 
       <!-- AI 카메라 섹션 -->
       <!-- <section class="section scroll-snap-section" data-section="ai-camera">
@@ -54,6 +59,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import NavigationBar from '@/components/common/NavigationBar.vue'
 import HeroSection from '@/components/home/HeroSection.vue'
 import WeeklyRecommendSection from '@/components/home/WeeklyRecommendSection.vue'
+import PopularCoursesSection from '@/components/home/PopularCoursesSection.vue'
 import TravelTargetSection from '@/components/home/TravelTargetSection.vue'
 import DestinationSection from '@/components/home/DestinationSection.vue'
 import AICameraSection from '@/components/ai/AICameraSection.vue'
