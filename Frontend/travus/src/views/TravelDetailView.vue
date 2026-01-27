@@ -235,6 +235,9 @@
                 <div v-else-if="aiSummary" class="ai-summary-content">
                   <p>{{ aiSummary }}</p>
                 </div>
+                <div v-else class="ai-summary-content ai-unavailable">
+                  <p>현재 AI 요약 기능을 일시적으로 사용할 수 없습니다. 아래 댓글을 직접 확인해주세요.</p>
+                </div>
               </div>
             </div>
 
@@ -2149,6 +2152,11 @@ watch(() => route.params.id, (newId, oldId) => {
   font-size: 0.95rem;
   white-space: pre-wrap;
   color: #374151;
+}
+
+.ai-summary-content.ai-unavailable p {
+  color: #6b7280;
+  font-style: italic;
 }
 
 /* 별점 섹션 */

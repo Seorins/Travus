@@ -1,14 +1,13 @@
+import os
 import requests
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
 
-# 네이버 API 키
-NAVER_CLIENT_ID = 'ehMeVNZQ4tPiZrqNxnzi'
-NAVER_CLIENT_SECRET = 'k3HrwuBrmV'
-
-# YouTube API 키
-YOUTUBE_API_KEY = 'AIzaSyDe0FYArq5BSyYz5Hz9Q9sPterrMyHPK3w'
+# 환경변수에서 API 키 로드
+NAVER_CLIENT_ID = os.getenv('NAVER_CLIENT_ID')
+NAVER_CLIENT_SECRET = os.getenv('NAVER_CLIENT_SECRET')
+YOUTUBE_API_KEY = os.getenv('YOUTUBE_API_KEY')
 
 
 @csrf_exempt

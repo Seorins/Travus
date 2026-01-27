@@ -1,3 +1,4 @@
+import logging
 from django.db import models
 from django.conf import settings
 from rest_framework import viewsets, status, generics, permissions
@@ -18,6 +19,8 @@ from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError
 from .serializers import SignupSerializer, LoginSerializer
+
+logger = logging.getLogger(__name__)
 
 
 
@@ -780,10 +783,10 @@ class CourseViewSet(viewsets.ModelViewSet):
         duration = request.data.get('duration')
         themes = request.data.get('themes', [])
 
-        print(f"[DEBUG] AI 코스 생성 요청: region={region}, area_code={area_code}, duration={duration}, themes={themes}")
+        logger.debug(f"AI 코스 생성 요청: region={region}, area_code={area_code}, duration={duration}, themes={themes}")
 
         if not region or not area_code or not duration:
-            print(f"[ERROR] 필수 파라미터 누락: region={region}, area_code={area_code}, duration={duration}")
+            logger.error(f"필수 파라미터 누락: region={region}, area_code={area_code}, duration={duration}")
             return Response(
                 {'error': '지역, 지역코드, 여행 기간은 필수입니다'},
                 status=status.HTTP_400_BAD_REQUEST
@@ -813,15 +816,15 @@ class CourseViewSet(viewsets.ModelViewSet):
                 'latitude', 'longitude', 'address', 'image_url', 'area_code'
             )
 
-            print(f"[DEBUG] DB 조회 결과: {len(travel_spots)}개 장소")
+            logger.debug(f"DB 조회 결과: {len(travel_spots)}개 장소")
             if len(travel_spots) > 0:
-                print(f"[DEBUG] 첫 번째 장소: name={travel_spots[0].get('name')}, area_code={travel_spots[0].get('area_code')}, address={travel_spots[0].get('address')}")
+                logger.debug(f"첫 번째 장소: name={travel_spots[0].get('name')}, area_code={travel_spots[0].get('area_code')}, address={travel_spots[0].get('address')}")
                 # 지역 코드 분포 확인
                 area_codes = {}
                 for spot in travel_spots:
                     code = spot.get('area_code')
                     area_codes[code] = area_codes.get(code, 0) + 1
-                print(f"[DEBUG] 지역 코드 분포: {area_codes}")
+                logger.debug(f"지역 코드 분포: {area_codes}")
 
             # 여행지, 음식점, 숙박 분리
             attractions = [spot for spot in travel_spots if spot['content_type_id'] not in ['39', '32']]
@@ -888,7 +891,7 @@ class CourseViewSet(viewsets.ModelViewSet):
                     valid_itinerary.append(item)
                 else:
                     # ID가 없는 경우 로그 남기고 스킵
-                    print(f"[WARNING] ID {item['id']}에 해당하는 장소를 찾을 수 없습니다")
+                    logger.warning(f"ID {item['id']}에 해당하는 장소를 찾을 수 없습니다")
 
             # 유효한 일정으로 교체
             ai_result['itinerary'] = valid_itinerary
@@ -1005,11 +1008,11 @@ class CourseViewSet(viewsets.ModelViewSet):
         """
         월간 Best 30 코스 조회
         - 좋아요 수 기준 상위 30개 공개 코스 반환
-        - 최근 30일 이내 생성된 코스 중에서 선택
+        - 최근 30일 이내 코스가 부족하면 전체에서 선택
         """
         from datetime import datetime, timedelta
 
-        # 최근 30일
+        # 최근 30일 이내 코스 먼저 조회
         thirty_days_ago = datetime.now() - timedelta(days=30)
 
         queryset = Course.objects.filter(
@@ -1018,6 +1021,13 @@ class CourseViewSet(viewsets.ModelViewSet):
         ).select_related('user').prefetch_related('course_spots__travel_spot')
 
         queryset = queryset.order_by('-like_count', '-view_count')[:30]
+
+        # 30일 이내 코스가 부족하면 전체에서 조회
+        if queryset.count() < 10:
+            queryset = Course.objects.filter(
+                is_public=True
+            ).select_related('user').prefetch_related('course_spots__travel_spot')
+            queryset = queryset.order_by('-like_count', '-view_count')[:30]
 
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
@@ -1095,8 +1105,8 @@ class ReviewViewSet(viewsets.ModelViewSet):
         return queryset.select_related('user', 'travel_spot').order_by('-created_at')
 
     def perform_create(self, serializer):
-        print(f"🔍 댓글 작성 요청 데이터: {self.request.data}")
-        print(f"🔍 요청 사용자: {self.request.user}")
+        logger.debug(f"댓글 작성 요청 데이터: {self.request.data}")
+        logger.debug(f"요청 사용자: {self.request.user}")
         serializer.save(user=self.request.user)
 
     @action(detail=False, methods=['get'], permission_classes=[permissions.AllowAny])
@@ -1176,7 +1186,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
                 raise Exception(f"GMS API 호출 실패: {response.status_code}")
 
         except Exception as e:
-            print(f"AI 요약 생성 실패: {str(e)}")
+            logger.error(f"AI 요약 생성 실패: {str(e)}")
             return Response({
                 'summary': '댓글 요약을 생성하는 중 오류가 발생했습니다.',
                 'review_count': reviews.count(),
@@ -1322,12 +1332,3 @@ class CourseCommentRepliesView(generics.ListAPIView):
     def get_queryset(self):
         comment_id = self.kwargs['comment_id']
         return CourseComment.objects.filter(parent_id=comment_id).order_by('created_at')
-@api_view(['POST'])
-def analyze_image(request):
-    return Response({"message": "analyze_image OK"})
-
-@api_view(['POST'])
-def chat_ai(request):
-    return Response({"message": "chat_ai OK"})
-
-

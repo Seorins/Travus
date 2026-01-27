@@ -197,10 +197,10 @@ def password_reset_request(request):
         user.set_password(temp_password)
         user.save()
 
-        # 실제로는 이메일로 전송하지만, 개발 환경에서는 응답으로 반환
+        # TODO: 실제 프로덕션에서는 이메일로 임시 비밀번호 전송 구현 필요
+        # 현재는 비밀번호만 변경하고 메시지만 반환
         return Response({
-            'message': '임시 비밀번호가 이메일로 전송되었습니다.',
-            'temp_password': temp_password  # 실제 프로덕션에서는 삭제
+            'message': '임시 비밀번호가 이메일로 전송되었습니다.'
         })
     except User.DoesNotExist:
         # 보안상 이메일이 존재하지 않아도 성공 메시지 반환

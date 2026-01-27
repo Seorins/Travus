@@ -4,8 +4,11 @@ OpenAI GPT를 사용하여 맞춤형 여행 코스를 생성합니다.
 """
 import os
 import json
+import logging
 from openai import OpenAI
 from django.conf import settings
+
+logger = logging.getLogger(__name__)
 
 
 class AITravelCourseService:
@@ -88,7 +91,7 @@ class AITravelCourseService:
             return result
 
         except Exception as e:
-            print(f"❌ AI 코스 생성 실패: {str(e)}")
+            logger.error(f"AI 코스 생성 실패: {str(e)}")
             # 에러 발생 시 기본 코스 반환
             return self._create_fallback_course(region_name, days, available_spots)
 

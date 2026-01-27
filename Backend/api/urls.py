@@ -1,5 +1,4 @@
 from django.urls import path, include
-from .views import analyze_image, chat_ai
 from rest_framework.routers import DefaultRouter
 from .views import (
     TravelSpotViewSet, TravelSpotCategoryViewSet,

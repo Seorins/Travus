@@ -3,9 +3,12 @@ AI 여행 코스 생성 서비스
 GMS API를 통해 OpenAI GPT를 호출하여 여행 코스를 생성합니다.
 """
 
+import logging
 import requests
 import json
 from django.conf import settings
+
+logger = logging.getLogger(__name__)
 
 
 class AICourseGenerator:
@@ -262,7 +265,7 @@ Day 3: travel → travel → restaurant → travel → travel → restaurant
 
             # ID 존재 여부는 경고만 출력 (에러 발생하지 않음)
             if item['id'] not in spot_ids:
-                print(f"[WARNING] AI가 존재하지 않는 ID를 반환했습니다: {item['id']} (views.py에서 필터링됨)")
+                logger.warning(f"AI가 존재하지 않는 ID를 반환했습니다: {item['id']} (views.py에서 필터링됨)")
 
             # type 값 확인
             if item['type'] not in ['travel', 'restaurant', 'accommodation']:

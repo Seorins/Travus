@@ -1,165 +1,52 @@
-# 🧭 Git 협업 규칙 
+# TravUs - 모두를 위한 여행 플랫폼
 
-`final-pjt` 프로젝트를 기준으로,
-**각자 자신의 폴더에서만 작업**하고
-**브랜치별로 관리 후 master로 합병**
+![TravUs](results/images/1.PNG)
 
----
+TRAVUS는 "모두를 위한 여행"이라는 슬로건 아래, 장애인과 비장애인 모두가 함께 즐길 수 있는 배리어프리 여행 플랫폼입니다. 걸음의 속도가 달라도, 바라보는 높이가 달라도 모두가 편안하게 여행을 즐길 수 있도록 설계되었습니다.
 
-## ✅ 1. 최초 세팅
+## 기술 스택
 
-```bash
-git clone https://lab.ssafy.com/tjfls295/final-pjt
-cd 06-pjt
-git switch -c <본인_이름>   # 예: git switch -c seorin
-```
+### Backend
+- Python 3.x
+- Django 5.2 / Django REST Framework
+- MySQL
+- JWT 인증 (SimpleJWT)
 
-* master 브랜치에서는 직접 작업하지 않는다.
-* 모든 작업은 **개인 브랜치**에서 진행한다.
+### Frontend
+- Vue 3 (Composition API)
+- Vite
+- Pinia (상태관리)
+- Vue Router
+- Axios
 
----
+### 외부 API
+- 한국관광공사 무장애 여행 API
+- OpenAI GPT (AI 코스 생성)
+- 카카오맵 API
+- 네이버 검색 API
+- YouTube API
 
-## ✅ 2. 작업
+## 주요 기능
 
-1. **본인 전용 폴더 생성**
+### 여행지 검색
+- 지역별/테마별 무장애 여행지 검색
+- 상세 접근성 정보 제공 (휠체어, 시각장애, 청각장애 등)
+- 북마크 기능
 
-   ```bash
-   mkdir <본인_이름>
-   ```
+### AI 맞춤 코스 생성
+- 지역, 기간, 테마 선택
+- AI 기반 최적 여행 코스 자동 생성
+- 당일치기 / 1박 2일 / 2박 3일 지원
 
-   예시:
+### 코스 공유
+- 사용자 생성 코스 공유
+- 좋아요 및 댓글 기능
+- 월간 인기 코스 30
 
-   ```
-   seorin
-   sehyeon
-   ```
+### 사용자 기능
+- 회원가입/로그인
+- 마이페이지 (북마크, 내 코스, 좋아요한 코스)
+- 여행지 리뷰 작성
 
-2. **자신의 폴더 안에서만 코드 작성 및 수정**
 
-   * 다른 사람의 폴더는 임의로 수정하지 않는다.
-   * 협의가 필요한 경우, 반드시 주석으로 표시한다.
 
-     ```python
-     # [수정자: 서린] 텍스트 색상 변경 (2025-12-19)
-     ```
-
-    💡 병합 전에 개인 폴더는 삭제해도 상관없음(깔끔)
-
-3. **작업 완료 후 커밋 및 푸시**
-
-   ```bash
-   git add .
-   git commit -m "11_28_이름 작업 내용"
-   git push origin <본인_이름>
-   ```
-
----
-
-## ✅ 3. GitLab에서 Merge Request (PR) 생성
-
-1. GitLab에서 `Merge Request` 생성
-2. Reviewer 또는 Assignee 지정
-3. 코드 리뷰 후 `master` 브랜치로 merge
-
-> ⚠️ **주의:**
-> 충돌(conflict)이 발생하지 않도록
-> 서로의 폴더 구조를 변경하지 않는다.
-
----
-
-## ✅ 4. master 최신화
-
-모든 병합이 완료된 후, 팀원 전원은 아래 명령어를 실행한다.
-
-```bash
-git checkout master
-git pull origin master
-```
-
-> 👉 master 브랜치를 항상 최신 상태로 유지해야 한다.
-
----
-
-## ✅ 5. 다음 작업 시작 시
-
-새 브랜치를 생성한다.
-
-```bash
-git switch -c <새_브랜치명>
-```
-
----
-
-* 각자의 폴더 안에 개별 작업 내용이 정리된다.
-* 모든 브랜치는 merge 완료 후 삭제 가능하다.
-
-```bash
-git branch -d <브랜치명>
-```
-
----
-
-## ✅ 6. 최종 상태
-
-* master(`M3`)에는 모든 브랜치가 반영된 최종 버전이 남는다.
-* 사용 완료된 개인 브랜치는 정리되어 깔끔한 상태 유지.
-
----
-
-## ✅ 7. 작업 중 master 변경사항 가져오기 
-
-* 내 작업은 아직 커밋하지 않은 상태
-* 다른 팀원이 master에 merge 완료한 경우
-* 내 작업을 유지한 채 최신 master를 반영해야 할 때
-
----
-
-### 안전한 작업 절차 (커밋 전 기준)
-
-1️⃣ 현재 작업 내용 임시 저장
-```bash
-git status
-git stash
-```
-
-* 작업 중이던 코드가 임시로 안전하게 보관됨
-
----
-
-2️⃣ master 브랜치로 이동
-```bash
-git checkout master
-```
-
----
-
-3️⃣ 최신 master 가져오기
-```bash
-git pull origin master
-```
-
-* 다른 팀원의 merge 내용 반영
-
----
-
-4️⃣ 내 작업 브랜치로 복귀
-```bash
-git checkout <본인_브랜치명>
-```
-
----
-
-5️⃣ master 변경사항 병합
-```bash
-git merge master
-```
-
-* 충돌 없으면 즉시 완료
-* 충돌 발생 시 → 직접 수정 후 commit
-
----
-
-6️⃣ 임시 저장한 작업 복구
-```bash
-git stash pop
-```

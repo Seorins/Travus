@@ -263,14 +263,12 @@ const generateCourse = async (themes) => {
   } catch (error) {
     console.error('AI 코스 생성 실패:', error)
 
-    let errorMessage = 'AI 코스 생성에 실패했습니다.'
+    let errorMessage = '현재 AI 코스 생성 기능을 일시적으로 사용할 수 없습니다.\n\n잠시 후 다시 시도해주시거나, 직접 코스를 구성해보세요.'
 
-    if (error.response?.data?.error) {
-      errorMessage = error.response.data.error
+    if (error.response?.status === 503 || error.response?.status === 502) {
+      errorMessage = '현재 AI 서버 점검 중입니다.\n\n잠시 후 다시 시도해주세요.'
     } else if (error.code === 'ECONNABORTED') {
-      errorMessage = '요청 시간이 초과되었습니다. 다시 시도해주세요.'
-    } else if (error.message) {
-      errorMessage = error.message
+      errorMessage = '요청 시간이 초과되었습니다.\n\n다시 시도해주세요.'
     }
 
     alert(errorMessage)

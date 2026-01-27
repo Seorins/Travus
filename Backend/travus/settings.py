@@ -86,17 +86,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'travus.wsgi.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
-
-
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 
@@ -142,12 +131,14 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # CORS Settings
-# ngrok 사용 시 프론트/백엔드 모두 https로 접근하므로 모두 허용하고, CSRF 신뢰 도메인을 추가합니다.
-CORS_ALLOW_ALL_ORIGINS = True
+# 개발 환경에서는 특정 출처만 허용 (프로덕션에서는 실제 도메인으로 변경)
+CORS_ALLOWED_ORIGINS = os.getenv('CORS_ALLOWED_ORIGINS', 'http://localhost:5173,http://127.0.0.1:5173').split(',')
 CORS_ALLOW_CREDENTIALS = True
 CSRF_TRUSTED_ORIGINS = [
     "https://*.ngrok-free.dev",
     "https://*.ngrok.io",
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
 ]
 
 # REST Framework Settings
@@ -167,8 +158,7 @@ REST_FRAMEWORK = {
     ],
 }
 
-# Korean Tourism API Settings (무장애 여행 API는 Service2 사용)
-TOUR_API_BASE_URL = os.getenv('TOUR_API_BASE_URL', 'http://apis.data.go.kr/B551011/KorWithService2')
+# Simple JWT Settings
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=14),
@@ -180,8 +170,7 @@ SIMPLE_JWT = {
 }
 
 # Korean Tourism API Settings
-# TOUR_API_BASE_URL = os.getenv('TOUR_API_BASE_URL', 'http://apis.data.go.kr/B551python011/KorWithService1')
-TOUR_API_BASE_URL = os.getenv('TOUR_API_BASE_URL', 'http://apis.data.go.kr/B551011/KorWithService1')
+TOUR_API_BASE_URL = os.getenv('TOUR_API_BASE_URL', 'https://apis.data.go.kr/B551011/KorWithService2')
 TOUR_API_KEY = os.getenv('TOUR_API_KEY', '')
 TOUR_API_MOBILE_OS = os.getenv('TOUR_API_MOBILE_OS', 'ETC')
 TOUR_API_MOBILE_APP = os.getenv('TOUR_API_MOBILE_APP', 'TravUs')
@@ -196,15 +185,15 @@ REDIS_HOST = os.getenv('REDIS_HOST', 'localhost')
 REDIS_PORT = int(os.getenv('REDIS_PORT', 6379))
 REDIS_DB = int(os.getenv('REDIS_DB', 0))
 
-# Mysql 설정
+# MySQL 설정 (환경변수에서 로드)
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'travus',
-        'USER': 'root',
-        'PASSWORD': '1234',
-        'HOST': '127.0.0.1',   # MySQL 호스트
-        'PORT': '3306',        # MySQL 포트 (기본값은 3306)
+        'NAME': os.getenv('DB_NAME', 'travus'),
+        'USER': os.getenv('DB_USER', 'root'),
+        'PASSWORD': os.getenv('DB_PASSWORD', ''),
+        'HOST': os.getenv('DB_HOST', '127.0.0.1'),
+        'PORT': os.getenv('DB_PORT', '3306'),
         'OPTIONS': {
             'charset': 'utf8mb4',
         },
