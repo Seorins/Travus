@@ -1,6 +1,6 @@
 # TRAVUS - 모두를 위한 여행 플랫폼
 
-🏆 **SSAFY 관통프로젝트 1등**
+🏆 **SSAFY 관통프로젝트 최우수상**
 
 ![TravUs](results/images/1.PNG)
 
