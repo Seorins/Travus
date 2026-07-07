@@ -9,16 +9,6 @@
   <img src="results/images/1.PNG" alt="TRAVUS 메인 화면" width="900" />
 </p>
 
-## 바로가기
-
-<p align="center">
-  <a href="#프로젝트-소개"><img src="https://img.shields.io/badge/Project-Intro-0A7C80?style=for-the-badge" alt="프로젝트 소개" /></a>
-  <a href="#주요-화면"><img src="https://img.shields.io/badge/Service-Screens-2F80ED?style=for-the-badge" alt="주요 화면" /></a>
-  <a href="#기술-스택"><img src="https://img.shields.io/badge/Tech-Stack-555555?style=for-the-badge" alt="기술 스택" /></a>
-  <a href="#프로젝트-구조"><img src="https://img.shields.io/badge/Project-Structure-6F42C1?style=for-the-badge" alt="프로젝트 구조" /></a>
-  <a href="#실행-방법"><img src="https://img.shields.io/badge/Run-Guide-F2994A?style=for-the-badge" alt="실행 방법" /></a>
-</p>
-
 ## 목차
 
 - [프로젝트 소개](#프로젝트-소개)
@@ -27,12 +17,8 @@
 - [접근성 기능](#접근성-기능)
 - [기술 스택](#기술-스택)
 - [시스템 아키텍처](#시스템-아키텍처)
-- [데이터 모델 요약](#데이터-모델-요약)
-- [주요 API](#주요-api)
 - [프로젝트 구조](#프로젝트-구조)
-- [실행 방법](#실행-방법)
-- [환경 변수](#환경-변수)
-- [데이터 적재 및 관리 명령어](#데이터-적재-및-관리-명령어)
+
 
 ## 프로젝트 소개
 
