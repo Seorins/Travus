@@ -6,14 +6,15 @@
 🏆 **SSAFY 관통프로젝트 최우수상**
 
 <p align="center">
-  <img src="results/images/1.PNG" alt="TRAVUS 메인 화면" width="900" />
+  <img src="results/images/readme/screens/home-01-main.png" alt="TRAVUS 메인 화면" width="900" />
 </p>
 
 ## 목차
 
 - [프로젝트 소개](#프로젝트-소개)
 - [서비스 흐름](#서비스-흐름)
-- [주요 화면](#주요-화면)
+- [주요 기능 및 화면](#주요-기능-및-화면)
+- [핵심 구현 포인트](#핵심-구현-포인트)
 - [접근성 기능](#접근성-기능)
 - [기술 스택](#기술-스택)
 - [프로젝트 구조](#프로젝트-구조)
@@ -46,173 +47,280 @@ flowchart LR
   C --> I["AI 카메라 및 음성 안내"]
 ```
 
-## 주요 화면
+## 주요 기능 및 화면
+
+서비스의 주요 페이지를 **페이지 단위**로 나누어 정리했습니다.
+
+각 페이지는 아래 순서로 반복됩니다.
+
+1. 기능 설명: 해당 화면에서 제공하는 주요 기능
+2. 대표 화면: 페이지 전체 흐름을 보여주는 큰 이미지
+3. 세부 화면: 사용자가 실제로 확인하거나 조작하는 주요 영역
+
+### 서비스 기능 한눈에 보기
+
+| 기능 | 설명 |
+| --- | --- |
+| 무장애 여행지 검색 | 장애 유형과 편의시설 조건을 조합해 여행지, 숙소, 음식점을 탐색합니다. |
+| 여행지 상세 정보 | 대표 이미지, 위치, 무장애 관광 정보, 추천 여행지, 댓글을 한 화면에서 확인합니다. |
+| AI 후기 요약 | 여행지 댓글을 바탕으로 사용자가 빠르게 참고할 수 있는 후기 요약을 제공합니다. |
+| AI 코스 플래너 | 지역, 기간, 테마를 입력하면 관광지, 음식점, 숙소를 조합한 여행 코스를 생성합니다. |
+| 지도 기반 코스 결과 | Kakao Map 위에 일정별 마커와 동선을 표시하고 코스 저장, 공유, 댓글을 지원합니다. |
+| 코스 공유 | 공개 코스를 월간 인기순, 지역별, 내가 만든 코스 기준으로 조회합니다. |
+| AI 카메라 | 카메라 또는 업로드 이미지를 분석하고 텍스트/음성 질문으로 후속 안내를 제공합니다. |
+| 여행 정보 통합 검색 | Naver Blog, Naver News, YouTube 결과를 한 화면에서 비교합니다. |
+| 마이페이지 | 북마크, 작성 댓글, 생성 코스, 좋아요한 코스 등 사용자 활동을 관리합니다. |
 
 ### 1. 메인 홈
 
-TRAVUS의 핵심 서비스를 한눈에 볼 수 있는 첫 화면입니다. 서비스 바로가기, 추천 여행지, 인기 코스가 홈에서 이어집니다.
+> 서비스 첫 진입 화면입니다. 추천 여행지와 인기 코스로 주요 탐색 흐름을 시작합니다.
 
-| 메인 히어로 | 추천 여행지 |
-| --- | --- |
-| <img src="results/images/1.PNG" alt="메인 히어로" width="430" /> | <img src="results/images/2.PNG" alt="추천 여행지" width="430" /> |
+#### 기능 설명
 
-| 인기 여행 코스 | 푸터 |
+| 기능 | 설명 |
 | --- | --- |
-| <img src="results/images/3.PNG" alt="인기 여행 코스" width="430" /> | <img src="results/images/4.PNG" alt="푸터" width="430" /> |
+| 서비스 진입 | TRAVUS의 핵심 메시지와 주요 메뉴를 첫 화면에서 안내합니다. |
+| 추천 여행지 | 사용자가 바로 탐색할 수 있도록 주요 여행지 카드를 노출합니다. |
+| 인기 코스 | 다른 사용자가 만든 인기 여행 코스를 홈에서 확인할 수 있습니다. |
+
+#### 대표 화면
+
+<p align="center">
+  <img src="results/images/readme/screens/home-01-main.png" alt="메인 홈 대표 화면" width="820" />
+</p>
+<p align="center"><b>메인 홈 전체 화면</b></p>
+
+#### 세부 화면
+
+| 추천 여행지 | 인기 여행 코스 |
+| --- | --- |
+| <img src="results/images/readme/screens/home-02-recommend.png" alt="홈 추천 여행지" width="390" /> | <img src="results/images/readme/screens/home-03-popular-course.png" alt="홈 인기 여행 코스" width="390" /> |
 
 ### 2. 서비스 소개
 
-TRAVUS의 의미와 서비스 방향성을 소개하는 페이지입니다. 프로젝트의 배리어프리 메시지를 캐릭터와 시각 요소로 전달합니다.
+> TRAVUS의 서비스 방향성과 배리어프리 여행 메시지를 소개하는 화면입니다.
+
+#### 기능 설명
+
+| 기능 | 설명 |
+| --- | --- |
+| 브랜드 메시지 | `Travel`과 `Us`를 결합한 TRAVUS의 의미를 소개합니다. |
+| 서비스 가치 전달 | 누구나 편하게 여행할 수 있다는 배리어프리 여행 방향성을 보여줍니다. |
+| 시각적 브랜딩 | 캐릭터와 배너 이미지를 활용해 서비스의 따뜻한 분위기를 전달합니다. |
+
+#### 대표 화면
 
 <p align="center">
-  <img src="results/images/5.png" alt="서비스 소개 페이지" width="720" />
+  <img src="results/images/readme/screens/about-01-main.png" alt="서비스 소개 대표 화면" width="820" />
 </p>
+<p align="center"><b>서비스 소개 전체 화면</b></p>
+
+#### 세부 화면
+
+| 서비스 메시지 | 배리어프리 비주얼 |
+| --- | --- |
+| <img src="results/images/readme/screens/about-02-message.png" alt="서비스 메시지" width="390" /> | <img src="results/images/readme/screens/about-03-banner.png" alt="배리어프리 비주얼" width="390" /> |
 
 ### 3. 무장애 여행지 검색
 
-여행지, 숙소, 음식점을 카테고리별로 탐색하고, 장애 유형별 접근성 시설을 선택해 필터링할 수 있습니다.
+> 여행지, 숙소, 음식점을 접근성 조건과 함께 검색하는 핵심 탐색 화면입니다.
+
+#### 기능 설명
+
+| 기능 | 설명 |
+| --- | --- |
+| 카테고리 탐색 | 여행지, 숙소, 음식점을 카테고리별로 조회합니다. |
+| 접근성 필터 | 지체장애, 시각장애, 청각장애, 영유아 가족, 고령자 조건을 선택합니다. |
+| 시설 조건 검색 | 주차, 대중교통, 접근로, 휠체어, 엘리베이터, 화장실 등 세부 시설을 조합합니다. |
+| 목록 조회 | 검색 결과를 카드형 UI와 페이지네이션으로 확인합니다. |
+
+#### 대표 화면
 
 <p align="center">
-  <img src="results/images/6.png" alt="무장애 여행지 검색 페이지" width="720" />
+  <img src="results/images/readme/screens/travel-01-main.png" alt="무장애 여행지 검색 대표 화면" width="820" />
 </p>
+<p align="center"><b>무장애 여행지 검색 전체 화면</b></p>
 
-구현 포인트:
+#### 세부 화면
 
-- 지역, 카테고리, 검색어, 정렬 조건 기반 여행지 목록 조회
-- 지체장애, 시각장애, 청각장애, 영유아 가족, 고령자 유형별 시설 필터 제공
-- 휠체어, 주차, 대중교통, 접근로, 승강기, 화장실, 오디오가이드 등 접근성 조건 조합 검색
-- 페이지네이션과 카드형 목록 UI 제공
+| 접근성 필터 | 여행지 목록 |
+| --- | --- |
+| <img src="results/images/readme/screens/travel-02-filter.png" alt="접근성 필터" width="390" /> | <img src="results/images/readme/screens/travel-03-list.png" alt="여행지 목록" width="390" /> |
 
 ### 4. 여행지 상세 정보
 
-여행지 상세 페이지에서는 대표 이미지, 기본 정보, Kakao Map 위치, 무장애 관광 정보, 추천 여행지, 댓글과 AI 후기 요약을 확인할 수 있습니다.
+> 선택한 여행지의 기본 정보, 지도 위치, 접근성 정보, 댓글을 한 화면에서 확인합니다.
+
+#### 기능 설명
+
+| 기능 | 설명 |
+| --- | --- |
+| 기본 정보 조회 | 여행지 대표 이미지, 주소, 분류, 지역 정보를 확인합니다. |
+| 지도 위치 확인 | Kakao Map으로 여행지 위치를 시각적으로 확인합니다. |
+| 무장애 정보 확인 | 접근 가능한 시설을 아이콘 활성화 상태로 보여줍니다. |
+| AI 후기 요약 | 댓글 내용을 바탕으로 여행지에 대한 사용자 후기를 요약합니다. |
+| 댓글 및 북마크 | 로그인 사용자가 댓글과 북마크로 여행지를 기록합니다. |
+
+#### 대표 화면
 
 <p align="center">
-  <img src="results/images/7.png" alt="여행지 상세 페이지" width="720" />
+  <img src="results/images/readme/screens/detail-01-main.png" alt="여행지 상세 대표 화면" width="820" />
 </p>
+<p align="center"><b>여행지 상세 정보 전체 화면</b></p>
 
-구현 포인트:
+#### 세부 화면
 
-- `content_id` 기반 여행지 상세 조회
-- Kakao Map SDK를 활용한 위치 표시
-- 접근성 아이콘 활성화 표시
-- 같은 지역의 추천 여행지 제공
-- 로그인 사용자 대상 북마크 토글
-- 여행지 댓글 작성, 수정, 삭제
-- AI 기반 사용자 후기 요약
-- 여행지 설명이 부족한 경우 AI 설명 생성
+| 기본 정보 및 지도 | 무장애 관광 정보 |
+| --- | --- |
+| <img src="results/images/readme/screens/detail-02-info-map.png" alt="기본 정보 및 지도" width="390" /> | <img src="results/images/readme/screens/detail-03-accessibility.png" alt="무장애 관광 정보" width="390" /> |
+
+| AI 후기 요약 및 댓글 |
+| --- |
+| <img src="results/images/readme/screens/detail-04-comments.png" alt="AI 후기 요약 및 댓글" width="620" /> |
 
 ### 5. AI 코스 플래너
 
-사용자가 지역, 여행 기간, 테마를 선택하면 AI가 관광지, 음식점, 숙소를 조합해 여행 코스를 생성합니다.
+> 지역, 기간, 테마를 선택하면 AI가 일정형 여행 코스를 생성하는 화면입니다.
 
-| 지역 선택 | 기간 선택 |
+#### 기능 설명
+
+| 기능 | 설명 |
 | --- | --- |
-| <img src="results/images/9.png" alt="지역 선택" width="430" /> | <img src="results/images/11.PNG" alt="기간 선택" width="430" /> |
+| 지역 선택 | 여행할 지역을 선택해 코스 생성 범위를 정합니다. |
+| 기간 선택 | 당일치기, 1박 2일, 2박 3일 중 여행 기간을 선택합니다. |
+| 테마 선택 | 산, 바다, 실내여행지, 액티비티 등 원하는 여행 테마를 고릅니다. |
+| AI 코스 생성 | 관광지, 음식점, 숙소 데이터를 조합해 맞춤형 일정을 생성합니다. |
+| 지도 결과 확인 | 생성된 코스를 지도와 일정 리스트로 확인합니다. |
 
-| 테마 선택 | 생성 로딩 |
+#### 대표 화면
+
+<p align="center">
+  <img src="results/images/readme/screens/course-01-start.png" alt="AI 코스 플래너 대표 화면" width="820" />
+</p>
+<p align="center"><b>AI 코스 플래너 전체 화면</b></p>
+
+#### 세부 화면
+
+| 지역 선택 | 기간 선택 | 테마 선택 |
+| --- | --- | --- |
+| <img src="results/images/readme/screens/course-02-region.png" alt="코스 지역 선택" width="260" /> | <img src="results/images/readme/screens/course-03-duration.png" alt="코스 기간 선택" width="260" /> | <img src="results/images/readme/screens/course-04-theme.png" alt="코스 테마 선택" width="260" /> |
+
+| 생성 로딩 | 지도 기반 코스 결과 |
 | --- | --- |
-| <img src="results/images/12.png" alt="테마 선택" width="430" /> | <img src="results/images/13.PNG" alt="AI 코스 생성 로딩" width="430" /> |
+| <img src="results/images/readme/screens/course-05-loading.png" alt="AI 코스 생성 로딩" width="390" /> | <img src="results/images/readme/screens/course-06-result-map.png" alt="지도 기반 코스 결과" width="390" /> |
 
-구현 포인트:
+### 6. 코스 공유 및 인기 코스
 
-- 지역 선택, 기간 선택, 테마 선택을 단계형 플로우로 구성
-- 당일치기, 1박 2일, 2박 3일 일정 지원
-- 관광지, 음식점, 숙소 데이터를 구분해 AI 프롬프트 구성
-- AI 응답의 장소 ID를 실제 DB 데이터와 검증
-- 일정 생성 실패 또는 데이터 부족 상황에 대한 예외 처리
+> 공개된 여행 코스를 인기순, 지역별, 사용자별로 탐색하는 화면입니다.
 
-### 6. 지도 기반 코스 결과
+#### 기능 설명
 
-생성된 여행 코스는 지도와 일정 리스트를 함께 보여줍니다. 날짜별 마커, 동선, 장소 상세 패널, 코스 저장, 공유, 좋아요, 댓글 기능을 제공합니다.
+| 기능 | 설명 |
+| --- | --- |
+| 월간 인기 코스 | 좋아요와 조회수를 기준으로 인기 코스를 확인합니다. |
+| 지역별 코스 | 공개된 사용자 코스를 지역별로 탐색합니다. |
+| 내 코스 조회 | 로그인 사용자가 직접 생성한 코스를 관리합니다. |
+| 코스 반응 | 공개 코스에 좋아요와 댓글을 남길 수 있습니다. |
 
-<p align="center">
-  <img src="results/images/14.PNG" alt="AI 코스 결과 지도" width="900" />
-</p>
-
-구현 포인트:
-
-- Kakao Map 위에 일정 순서별 커스텀 마커 표시
-- 날짜별 또는 전체 일정 보기 지원
-- 장소 간 이동 동선을 Polyline으로 시각화
-- 생성된 AI 코스를 DB에 자동 저장
-- 저장된 코스 공유 URL 생성
-- 코스 좋아요, 댓글 작성 및 삭제
-- 기존 공개 코스 상세 조회 지원
-
-### 7. 코스 공유 및 인기 코스
-
-사용자들이 생성한 공개 코스를 모아 월간 Best 30, 지역별 사용자 코스, 내가 만든 코스 목록으로 보여줍니다.
+#### 대표 화면
 
 <p align="center">
-  <img src="results/images/8.png" alt="코스 목록 페이지" width="720" />
+  <img src="results/images/readme/screens/course-share-01-main.png" alt="코스 공유 대표 화면" width="820" />
 </p>
+<p align="center"><b>코스 공유 및 인기 코스 전체 화면</b></p>
 
-구현 포인트:
+#### 세부 화면
 
-- 월간 인기 코스 30개 조회
-- 좋아요와 조회수 기반 정렬
-- 지역별 공개 코스 필터링
-- 로그인 사용자별 내 코스 조회
+| 월간 Best 30 | 공개 코스 목록 |
+| --- | --- |
+| <img src="results/images/readme/screens/course-share-02-best.png" alt="월간 인기 코스" width="390" /> | <img src="results/images/readme/screens/course-share-03-list.png" alt="공개 코스 목록" width="390" /> |
 
-### 8. AI 카메라
+### 7. AI 카메라
 
-카메라를 켜거나 사진을 업로드하면 AI가 여행지를 분석합니다. 분석 결과를 바탕으로 텍스트 질문과 음성 질문도 할 수 있습니다.
+> 카메라 또는 업로드 이미지로 여행지를 분석하고, 텍스트/음성 질문까지 이어지는 화면입니다.
+
+#### 기능 설명
+
+| 기능 | 설명 |
+| --- | --- |
+| 카메라 분석 | 실시간 카메라 또는 업로드 이미지를 AI가 분석합니다. |
+| 텍스트 질문 | 분석 결과를 바탕으로 여행지에 대해 추가 질문을 할 수 있습니다. |
+| 음성 질문 | 음성 녹음, STT 변환, AI 응답 흐름을 지원합니다. |
+| 음성 안내 | 분석 결과와 답변을 TTS로 들을 수 있습니다. |
+
+#### 대표 화면
 
 <p align="center">
-  <img src="results/images/15.png" alt="AI 카메라 페이지" width="720" />
+  <img src="results/images/readme/screens/ai-camera-01-main.png" alt="AI 카메라 대표 화면" width="820" />
 </p>
+<p align="center"><b>AI 카메라 전체 화면</b></p>
 
-구현 포인트:
+### 8. 여행 정보 통합 검색
 
-- 브라우저 `getUserMedia`로 실시간 카메라 접근
-- 캡처 이미지 리사이즈 및 JPEG 압축 후 서버 전송
-- OpenAI Vision 모델 기반 이미지 분석
-- 분석 결과 TTS 음성 안내
-- MediaRecorder 기반 음성 녹음
-- Whisper STT로 음성을 텍스트로 변환
-- 변환된 질문을 AI 채팅 API에 자동 전송
+> 여행지 관련 블로그, 뉴스, 유튜브 결과를 한 화면에서 비교하는 검색 화면입니다.
 
-### 9. 여행 정보 통합 검색
+#### 기능 설명
 
-여행지를 검색하면 블로그, 뉴스, 유튜브 결과를 한 화면에서 확인할 수 있습니다.
+| 기능 | 설명 |
+| --- | --- |
+| 블로그 검색 | Naver Blog API를 통해 여행 후기와 기록을 검색합니다. |
+| 뉴스 검색 | Naver News API로 최신 여행 관련 뉴스를 확인합니다. |
+| 영상 검색 | YouTube Data API로 여행지 관련 영상을 조회합니다. |
+| 통합 결과 | 블로그, 뉴스, 영상을 한 화면에서 비교합니다. |
+
+#### 대표 화면
 
 <p align="center">
-  <img src="results/images/16.png" alt="여행 정보 검색 페이지" width="720" />
+  <img src="results/images/readme/screens/travel-info-01-main.png" alt="여행 정보 검색 대표 화면" width="820" />
 </p>
+<p align="center"><b>여행 정보 통합 검색 전체 화면</b></p>
 
-구현 포인트:
+#### 세부 화면
 
-- Naver Blog API 프록시 검색
-- Naver News API 프록시 검색
-- YouTube Data API 검색
-- `Promise.all`을 사용한 병렬 검색
-- 가로 슬라이더 및 영상 카드 UI 제공
+| 블로그 및 뉴스 | 유튜브 검색 결과 |
+| --- | --- |
+| <img src="results/images/readme/screens/travel-info-02-blog-news.png" alt="블로그 및 뉴스 검색 결과" width="390" /> | <img src="results/images/readme/screens/travel-info-03-youtube.png" alt="유튜브 검색 결과" width="390" /> |
 
-### 10. 마이페이지
+### 9. 마이페이지
 
-사용자는 북마크한 장소, 작성한 여행지 댓글, 내가 만든 코스, 좋아요한 코스, 코스 댓글을 한곳에서 관리할 수 있습니다.
+> 사용자의 북마크, 댓글, 코스, 회원 정보를 한곳에서 관리하는 개인 활동 화면입니다.
+
+#### 기능 설명
+
+| 기능 | 설명 |
+| --- | --- |
+| 북마크 관리 | 사용자가 저장한 여행지를 지역별로 확인합니다. |
+| 댓글 기록 | 여행지 댓글과 코스 댓글 작성 내역을 조회합니다. |
+| 코스 관리 | 내가 만든 코스와 좋아요한 코스를 확인합니다. |
+| 회원 정보 수정 | 이메일, 전화번호 등 사용자 정보를 수정합니다. |
+
+#### 대표 화면
 
 <p align="center">
-  <img src="results/images/17.png" alt="마이페이지" width="720" />
+  <img src="results/images/readme/screens/mypage-01-main.png" alt="마이페이지 대표 화면" width="820" />
 </p>
+<p align="center"><b>마이페이지 전체 화면</b></p>
 
-구현 포인트:
+## 핵심 구현 포인트
 
-- JWT 로그인 상태 확인
-- 사용자별 북마크 목록 조회
-- 사용자 작성 리뷰 조회
-- 내가 만든 코스 조회
-- 좋아요한 코스 조회
-- 코스 댓글 조회
-- 회원 정보 수정 모달 제공
+화면 설명과 분리해, 기술적으로 신경 쓴 구현 내용을 따로 모았습니다.
+
+| 영역 | 구현 포인트 | 내용 |
+| --- | --- | --- |
+| Data/API | 무장애 데이터 기반 검색 | 한국관광공사 무장애 여행 데이터를 활용해 여행지, 숙소, 음식점을 조회하고 장애 유형과 편의시설 조건으로 필터링합니다. |
+| Detail | 여행지 상세 정보 구성 | 기본 정보, Kakao Map 위치, 접근성 아이콘, 추천 여행지, 댓글, AI 후기 요약을 한 상세 화면에 모았습니다. |
+| AI | AI 코스 생성 | 지역, 기간, 테마 입력값을 바탕으로 관광지, 음식점, 숙소를 조합해 일정형 여행 코스를 생성합니다. |
+| Map | 지도 기반 코스 시각화 | 생성된 코스를 Kakao Map 마커, 동선, 일정 리스트로 보여주고 저장, 공유, 댓글 흐름까지 연결합니다. |
+| AI Camera | 이미지 및 음성 안내 | 이미지 분석 결과에 텍스트 질문, 음성 질문, STT, TTS 흐름을 붙여 현장에서 정보를 확인할 수 있게 했습니다. |
+| Search | 통합 여행 정보 검색 | Naver Blog, Naver News, YouTube 검색 결과를 한 화면에서 비교할 수 있도록 정리했습니다. |
+| User | 사용자 활동 관리 | 북마크, 댓글, 생성 코스, 좋아요한 코스, 회원 정보를 마이페이지에서 관리할 수 있게 구성했습니다. |
+
 
 ## 접근성 기능
 
 TRAVUS는 서비스 주제에 맞게 사용자 인터페이스에도 접근성 기능을 반영했습니다.
 
 - 글자 크기 확대 및 축소
-- 설정값 `localStorage` 저장
 - TTS(Text-to-Speech) 음성 안내
 - 포커스된 버튼과 링크의 텍스트 읽기
 - 키보드 포커스 스타일 제공
@@ -314,7 +422,10 @@ Travus
 ├─ README.md
 ├─ results
 │  └─ images
-│     └─ 서비스 화면 캡처 이미지
+│     ├─ readme
+│     │  └─ screens
+│     │     └─ README용 1280x720 화면 캡처 이미지
+│     └─ 서비스 화면 캡처 이미지 및 아키텍처 다이어그램
 ├─ Backend
 │  ├─ manage.py
 │  ├─ requirements.txt

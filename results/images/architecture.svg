@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1400" height="850" viewBox="0 0 1400 850" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%">
+      <feDropShadow dx="0" dy="16" stdDeviation="14" flood-color="#0B1F2A" flood-opacity="0.16"/>
+    </filter>
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="150%">
+      <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#0B1F2A" flood-opacity="0.14"/>
+    </filter>
+    <linearGradient id="baseGrad" x1="160" y1="120" x2="1240" y2="750" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F8FCFF"/>
+      <stop offset="1" stop-color="#EEF7FA"/>
+    </linearGradient>
+    <linearGradient id="frontendGrad" x1="250" y1="260" x2="650" y2="520" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#E8FFF6"/>
+      <stop offset="1" stop-color="#DBF7FF"/>
+    </linearGradient>
+    <linearGradient id="backendGrad" x1="610" y1="350" x2="880" y2="560" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F0FFF4"/>
+      <stop offset="1" stop-color="#E4F8D7"/>
+    </linearGradient>
+    <linearGradient id="externalGrad" x1="890" y1="230" x2="1220" y2="570" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFF8E8"/>
+      <stop offset="1" stop-color="#F8F1FF"/>
+    </linearGradient>
+    <marker id="arrowBlue" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M2 2 L10 6 L2 10 Z" fill="#1B88D1"/>
+    </marker>
+    <marker id="arrowGreen" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M2 2 L10 6 L2 10 Z" fill="#2E9D55"/>
+    </marker>
+    <marker id="arrowOrange" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M2 2 L10 6 L2 10 Z" fill="#E58C19"/>
+    </marker>
+    <style>
+      .title { font: 800 34px 'Segoe UI', Arial, sans-serif; fill: #102A43; }
+      .subtitle { font: 600 16px 'Segoe UI', Arial, sans-serif; fill: #486581; }
+      .section { font: 800 22px 'Segoe UI', Arial, sans-serif; fill: #102A43; }
+      .label { font: 700 16px 'Segoe UI', Arial, sans-serif; fill: #243B53; }
+      .small { font: 600 13px 'Segoe UI', Arial, sans-serif; fill: #52606D; }
+      .tiny { font: 600 11px 'Segoe UI', Arial, sans-serif; fill: #627D98; }
+      .white { fill: #FFFFFF; }
+      .card { fill: #FFFFFF; stroke: #C7D7E4; stroke-width: 2; }
+      .blueLine { stroke: #1B88D1; stroke-width: 4; marker-end: url(#arrowBlue); }
+      .greenLine { stroke: #2E9D55; stroke-width: 4; marker-end: url(#arrowGreen); }
+      .orangeLine { stroke: #E58C19; stroke-width: 4; marker-end: url(#arrowOrange); }
+      .mutedLine { stroke: #9FB3C8; stroke-width: 3; marker-end: url(#arrowBlue); }
+    </style>
+  </defs>
+
+  <rect width="1400" height="850" fill="#FFFFFF"/>
+
+  <text x="96" y="70" class="title">TRAVUS System Architecture</text>
+  <text x="98" y="100" class="subtitle">Barrier-free travel search, AI course generation, camera analysis, and travel content search</text>
+
+  <g filter="url(#shadow)">
+    <polygon points="150,180 1200,115 1305,650 245,765" fill="#FF9F1C"/>
+    <polygon points="180,205 1175,145 1268,625 268,730" fill="#10A7E2"/>
+    <polygon points="215,230 1150,175 1230,600 292,695" fill="url(#baseGrad)" stroke="#C6D7E2" stroke-width="2"/>
+  </g>
+
+  <g transform="translate(84 238)" filter="url(#softShadow)">
+    <polygon points="0,45 80,0 165,45 82,92" fill="#DDEBFF" stroke="#4D86D9" stroke-width="2"/>
+    <polygon points="0,45 82,92 82,135 0,88" fill="#B9D3FF" stroke="#4D86D9" stroke-width="2"/>
+    <polygon points="82,92 165,45 165,88 82,135" fill="#84B6FF" stroke="#4D86D9" stroke-width="2"/>
+    <circle cx="82" cy="52" r="18" fill="#2F80ED"/>
+    <path d="M72 52h20M82 42v20" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/>
+    <text x="22" y="164" class="label">User Browser</text>
+    <text x="8" y="184" class="small">Customer · Admin</text>
+  </g>
+
+  <line x1="250" y1="332" x2="332" y2="332" class="blueLine"/>
+  <text x="258" y="312" class="tiny">HTTPS</text>
+
+  <g transform="translate(320 250)" filter="url(#softShadow)">
+    <polygon points="0,40 310,18 380,230 62,260" fill="url(#frontendGrad)" stroke="#73C2FB" stroke-width="9"/>
+    <text x="26" y="70" class="section">Vue Frontend</text>
+
+    <g transform="translate(40 95)">
+      <rect width="104" height="72" rx="10" class="card"/>
+      <text x="22" y="32" class="label">Vue 3</text>
+      <text x="16" y="54" class="small">SPA Views</text>
+    </g>
+    <g transform="translate(164 80)">
+      <rect width="118" height="72" rx="10" class="card"/>
+      <text x="20" y="31" class="label">Router</text>
+      <text x="17" y="54" class="small">Page Flow</text>
+    </g>
+    <g transform="translate(184 170)">
+      <rect width="128" height="72" rx="10" class="card"/>
+      <text x="30" y="31" class="label">Pinia</text>
+      <text x="16" y="54" class="small">Auth Store</text>
+    </g>
+    <g transform="translate(34 188)">
+      <rect width="130" height="72" rx="10" class="card"/>
+      <text x="34" y="31" class="label">Axios</text>
+      <text x="14" y="54" class="small">REST Client</text>
+    </g>
+  </g>
+
+  <g transform="translate(335 575)" filter="url(#softShadow)">
+    <polygon points="0,24 248,0 298,92 48,120" fill="#F7FBFF" stroke="#9ED0F6" stroke-width="7"/>
+    <text x="26" y="48" class="section">Browser APIs</text>
+    <text x="30" y="74" class="small">Camera · MediaRecorder · TTS</text>
+  </g>
+
+  <line x1="500" y1="525" x2="500" y2="590" class="mutedLine"/>
+  <text x="512" y="562" class="tiny">capture · speech · audio guide</text>
+
+  <g transform="translate(624 360)" filter="url(#softShadow)">
+    <polygon points="0,44 258,16 326,164 66,202" fill="url(#backendGrad)" stroke="#7AC943" stroke-width="10"/>
+    <text x="42" y="78" class="section">Django REST API</text>
+
+    <g transform="translate(38 104)">
+      <rect width="94" height="62" rx="9" class="card"/>
+      <text x="17" y="28" class="label">api</text>
+      <text x="12" y="48" class="small">spots · courses</text>
+    </g>
+    <g transform="translate(146 88)">
+      <rect width="104" height="62" rx="9" class="card"/>
+      <text x="13" y="28" class="label">accounts</text>
+      <text x="19" y="48" class="small">JWT auth</text>
+    </g>
+    <g transform="translate(164 160)">
+      <rect width="98" height="62" rx="9" class="card"/>
+      <text x="19" y="28" class="label">ai</text>
+      <text x="13" y="48" class="small">vision · STT</text>
+    </g>
+    <g transform="translate(46 176)">
+      <rect width="94" height="62" rx="9" class="card"/>
+      <text x="12" y="28" class="label">board</text>
+      <text x="9" y="48" class="small">search proxy</text>
+    </g>
+  </g>
+
+  <line x1="655" y1="424" x2="624" y2="412" class="greenLine"/>
+  <line x1="610" y1="404" x2="654" y2="430" class="greenLine"/>
+  <line x1="648" y1="510" x2="675" y2="518" class="greenLine"/>
+  <text x="564" y="398" class="tiny">HTTP API</text>
+
+  <g transform="translate(970 395)" filter="url(#softShadow)">
+    <polygon points="0,42 96,0 192,42 96,88" fill="#EAF3FF" stroke="#4479A1" stroke-width="2"/>
+    <polygon points="0,42 96,88 96,154 0,104" fill="#BBD3EA" stroke="#4479A1" stroke-width="2"/>
+    <polygon points="96,88 192,42 192,104 96,154" fill="#8CB8D8" stroke="#4479A1" stroke-width="2"/>
+    <text x="39" y="62" class="label">MySQL</text>
+    <text x="34" y="186" class="small">service data</text>
+  </g>
+
+  <g transform="translate(963 590)" filter="url(#softShadow)">
+    <polygon points="0,34 70,0 140,34 70,70" fill="#FFE2E0" stroke="#DC382D" stroke-width="2"/>
+    <polygon points="0,34 70,70 70,116 0,78" fill="#F3AAA4" stroke="#DC382D" stroke-width="2"/>
+    <polygon points="70,70 140,34 140,78 70,116" fill="#E36A60" stroke="#DC382D" stroke-width="2"/>
+    <text x="38" y="49" class="label">Redis</text>
+    <text x="18" y="148" class="small">cache ready</text>
+  </g>
+
+  <line x1="884" y1="462" x2="973" y2="464" class="greenLine"/>
+  <text x="905" y="444" class="tiny">ORM</text>
+  <line x1="838" y1="548" x2="963" y2="635" class="greenLine"/>
+  <text x="846" y="592" class="tiny">cache</text>
+
+  <g transform="translate(900 195)" filter="url(#softShadow)">
+    <polygon points="0,44 305,18 380,255 70,295" fill="url(#externalGrad)" stroke="#F6C56B" stroke-width="8"/>
+    <text x="34" y="76" class="section">External Services</text>
+
+    <g transform="translate(40 112)">
+      <rect width="128" height="66" rx="10" class="card"/>
+      <text x="18" y="28" class="label">Tour API</text>
+      <text x="14" y="50" class="small">barrier-free data</text>
+    </g>
+    <g transform="translate(200 94)">
+      <rect width="126" height="66" rx="10" class="card"/>
+      <text x="18" y="28" class="label">Kakao Map</text>
+      <text x="20" y="50" class="small">map · route</text>
+    </g>
+    <g transform="translate(62 202)">
+      <rect width="138" height="66" rx="10" class="card"/>
+      <text x="18" y="28" class="label">OpenAI/GMS</text>
+      <text x="12" y="50" class="small">course · vision · STT</text>
+    </g>
+    <g transform="translate(226 190)">
+      <rect width="124" height="66" rx="10" class="card"/>
+      <text x="17" y="28" class="label">Naver/YT</text>
+      <text x="14" y="50" class="small">blog · news · video</text>
+    </g>
+  </g>
+
+  <line x1="866" y1="410" x2="944" y2="334" class="orangeLine"/>
+  <text x="865" y="364" class="tiny">data sync</text>
+  <line x1="820" y1="390" x2="1104" y2="288" class="orangeLine"/>
+  <text x="955" y="300" class="tiny">map SDK</text>
+  <line x1="860" y1="520" x2="1010" y2="455" class="orangeLine"/>
+  <text x="910" y="504" class="tiny">AI request</text>
+  <line x1="866" y1="565" x2="1136" y2="470" class="orangeLine"/>
+  <text x="1015" y="538" class="tiny">search request</text>
+
+  <g transform="translate(225 655)" filter="url(#softShadow)">
+    <polygon points="0,32 190,12 238,92 44,118" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="6"/>
+    <text x="26" y="58" class="section">Deployment</text>
+    <text x="30" y="84" class="small">AWS EC2 · Vite build · Django server</text>
+  </g>
+
+  <line x1="650" y1="602" x2="460" y2="700" class="mutedLine"/>
+  <text x="526" y="672" class="tiny">deploy</text>
+
+  <g transform="translate(1048 650)" filter="url(#softShadow)">
+    <polygon points="0,30 185,10 236,96 48,124" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="6"/>
+    <text x="28" y="60" class="section">Static Assets</text>
+    <text x="31" y="86" class="small">screenshots · images · icons</text>
+  </g>
+
+  <line x1="548" y1="332" x2="944" y2="278" class="orangeLine"/>
+  <text x="700" y="287" class="tiny">Kakao Map SDK</text>
+
+  <g transform="translate(1120 100)" filter="url(#softShadow)">
+    <path d="M66 6C91 6 112 21 118 43C142 47 158 64 158 85C158 111 135 130 105 130H44C18 130 0 113 0 91C0 73 12 58 31 52C31 24 46 6 66 6Z" fill="#FFFFFF" stroke="#FF9F1C" stroke-width="5"/>
+    <text x="42" y="72" class="title" style="font-size:28px;">AWS</text>
+    <text x="42" y="96" class="small">EC2</text>
+  </g>
+
+  <text x="1130" y="785" class="small">README architecture diagram · results/images/architecture.svg</text>
+</svg>
