@@ -183,7 +183,7 @@ flowchart LR
 
 | AI 후기 요약 및 댓글 |
 | --- |
-| <img src="results/images/readme/screens/detail-04-comments.png" alt="AI 후기 요약 및 댓글" width="620" /> |
+| <img src="results/images/readme/screens/detail-04-comments.png" alt="AI 후기 요약 및 댓글" width="820" /> |
 
 <br>
 
