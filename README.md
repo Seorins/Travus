@@ -240,6 +240,12 @@ flowchart LR
 </p>
 <p align="center"><b>AI 카메라 전체 화면</b></p>
 
+#### 기능 시연
+
+| 이미지로 분석 | 음성으로 질문 |
+| --- | --- |
+| <img src="results/images/ai카메라1.gif" alt="AI 카메라 이미지 분석 시연" width="390" /> | <img src="results/images/ai카메라2.gif" alt="AI 카메라 음성 질문 시연" width="390" /> |
+
 ### 8. 여행 정보 통합 검색
 
 > 여행지 관련 블로그, 뉴스, 유튜브 결과를 한 화면에서 비교하는 검색 화면입니다.
