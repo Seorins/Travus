@@ -11,10 +11,11 @@
 
 ## 팀원
 
-| 이름 | GitHub |
-| --- | --- |
-| [박서린](https://github.com/Seorins) | [@Seorins](https://github.com/Seorins) |
-| [김세현](https://github.com/sehyeon262) | [@sehyeon262](https://github.com/sehyeon262) |
+<p align="center">
+  <a href="https://github.com/Seorins"><b>박서린</b></a>
+  &nbsp;&nbsp;|&nbsp;&nbsp;
+  <a href="https://github.com/sehyeon262"><b>김세현</b></a>
+</p>
 
 ## 목차
 
